@@ -1,0 +1,44 @@
+{
+  "name": "atlas",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "25",
+      "jdkDistro": "tem",
+      "installGradle": false,
+      "installMaven": false
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "24.21.0",
+      "pnpmVersion": "12.3.4"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "forwardPorts": [5173, 8080],
+  "portsAttributes": {
+    "5173": { "label": "atlas_ui (Vite)" },
+    "8080": { "label": "atlas_backend" }
+  },
+  "postCreateCommand": "cd atlas_ui && pnpm install --frozen-lockfile && cd ../atlas_backend && ./gradlew --console=plain classes testClasses",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-spring-boot",
+        "vscjava.vscode-gradle",
+        "esbenp.prettier-vscode",
+        "oxc.oxc-vscode",
+        "vitest.explorer",
+        "anthropic.claude-code"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+        "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+        "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+        "[markdown]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+        "java.configuration.updateBuildConfiguration": "automatic"
+      }
+    }
+  }
+}

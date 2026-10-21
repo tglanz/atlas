@@ -1,0 +1,8 @@
+CREATE TABLE app_user (
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(16) NOT NULL,
+    preferred_avatar_id VARCHAR(36) REFERENCES avatar (id) ON DELETE SET NULL,
+    created_at TIMESTAMP NOT NULL
+);

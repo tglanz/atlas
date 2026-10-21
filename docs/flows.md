@@ -8,6 +8,10 @@ Browse and search the Movement library by name and tags.
 
 View its description, cues, illustrations, tags, and links to related Movements. Each relationship type appears in its own subsection, such as Progressions, with previews of candidate Movements.
 
+## Choose an Avatar
+
+Choose the kind of figure to see in Movement illustrations. Without a choice, the default Avatar is used.
+
 ## Create a Routine
 
 Create a Routine with a name and description, organized into ordered Sections containing specific Movement revisions.

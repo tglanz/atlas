@@ -6,7 +6,7 @@
 - Maintainer navigation: Illustration Settings.
 - Account menu: Sign In, Sign Out, Account Management.
 - Public pages are accessible without authentication.
-- Consumer and maintainer actions require authentication.
+- Practitioner and maintainer actions require authentication.
 - Backend authorization enforces all access restrictions.
 
 ## 1. Movement Library
@@ -22,8 +22,9 @@ URL: `/movements`
 URL: `/movements/:key`
 
 - Data: Current published revision's name, description, illustrations, cues, tags, and linked Movements.
-- Actions: Select Avatar, view illustrations, open linked Movements.
-- Consumer actions: Add Movement to a Routine.
+- Actions: View illustrations, open linked Movements.
+- Illustrations shown are those of the user's preferred Avatar. Visitors without a preference, and Movements with no illustrations for the preferred Avatar, show the default Avatar's illustrations.
+- Practitioner actions: Add Movement to a Routine.
 - Maintainer actions: Edit draft, create revision, view Revision History.
 
 ## 3. Movement Editor
@@ -43,7 +44,7 @@ URL: `/movements/:key/revisions`
 - Data: Published revision numbers and publication information.
 - Links: Open a historical published revision.
 - Maintainer actions: View drafts and create a new draft from the latest published revision.
-- Consumers and public visitors see published revisions only.
+- Practitioners and public visitors see published revisions only.
 
 ## 5. Historical Movement Details
 
@@ -62,8 +63,9 @@ Maintainer-only page with two tabs.
 
 ### Avatars
 
-- Data: Avatar names.
-- Actions: Create, edit, delete Avatars.
+- Data: Avatar names and which Avatar is the default.
+- Actions: Create, edit, delete Avatars, set the default Avatar.
+- The default Avatar cannot be deleted.
 - Create and edit open a modal containing the Avatar name and illustration-generation specification.
 
 ### Viewpoints
@@ -76,7 +78,7 @@ Maintainer-only page with two tabs.
 
 URL: `/routines`
 
-- Data: The consumer's Routines, including names and descriptions.
+- Data: The practitioner's Routines, including names and descriptions.
 - Actions: Create Routine, open Routine Details, delete Routine.
 - Creating a Routine opens the Routine Editor.
 - Deleting a Routine requires confirmation.
@@ -99,17 +101,17 @@ URLs: `/routines/new`, `/routines/:id/edit`
 - Adding a Movement opens a searchable Movement picker modal.
 - Selecting a Movement adds a reference to its current published revision.
 - Buttons: Save, Cancel.
-- Consumers can edit only their own Routines.
+- Practitioners can edit only their own Routines.
 
 ## 10. Account
 
-- Authentication and account management are handled by Keycloak.
-- Actions: Sign In, Sign Out, Manage Account.
+- Registration, sign-in and sign-out are handled by the application. The first registered user is a Maintainer; later users are Practitioners.
+- Actions: Register, Sign In, Sign Out, choose the preferred Avatar.
 
 ## Access and Revision Rules
 
 - Public visitors can view the Movement Library, current published Movement Details, and published Revision History.
-- Consumers have public access and can manage their own Routines.
+- Practitioners have public access and can manage their own Routines.
 - Maintainers can manage Movement drafts, publish revisions, and manage Avatars and Viewpoints.
 - Drafts are visible only to maintainers.
 - Publishing a draft makes it the current published revision.

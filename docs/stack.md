@@ -25,17 +25,16 @@
   - Provider: IDrive e2
 
 - Authentication and Authorization
-  - Identity management: Keycloak
+  - Identity management: Spring Security with database users and session cookies
   - Backend authorization: Spring Security
 
 - Infrastructure and Deployment
   - Backend hosting: Render
-  - Identity hosting: Render
   - Reverse proxy and TLS: Render-managed HTTPS
   - Configuration and secrets: Render environment variables
   - CI/CD: GitHub Actions
 
 - Deferred
-  - Image generation provider: None for now
+  - Illustration generation provider: None for now
   - Logging and monitoring: None for now
   - Search engine: Deferred

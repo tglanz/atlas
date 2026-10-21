@@ -1,14 +1,21 @@
-# Movement Revisioning and Publishing
+# Standard
 
-A Movement is identified by a stable Key and has numbered revisions starting at 1.
+**Style**
+- Draw in a realistic anatomical sketch style.
+- Use black graphite outlines with fine cross-hatching.
+- Use only black, white, and grayscale.
 
-A new Movement begins as a draft at revision 1. Drafts can be edited in place and may exist without illustrations.
+**Physique**
+- Depict a very fit, athletic human figure.
+- Define muscles clearly with moderate muscularity.
+- Maintain realistic anatomy and balanced proportions.
+- Avoid exaggerated muscle size and excessive vascularity.
 
-Publishing a draft makes that revision immutable and available in the Movement library.
+**Rendering**
+- Use consistent line weight and restrained shading.
+- Show the entire body, including hands and feet.
+- Use a pure white background.
 
-Revising a published Movement creates a new draft with the same Key and the next revision number. The published revision remains available until the new draft is published.
-
-Publishing the new draft makes it the current revision. Previous published revisions remain unchanged and available for historical references.
-
-Routines reference exact published Movement revisions, so publishing a new revision does not alter existing Routines.
-
+**Defaults**
+- Unless explicitly specified otherwise, exclude props, scenery, and text.
+- Unless explicitly specified otherwise, do not use color, photorealism, or 3D rendering.
