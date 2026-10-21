@@ -1,0 +1,57 @@
+name: Deploy UI
+
+# Builds atlas_ui and publishes it to the gh-pages branch, which GitHub Pages serves.
+on:
+  push:
+    branches: [main]
+    paths:
+      - atlas_ui/**
+      - .github/workflows/deploy-ui.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-ui
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: atlas_ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: atlas_ui/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: atlas_ui/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+        env:
+          # Project site: https://<owner>.github.io/<repo>/
+          VITE_BASE: /${{ github.event.repository.name }}/
+      - name: Prepare static site
+        run: |
+          touch dist/.nojekyll
+          # Pages has no server-side routing: unknown paths get the app, which routes them.
+          cp dist/index.html dist/404.html
+      - name: Publish to gh-pages
+        working-directory: atlas_ui/dist
+        env:
+          TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          git init --initial-branch=gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Deploy atlas_ui from ${SHA}"
+          git push --force "https://x-access-token:${TOKEN}@github.com/${REPO}.git" gh-pages

@@ -38,6 +38,23 @@ Session cookie based. Unsafe requests (POST, PUT, DELETE) must send the `XSRF-TO
 
 Movement content: `name`, `description`, `cues[]`, `tags[]`, `links[]` (`target`, `relationType`).
 
+Draft Illustrations (Maintainer):
+
+| Method and path | Purpose |
+| --- | --- |
+| `POST /movements/{key}/draft/generations` | Request generation. Body: `avatarId`, `viewpointId`, `stages[]` (`description` and/or `referenceUrl`). Returns 202 with the request. |
+| `GET /movements/{key}/draft/generations` | Generation requests, newest first |
+| `GET /movements/{key}/draft/generations/{id}` | One request: `status`, `failureReason`, `results[]` |
+| `POST /movements/{key}/draft/generations/{id}/retry` | Run a failed request again |
+| `POST /movements/{key}/draft/avatars/{avatarId}/illustrations` | Upload a picture (multipart `file`; PNG, JPEG or WebP up to 10 MB). Appended to the Avatar's sequence. |
+| `DELETE /movements/{key}/draft/avatars/{avatarId}/illustrations` | Remove the Avatar's whole sequence from the draft |
+
+Generation runs in the background. A request fails if the draft it was made for is no longer open. Storage and generation are currently stubs: every stored or generated picture gets the url `atlas.storage.stub-url`.
+
+Responses:
+- Reads by viewers (`GET /movements`, `/movements/{key}`, `/movements/{key}/revisions/{revision}`) show the Illustrations of one Avatar: `avatarId` and an ordered `illustrations[]`. The Avatar is the signed-in user's preferred Avatar, or the default Avatar for visitors and when the preferred Avatar has no Illustrations in that revision. In the list, `representativeIllustration` is the first of them.
+- Maintainer endpoints (`GET /movements/{key}/draft` and all writes) return `illustrations` grouped by Avatar id.
+
 Rules:
 - A key is lowercase letters, digits and hyphens.
 - Tags and relation types are stored lowercase.

@@ -1,7 +1,7 @@
 package com.tglanz.atlas.backend.account.adapter.out.avatar;
 
 import com.tglanz.atlas.backend.account.application.port.out.AvatarCatalog;
-import com.tglanz.atlas.backend.illustration.application.port.in.AvatarUseCase;
+import com.tglanz.atlas.backend.avatar.application.port.in.AvatarUseCase;
 import com.tglanz.atlas.backend.shared.error.NotFoundException;
 import java.util.UUID;
 import org.springframework.stereotype.Component;

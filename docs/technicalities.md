@@ -12,3 +12,5 @@ Publishing the new draft makes it the current revision. Previous published revis
 
 Routines reference exact published Movement revisions, so publishing a new revision does not alter existing Routines.
 
+A revision's Illustrations are part of the revision and are immutable once it is published, so a Routine always shows the same Illustrations. Illustrations for a newly defined Avatar appear only in revisions published after they were added; earlier revisions fall back to the default Avatar.
+

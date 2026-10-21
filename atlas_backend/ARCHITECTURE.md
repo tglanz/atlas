@@ -1,6 +1,6 @@
 # Architecture
 
-The backend follows hexagonal architecture, organized by feature. Each feature (`movement`, `illustration`, `routine`, `account`) contains the same layers.
+The backend follows hexagonal architecture, organized by feature. Each feature (`movement`, `avatar`, `generation`, `routine`, `account`) contains the same layers.
 
 ```
 com.tglanz.atlas.backend
@@ -29,6 +29,33 @@ com.tglanz.atlas.backend
 8. Authorization is enforced by the backend: path rules in `config.SecurityConfig`, ownership checks in application services. Use cases receive only a user id; authentication details stay in `config` and `account.adapter`.
 
 These rules are enforced by ArchUnit tests in `ArchitectureTest`.
+
+## Features and dependencies
+
+- `movement`: Movements, revisions, publishing, and the Illustrations held by each revision.
+- `avatar`: Avatars, including the default Avatar.
+- `generation`: Viewpoints, generation requests, and picture uploads.
+- `routine`: Routines that pin published Movement revisions.
+- `account`: users, roles, and the preferred Avatar.
+
+```
+generation -> movement, avatar
+movement   -> avatar, account   (to choose which Avatar's Illustrations a viewer sees)
+routine    -> movement
+account    -> avatar
+```
+
+Each arrow is an outbound adapter in the dependent feature, such as `generation.adapter.out.movement`. `ArchitectureTest` rejects any other dependency between features.
+
+## Generation
+
+A generation request runs in the background on the application task executor. The run is split into short transactions around the slow generator call, so no database transaction stays open while waiting on the third party:
+
+1. `GenerationLifecycle.begin` marks the request running and builds the generator input.
+2. The generator and picture storage are called outside any transaction.
+3. `GenerationLifecycle.complete` attaches the Illustrations to the draft, or `fail` records the reason.
+
+`IllustrationGenerator` and `PictureStorage` are ports. Their current adapters are stubs; the storage target is S3.
 
 ## Errors
 

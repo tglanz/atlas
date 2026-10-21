@@ -15,3 +15,7 @@ Run from this directory.
 | Lint                          | `pnpm lint`         |
 | Build (type-check and bundle) | `pnpm build`        |
 | Test                          | `pnpm test`         |
+
+## Deployment
+
+The static site is published to the `gh-pages` branch by `.github/workflows/deploy-ui.yml`. To build it locally for a project site, run `VITE_BASE=/atlas/ pnpm build`.

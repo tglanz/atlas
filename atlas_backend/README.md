@@ -15,6 +15,10 @@ Run from this directory.
 | Test | `./gradlew test` |
 | Run | `./gradlew bootRun` |
 
+## Stubs
+
+Picture storage (S3) and Illustration generation are stubs: every stored or generated picture gets the url in `atlas.storage.stub-url`.
+
 ## Database
 
 Auth: session cookie login with users stored in the database. The first registered user is a Maintainer. Set `ATLAS_COOKIE_SECURE=true` behind HTTPS.

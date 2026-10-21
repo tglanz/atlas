@@ -35,6 +35,6 @@
   - CI/CD: GitHub Actions
 
 - Deferred
-  - Illustration generation provider: None for now
+  - Illustration generation provider: None for now (stubbed)
   - Logging and monitoring: None for now
   - Search engine: Deferred

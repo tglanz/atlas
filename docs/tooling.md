@@ -75,3 +75,5 @@ Test runner: Vitest 5.0.5 (`pnpm test`).
 ## CI
 
 `.github/workflows/ci.yml` builds and tests both projects on push to `main` and on pull requests.
+
+`.github/workflows/deploy-ui.yml` builds `atlas_ui` on pushes to `main` that change it and publishes the static site to the `gh-pages` branch. GitHub Pages serves that branch at `https://<owner>.github.io/<repo>/`. The workflow sets `VITE_BASE` to the repository path, and copies `index.html` to `404.html` so deep links reach the app.

@@ -96,7 +96,7 @@ class MovementPersistenceAdapter implements MovementRepository {
               for (Illustration illustration : list) {
                 var row = new MovementRevisionEntity.IllustrationRow();
                 row.avatarId = avatarId.toString();
-                row.objectKey = illustration.objectKey();
+                row.url = illustration.url();
                 entity.illustrations.add(row);
               }
             });
@@ -114,7 +114,7 @@ class MovementPersistenceAdapter implements MovementRepository {
     for (var row : e.illustrations) {
       illustrations
           .computeIfAbsent(UUID.fromString(row.avatarId), id -> new ArrayList<>())
-          .add(new Illustration(row.objectKey));
+          .add(new Illustration(row.url));
     }
     return Movement.restore(
         new MovementKey(e.movementKey),

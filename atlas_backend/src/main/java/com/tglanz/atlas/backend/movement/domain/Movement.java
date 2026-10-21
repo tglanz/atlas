@@ -2,6 +2,9 @@ package com.tglanz.atlas.backend.movement.domain;
 
 import com.tglanz.atlas.backend.shared.error.ConflictException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -13,7 +16,7 @@ public final class Movement {
   private RevisionStatus status;
   private Instant publishedAt;
   private MovementContent content;
-  private final Map<UUID, List<Illustration>> illustrations;
+  private final Map<UUID, List<Illustration>> illustrations = new LinkedHashMap<>();
 
   private Movement(
       MovementKey key,
@@ -36,7 +39,7 @@ public final class Movement {
     this.status = status;
     this.publishedAt = publishedAt;
     this.content = content;
-    this.illustrations = copy(illustrations);
+    illustrations.forEach((avatarId, list) -> this.illustrations.put(avatarId, List.copyOf(list)));
   }
 
   /** A new Movement starts as a draft at revision 1. */
@@ -74,19 +77,37 @@ public final class Movement {
     if (status != RevisionStatus.PUBLISHED) {
       throw new ConflictException("Only published revisions can be revised");
     }
-    return new Movement(key, revision + 1, RevisionStatus.DRAFT, null, content, illustrations);
+    return new Movement(key, revision + 1, RevisionStatus.DRAFT, null, content, illustrations());
+  }
+
+  /** Replaces the Avatar's whole sequence; an empty list removes it. */
+  public void replaceIllustrations(UUID avatarId, List<Illustration> sequence) {
+    requireDraft("Only drafts can change illustrations");
+    if (avatarId == null || sequence == null) {
+      throw new IllegalArgumentException("Avatar and illustrations are required");
+    }
+    if (sequence.isEmpty()) {
+      illustrations.remove(avatarId);
+    } else {
+      illustrations.put(avatarId, List.copyOf(sequence));
+    }
+  }
+
+  /** Appends to the end of the Avatar's sequence. */
+  public void addIllustration(UUID avatarId, Illustration illustration) {
+    requireDraft("Only drafts can change illustrations");
+    if (avatarId == null || illustration == null) {
+      throw new IllegalArgumentException("Avatar and illustration are required");
+    }
+    List<Illustration> sequence = new ArrayList<>(illustrations.getOrDefault(avatarId, List.of()));
+    sequence.add(illustration);
+    illustrations.put(avatarId, List.copyOf(sequence));
   }
 
   private void requireDraft(String message) {
     if (status != RevisionStatus.DRAFT) {
       throw new ConflictException(message);
     }
-  }
-
-  private static Map<UUID, List<Illustration>> copy(Map<UUID, List<Illustration>> source) {
-    var result = new java.util.LinkedHashMap<UUID, List<Illustration>>();
-    source.forEach((avatarId, list) -> result.put(avatarId, List.copyOf(list)));
-    return java.util.Collections.unmodifiableMap(result);
   }
 
   public MovementKey key() {
@@ -110,6 +131,6 @@ public final class Movement {
   }
 
   public Map<UUID, List<Illustration>> illustrations() {
-    return illustrations;
+    return Collections.unmodifiableMap(new LinkedHashMap<>(illustrations));
   }
 }

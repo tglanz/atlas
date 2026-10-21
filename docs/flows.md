@@ -36,7 +36,11 @@ Create a new draft revision while preserving published revisions.
 
 ## Generate Movement Illustrations
 
-Select an Avatar and Viewpoint, then generate illustrations for the Movement draft.
+For a Movement draft, select an Avatar and a Viewpoint and specify the stages of the movement, each in words or with a reference picture. The system generates one Illustration per stage and replaces that Avatar's sequence on the draft. A failed generation can be retried.
+
+## Upload a Movement Illustration
+
+For a Movement draft, select an Avatar and provide a picture. The picture is stored as is and added to the end of that Avatar's sequence.
 
 ## Manage Movement Links
 

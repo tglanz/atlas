@@ -73,7 +73,7 @@ class MovementRevisionEntity {
     @Column(name = "avatar_id")
     String avatarId;
 
-    @Column(name = "object_key")
-    String objectKey;
+    @Column(name = "url")
+    String url;
   }
 }
