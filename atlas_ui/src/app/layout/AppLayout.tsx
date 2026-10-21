@@ -1,5 +1,6 @@
 import { Anchor, AppShell, Container, Group, Text } from '@mantine/core';
 import { Link, NavLink, Outlet } from 'react-router';
+import { AccountMenu } from '@/features/auth';
 import { navLinks } from './navLinks';
 import classes from './AppLayout.module.css';
 
@@ -33,6 +34,7 @@ export function AppLayout() {
                 ))}
               </Group>
             </nav>
+            <AccountMenu />
           </Group>
         </Container>
       </AppShell.Header>

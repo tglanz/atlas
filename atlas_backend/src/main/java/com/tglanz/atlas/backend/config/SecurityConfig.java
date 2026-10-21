@@ -19,6 +19,9 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
+import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
@@ -26,8 +29,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * {@code password}). Logout: {@code POST /api/auth/logout}. Unsafe requests must send the {@code
  * XSRF-TOKEN} cookie value in the {@code X-XSRF-TOKEN} header.
  *
- * <p>Public: reading published movements and avatars (names only), registering. Authenticated:
- * routines and the current user. Maintainer: everything else.
+ * <p>Public: the UI's static files, reading published movements and avatars (names only),
+ * registering. Authenticated: routines and the current user. Maintainer: everything else.
  */
 @Configuration
 class SecurityConfig {
@@ -41,6 +44,15 @@ class SecurityConfig {
                 csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
         .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+        // Never cache API responses. Static UI files set their own caching.
+        .headers(
+            headers ->
+                headers
+                    .cacheControl(cache -> cache.disable())
+                    .addHeaderWriter(
+                        new DelegatingRequestMatcherHeaderWriter(
+                            PathPatternRequestMatcher.withDefaults().matcher("/api/**"),
+                            new CacheControlHeadersWriter())))
         .formLogin(
             form ->
                 form.loginProcessingUrl("/api/auth/login")
@@ -71,6 +83,10 @@ class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/api/movements/**", "/api/avatars/**", "/api/viewpoints/**")
                     .hasRole(MAINTAINER)
+                    .requestMatchers("/api/**")
+                    .denyAll()
+                    .requestMatchers(HttpMethod.GET, "/**")
+                    .permitAll()
                     .anyRequest()
                     .denyAll());
     return http.build();

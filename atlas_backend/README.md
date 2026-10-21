@@ -11,7 +11,7 @@ Run from this directory.
 | Format | `./gradlew spotlessApply` |
 | Check formatting | `./gradlew spotlessCheck` |
 | Lint | `./gradlew compileJava compileTestJava` (javac `-Xlint:all -Werror`) |
-| Build (compile, format check, test) | `./gradlew build` |
+| Build (compile, format check, test, UI bundle) | `./gradlew build` (add `-PskipUi` to skip the UI and Node) |
 | Test | `./gradlew test` |
 | Run | `./gradlew bootRun` |
 

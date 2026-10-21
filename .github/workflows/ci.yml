@@ -17,7 +17,16 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: atlas_ui/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: atlas_ui/pnpm-lock.yaml
       - uses: gradle/actions/setup-gradle@v4
+      # Also builds the UI and packages it into the jar.
       - run: ./gradlew build
 
   frontend:

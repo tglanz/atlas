@@ -50,3 +50,34 @@ spotless {
 		googleJavaFormat()
 	}
 }
+
+// The UI is built by atlas_ui and served from the same origin as the API.
+// Pass -PskipUi to build the backend without Node.
+def uiDir = file('../atlas_ui')
+
+tasks.register('installUi', Exec) {
+	onlyIf { !project.hasProperty('skipUi') }
+	workingDir uiDir
+	commandLine 'pnpm', 'install', '--frozen-lockfile'
+	inputs.files(file("$uiDir/package.json"), file("$uiDir/pnpm-lock.yaml"))
+	outputs.dir(file("$uiDir/node_modules"))
+}
+
+tasks.register('buildUi', Exec) {
+	onlyIf { !project.hasProperty('skipUi') }
+	dependsOn 'installUi'
+	workingDir uiDir
+	commandLine 'pnpm', 'build'
+	inputs.dir(file("$uiDir/src"))
+	inputs.files(fileTree(uiDir) {
+		include 'index.html', 'package.json', 'vite.config.ts', 'tsconfig*.json'
+	})
+	outputs.dir(file("$uiDir/dist"))
+}
+
+tasks.named('bootJar') {
+	dependsOn 'buildUi'
+	from(file("$uiDir/dist")) {
+		into 'BOOT-INF/classes/static'
+	}
+}

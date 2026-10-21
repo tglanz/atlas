@@ -16,6 +16,10 @@ Run from this directory.
 | Build (type-check and bundle) | `pnpm build`        |
 | Test                          | `pnpm test`         |
 
+## Development
+
+Start the backend (`./gradlew bootRun` in `atlas_backend`), then `pnpm dev`. Vite proxies `/api` to the backend on port 8080; set `VITE_DEV_API` to change it. See `ARCHITECTURE.md` for how the code is organized.
+
 ## Deployment
 
-The static site is published to the `gh-pages` branch by `.github/workflows/deploy-ui.yml`. To build it locally for a project site, run `VITE_BASE=/atlas/ pnpm build`.
+In production the backend serves the built UI, so both share one origin. `atlas_backend`'s Gradle build runs `pnpm build` and packages `dist` into the jar.
