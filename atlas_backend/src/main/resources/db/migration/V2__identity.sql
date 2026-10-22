@@ -1,3 +1,4 @@
+-- Who can sign in.
 CREATE TABLE app_user (
     id VARCHAR(36) NOT NULL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,

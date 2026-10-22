@@ -10,7 +10,6 @@
 - **Description**: Text.
 - **Items**: Ordered collection of typed pieces of text, such as cues and comments.
 - **Tags**: Set of keywords.
-- **Links**: Collection of directed links, each containing a target Movement Key and a relationship type.
 - **Illustrations**: Ordered collection of Illustrations.
 
 Movements are edited in place; see `technicalities.md`.
@@ -21,6 +20,18 @@ Movements are edited in place; see `technicalities.md`.
 - **Content**: Text.
 
 The model does not restrict how items are used. The user interface groups items by type for display, and offers only the types it supports when editing.
+
+# Movement Graph
+
+The Movements and the relationships between them. It exists outside the Movements themselves, so relating Movements never changes a Movement.
+
+An **Edge** is a directed relationship from a source Movement to a target Movement, with a type such as progression or variant. The type is free text, normalized to lowercase.
+
+- Both ends of an Edge must be existing Movements.
+- A Movement cannot be related to itself.
+- A relationship that goes both ways is two Edges, one in each direction.
+
+The graph can be traversed: from a start Movement, follow Edges outgoing, incoming, or both, optionally only of given types and up to a given number of steps, to find the Movements reachable from it.
 
 # Illustration
 

@@ -11,7 +11,7 @@ class MovementTest {
 
   private static MovementContent content(String name) {
     return new MovementContent(
-        name, "desc", List.of(new MovementItem(ItemType.CUE, "Brace")), Set.of("Core"), List.of());
+        name, "desc", List.of(new MovementItem(ItemType.CUE, "Brace")), Set.of("Core"));
   }
 
   private static Movement movement() {

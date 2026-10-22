@@ -24,6 +24,7 @@ The web application talks to the backend over an HTTP API under `/api`. The cont
 
 - A Movement's key is fixed when it is created and cannot be changed.
 - A Routine can only reference existing Movements.
+- Relationships between Movements are managed through the graph, not the Movement. Both ends must exist, and a Movement cannot relate to itself.
 - Generation is asynchronous. A request returns immediately and its status is polled. A successful request replaces the Movement's whole sequence of Illustrations.
 - Pictures are uploaded separately, and a generation spec refers to the returned address.
 - An Avatar or Viewpoint that a generation request uses cannot be deleted.

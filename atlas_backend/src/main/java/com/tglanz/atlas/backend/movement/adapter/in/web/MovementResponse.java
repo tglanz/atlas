@@ -11,12 +11,9 @@ record MovementResponse(
     String description,
     List<ItemResponse> items,
     List<String> tags,
-    List<LinkResponse> links,
     List<String> illustrations) {
 
   record ItemResponse(String type, String content) {}
-
-  record LinkResponse(String target, String relationType) {}
 
   static MovementResponse from(Movement m) {
     MovementContent c = m.content();
@@ -26,9 +23,6 @@ record MovementResponse(
         c.description(),
         c.items().stream().map(i -> new ItemResponse(i.type().name(), i.content())).toList(),
         c.tags().stream().sorted().toList(),
-        c.links().stream()
-            .map(l -> new LinkResponse(l.target().value(), l.relationType()))
-            .toList(),
         m.illustrations().stream().map(Illustration::url).toList());
   }
 }

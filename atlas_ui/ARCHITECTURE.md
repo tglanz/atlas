@@ -17,6 +17,7 @@ src/
   features/
     auth/             sign in, register, current user, route guard, account menu
     movements/        library, details, editor
+    graph/            relationships between movements
     avatars/          Avatar settings
     generation/       Viewpoint settings, setting a movement's Illustrations (generate or static images)
     routines/         routine library, details, editor
@@ -37,7 +38,7 @@ Inside a feature:
 3. Filters and search live in the URL as search params.
 4. `shared` imports nothing from `features` or `app`.
 5. A feature imports other features only through their `index.ts`, never their internals, and never imports from `app`.
-6. Dependencies between features point one way: `movements` uses `generation`, which uses `avatars`; `routines` uses `movements`. Features that need to combine two features that don't depend on each other are composed in `app/pages`.
+6. Dependencies between features point one way: `movements` uses `generation` (which uses `avatars`) and `graph`; `routines` uses `movements`. Features that need to combine two features that don't depend on each other are composed in `app/pages`.
 7. Only `shared/api` calls `fetch`.
 8. Route guards only shape the UI. The backend enforces access.
 

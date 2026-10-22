@@ -1,5 +1,4 @@
 import {
-  Anchor,
   Badge,
   Button,
   Group,
@@ -11,8 +10,9 @@ import {
 } from '@mantine/core';
 import { Link, useParams } from 'react-router';
 import { useCurrentUser } from '@/features/auth';
+import { RelatedMovements } from '@/features/graph';
 import { QueryBoundary } from '@/shared/ui';
-import type { Movement, MovementLink } from '../api';
+import type { Movement } from '../api';
 import { groupItems } from '../itemTypes';
 import { useMovement } from '../queries';
 
@@ -29,19 +29,6 @@ export function MovementDetailsPage() {
 
 function MovementView({ movement }: { movement: Movement }) {
   const user = useCurrentUser();
-
-  // Links are grouped by relationship, such as progression or variant.
-  const linksByType = [
-    ...movement.links
-      .reduce((groups, link) => {
-        groups.set(link.relationType, [
-          ...(groups.get(link.relationType) ?? []),
-          link,
-        ]);
-        return groups;
-      }, new Map<string, MovementLink[]>())
-      .entries(),
-  ];
 
   return (
     <Stack gap="lg">
@@ -105,29 +92,7 @@ function MovementView({ movement }: { movement: Movement }) {
         </Group>
       )}
 
-      {linksByType.map(([relationType, links]) => (
-        <section key={relationType}>
-          <Title
-            order={2}
-            size="h3"
-            mb="xs"
-            style={{ textTransform: 'capitalize' }}
-          >
-            {relationType}
-          </Title>
-          <Group gap="md">
-            {links.map((link) => (
-              <Anchor
-                key={link.target}
-                component={Link}
-                to={`/movements/${link.target}`}
-              >
-                {link.target}
-              </Anchor>
-            ))}
-          </Group>
-        </section>
-      ))}
+      <RelatedMovements movementKey={movement.key} />
     </Stack>
   );
 }

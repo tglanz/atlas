@@ -21,8 +21,8 @@ URL: `/movements`
 
 URL: `/movements/:key`
 
-- Data: Name, description, illustrations, items grouped by type, tags, and linked Movements.
-- Actions: View illustrations, open linked Movements.
+- Data: Name, description, illustrations, items grouped by type, tags, and related Movements: outgoing grouped by relationship type, and incoming.
+- Actions: View illustrations, open related Movements.
 - Practitioner actions: Add Movement to a Routine.
 - Maintainer actions: Edit Movement.
 
@@ -30,8 +30,9 @@ URL: `/movements/:key`
 
 URLs: `/movements/new`, `/movements/:key/edit`
 
-- Data: Movement name, description, items, tags, links, and the ordered illustrations.
-- Actions: Add, remove, and reorder items of the supported types; add and remove tags; manage links; set illustrations; remove all illustrations.
+- Data: Movement name, description, items, tags, outgoing relationships, and the ordered illustrations.
+- Actions: Add, remove, and reorder items of the supported types; add and remove tags; manage outgoing relationships; set illustrations; remove all illustrations.
+- Relationships can be managed once the Movement exists, and their targets must be existing Movements.
 - Items are added per type, not as free text with a chosen type. Only the supported types are offered.
 - Setting illustrations follows the flow "Set Movement Illustrations". Generation progress is shown, and failed generations can be retried.
 - Buttons: Save, Cancel.

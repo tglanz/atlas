@@ -11,7 +11,8 @@ A proof of concept. Movements, illustrations (uploaded or generated), routines, 
 - Real picture storage and a real illustration generator.
 - Account management: password reset, email verification, login throttling.
 - Recovery and cleanup of generation requests interrupted by a restart.
-- Movement: deleting a Movement, validating link targets, pagination, removing a single Illustration.
+- Movement: deleting a Movement, pagination, removing a single Illustration.
+- Using the graph: traversal exists in the API but nothing in the UI uses it yet. Relationships that go both ways are still added on each side by hand.
 - Change history for Movements, and a way to keep a Movement hidden while it is being built. Both were deferred on purpose; see `technicalities.md`.
 - "Add to routine" from a Movement page.
 - Deployment: container image, hosting, a verified PostgreSQL setup.

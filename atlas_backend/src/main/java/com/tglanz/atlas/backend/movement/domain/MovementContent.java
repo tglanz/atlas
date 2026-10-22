@@ -6,11 +6,7 @@ import java.util.stream.Collectors;
 
 /** The editable content of a Movement. */
 public record MovementContent(
-    String name,
-    String description,
-    List<MovementItem> items,
-    Set<String> tags,
-    List<MovementLink> links) {
+    String name, String description, List<MovementItem> items, Set<String> tags) {
 
   public MovementContent {
     if (name == null || name.isBlank()) {
@@ -31,6 +27,5 @@ public record MovementContent(
                       }
                     })
                 .collect(Collectors.toUnmodifiableSet());
-    links = links == null ? List.of() : List.copyOf(links);
   }
 }

@@ -29,7 +29,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * {@code password}). Logout: {@code POST /api/auth/logout}. Unsafe requests must send the {@code
  * XSRF-TOKEN} cookie value in the {@code X-XSRF-TOKEN} header.
  *
- * <p>Public: the UI's static files, reading published movements, registering. Authenticated:
+ * <p>Public: the UI's static files, reading movements and their graph, registering. Authenticated:
  * routines and the current user. Maintainer: everything else.
  */
 @Configuration
@@ -79,10 +79,11 @@ class SecurityConfig {
                     .authenticated()
                     .requestMatchers(HttpMethod.GET, "/api/movements/*/generations/**")
                     .hasRole(MAINTAINER)
-                    .requestMatchers(HttpMethod.GET, "/api/movements/**")
+                    .requestMatchers(HttpMethod.GET, "/api/movements/**", "/api/graph/**")
                     .permitAll()
                     .requestMatchers(
                         "/api/movements/**",
+                        "/api/graph/**",
                         "/api/avatars/**",
                         "/api/viewpoints/**",
                         "/api/media/**")

@@ -39,11 +39,6 @@ class MovementEntity {
   Set<String> tags = new HashSet<>();
 
   @ElementCollection
-  @CollectionTable(name = "movement_link", joinColumns = @JoinColumn(name = "movement_key"))
-  @OrderColumn(name = "position")
-  List<LinkRow> links = new ArrayList<>();
-
-  @ElementCollection
   @CollectionTable(name = "movement_illustration", joinColumns = @JoinColumn(name = "movement_key"))
   @OrderColumn(name = "position")
   List<IllustrationRow> illustrations = new ArrayList<>();
@@ -54,15 +49,6 @@ class MovementEntity {
     ItemType type;
 
     String content;
-  }
-
-  @Embeddable
-  static class LinkRow {
-    @Column(name = "target_key")
-    String targetKey;
-
-    @Column(name = "relation_type")
-    String relationType;
   }
 
   @Embeddable

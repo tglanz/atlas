@@ -1,6 +1,6 @@
 # Architecture
 
-The backend follows hexagonal architecture, organized by feature. Each feature (`movement`, `avatar`, `generation`, `routine`, `account`) contains the same layers.
+The backend follows hexagonal architecture, organized by feature. Each feature (`movement`, `graph`, `avatar`, `generation`, `routine`, `account`) contains the same layers.
 
 ```
 com.tglanz.atlas.backend
@@ -35,11 +35,13 @@ These rules are enforced by ArchUnit tests in `ArchitectureTest`.
 - `movement`: Movements and their ordered Illustrations.
 - `avatar`: Avatars, the looks used to generate Illustrations.
 - `generation`: Viewpoints, generation requests (a spec of stages, each avatar-based or a static image), and picture uploads.
+- `graph`: the relationships between Movements, and traversing them.
 - `routine`: Routines, which list Movements by key.
 - `account`: users and roles.
 
 ```
 generation -> movement, avatar
+graph      -> movement
 routine    -> movement
 ```
 
