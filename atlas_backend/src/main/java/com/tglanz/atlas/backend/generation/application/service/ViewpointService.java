@@ -46,6 +46,19 @@ public class ViewpointService implements ViewpointUseCase {
   }
 
   @Override
+  public Viewpoint makeDefault(UUID id) {
+    Viewpoint target = get(id);
+    if (target.isDefault()) {
+      return target;
+    }
+    // Clear the old default first: at most one Viewpoint may be the default at any time.
+    repository.findDefault().ifPresent(current -> repository.save(current.withDefault(false)));
+    Viewpoint updated = target.withDefault(true);
+    repository.save(updated);
+    return updated;
+  }
+
+  @Override
   public void delete(UUID id) {
     get(id);
     repository.deleteById(id);

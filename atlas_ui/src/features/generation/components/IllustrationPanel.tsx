@@ -105,11 +105,14 @@ function Producer({
   const [viewpointId, setViewpointId] = useState<string | null>(null);
   const [stages, setStages] = useState<StageInput[]>([emptyStage()]);
 
-  // With a single avatar or viewpoint there is nothing to choose, so use it.
+  // Preselect the default viewpoint; with a single avatar or viewpoint there is nothing to choose.
   const onlyId = (items: { id: string }[] | undefined) =>
     items?.length === 1 ? items[0].id : null;
   const chosenAvatarId = avatarId ?? onlyId(avatars.data);
-  const chosenViewpointId = viewpointId ?? onlyId(viewpoints.data);
+  const chosenViewpointId =
+    viewpointId ??
+    viewpoints.data?.find((v) => v.isDefault)?.id ??
+    onlyId(viewpoints.data);
 
   // Reload the movement whenever another request has finished successfully.
   const succeeded =

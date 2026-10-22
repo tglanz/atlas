@@ -1,3 +1,3 @@
 export { RelatedMovements } from './components/RelatedMovements';
-export { useEdges, useSetOutgoing } from './queries';
-export type { Edge, OutgoingEdge } from './api';
+export { useEdgeTypes, useEdges, useSetOutgoing } from './queries';
+export type { Edge, EdgeType, OutgoingEdge } from './api';

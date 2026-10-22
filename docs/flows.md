@@ -32,11 +32,11 @@ Change a Movement's details, relationships, or Illustrations. The change is visi
 
 ## Relate Movements
 
-From a Movement, define its outgoing relationships to other existing Movements, each with a type such as progression or variant. Incoming relationships are shown on the target Movement but are defined from the source.
+From a Movement, define its relationships to other existing Movements, each with a type chosen from the offered types, such as progression or variant. Relationships of a bidirectional type appear on both Movements. Relationships of other types are shown on the target Movement but defined from the source.
 
 ## Set Movement Illustrations
 
 For a Movement, choose one of two patterns and define the stages of the movement. One Illustration is produced per stage, and the result replaces the Movement's sequence.
 
-- Generate with an Avatar: choose an Avatar and a Viewpoint, then give each stage instructions, a reference image, or both.
+- Generate with an Avatar: choose an Avatar and a Viewpoint (the default Viewpoint is preselected), then give each stage instructions, a reference image, or both.
 - Use my own images: give each stage an image, which is used as is.

@@ -12,8 +12,12 @@ CREATE TABLE avatar (
 CREATE TABLE viewpoint (
     id VARCHAR(36) NOT NULL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
-    specification TEXT NOT NULL
+    specification TEXT NOT NULL,
+    is_default BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+-- At most one Viewpoint is the default.
+CREATE UNIQUE INDEX uq_viewpoint_single_default ON viewpoint (is_default) WHERE is_default;
 
 -- Movements
 

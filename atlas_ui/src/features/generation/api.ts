@@ -1,6 +1,11 @@
 import { apiFetch } from '@/shared/api';
 
-export type Viewpoint = { id: string; name: string; specification: string };
+export type Viewpoint = {
+  id: string;
+  name: string;
+  specification: string;
+  isDefault: boolean;
+};
 export type ViewpointInput = { name: string; specification: string };
 
 /** How one Illustration is produced. Exactly one of the two fields is set. */
@@ -33,6 +38,9 @@ export const createViewpoint = (input: ViewpointInput) =>
 
 export const updateViewpoint = (id: string, input: ViewpointInput) =>
   apiFetch<Viewpoint>(`/viewpoints/${id}`, { method: 'PUT', body: input });
+
+export const makeDefaultViewpoint = (id: string) =>
+  apiFetch<Viewpoint>(`/viewpoints/${id}/default`, { method: 'PUT' });
 
 export const deleteViewpoint = (id: string) =>
   apiFetch<void>(`/viewpoints/${id}`, { method: 'DELETE' });

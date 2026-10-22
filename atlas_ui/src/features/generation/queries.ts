@@ -5,6 +5,7 @@ import {
   deleteViewpoint,
   listGenerations,
   listViewpoints,
+  makeDefaultViewpoint,
   requestGeneration,
   retryGeneration,
   updateViewpoint,
@@ -34,6 +35,9 @@ export const useUpdateViewpoint = () =>
   useViewpointMutation((v: { id: string; input: ViewpointInput }) =>
     updateViewpoint(v.id, v.input),
   );
+
+export const useMakeDefaultViewpoint = () =>
+  useViewpointMutation((id: string) => makeDefaultViewpoint(id));
 
 export const useDeleteViewpoint = () =>
   useViewpointMutation((id: string) => deleteViewpoint(id));

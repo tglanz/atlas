@@ -1,5 +1,6 @@
 package com.tglanz.atlas.backend.generation.adapter.out.persistence;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -10,4 +11,7 @@ class ViewpointEntity {
   @Id String id;
   String name;
   String specification;
+
+  @Column(name = "is_default")
+  boolean isDefault;
 }

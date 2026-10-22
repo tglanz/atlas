@@ -8,10 +8,10 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useState } from 'react';
-import { useMovements } from '@/features/movements';
+import { useMovements } from '../queries';
 
-/** Searchable list of movements. */
-export function MoviePicker({
+/** A modal with a searchable list of movements; picking one reports its key and closes. */
+export function MovementPickerModal({
   opened,
   onClose,
   onPick,

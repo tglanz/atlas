@@ -40,6 +40,8 @@ class MovementTest {
     assertThatThrownBy(() -> new MovementKey("Front Plank"))
         .isInstanceOf(IllegalArgumentException.class);
     assertThat(new MovementKey("front-plank").value()).isEqualTo("front-plank");
+    assertThat(new MovementKey("supinated_pullup").value()).isEqualTo("supinated_pullup");
+    assertThatThrownBy(() -> new MovementKey("a_-b")).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test

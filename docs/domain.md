@@ -25,11 +25,11 @@ The model does not restrict how items are used. The user interface groups items 
 
 The Movements and the relationships between them. It exists outside the Movements themselves, so relating Movements never changes a Movement.
 
-An **Edge** is a directed relationship from a source Movement to a target Movement, with a type such as progression or variant. The type is free text, normalized to lowercase.
+An **Edge** is a directed relationship from a source Movement to a target Movement, with a type such as progression or variant. The type is free text, normalized to lowercase. The system knows a list of types to offer, but an Edge may carry any type.
 
 - Both ends of an Edge must be existing Movements.
 - A Movement cannot be related to itself.
-- A relationship that goes both ways is two Edges, one in each direction.
+- A relationship that goes both ways is two Edges, one in each direction. The system knows which types are bidirectional, such as variant: creating one also creates the opposite Edge, and removing one removes both.
 
 The graph can be traversed: from a start Movement, follow Edges outgoing, incoming, or both, optionally only of given types and up to a given number of steps, to find the Movements reachable from it.
 
@@ -58,7 +58,7 @@ The look that generated Illustrations should have, such as a sketch or a cartoon
 
 ## Viewpoint
 
-A predefined way to specify the viewing angle when generating an Illustration. It has a unique name and a specification. It is not stored on an Illustration.
+A predefined way to specify the viewing angle when generating an Illustration. It has a unique name and a specification. It is not stored on an Illustration. At most one Viewpoint is the default, which the user interface preselects when generating.
 
 # Routine
 

@@ -10,6 +10,8 @@ public interface ViewpointRepository {
 
   Optional<Viewpoint> findById(UUID id);
 
+  Optional<Viewpoint> findDefault();
+
   /** Throws ConflictException when the name is taken. */
   void save(Viewpoint viewpoint);
 

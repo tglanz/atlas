@@ -30,11 +30,17 @@ class ViewpointPersistenceAdapter implements ViewpointRepository {
   }
 
   @Override
+  public Optional<Viewpoint> findDefault() {
+    return jpa.findFirstByIsDefaultTrue().map(this::toDomain);
+  }
+
+  @Override
   public void save(Viewpoint viewpoint) {
     var entity = new ViewpointEntity();
     entity.id = viewpoint.id().toString();
     entity.name = viewpoint.name();
     entity.specification = viewpoint.specification();
+    entity.isDefault = viewpoint.isDefault();
     try {
       jpa.saveAndFlush(entity);
     } catch (DataAccessException e) {
@@ -59,6 +65,6 @@ class ViewpointPersistenceAdapter implements ViewpointRepository {
   }
 
   private Viewpoint toDomain(ViewpointEntity e) {
-    return new Viewpoint(UUID.fromString(e.id), e.name, e.specification);
+    return new Viewpoint(UUID.fromString(e.id), e.name, e.specification, e.isDefault);
   }
 }

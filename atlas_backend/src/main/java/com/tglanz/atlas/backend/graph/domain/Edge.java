@@ -16,4 +16,9 @@ public record Edge(String source, String target, String type) {
     }
     type = type.strip().toLowerCase();
   }
+
+  /** The same relationship seen from the other end. */
+  public Edge mirror() {
+    return new Edge(target, source, type);
+  }
 }

@@ -17,10 +17,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { IllustrationPanel } from '@/features/generation';
-import { useEdges, useSetOutgoing } from '@/features/graph';
-import type { Edge } from '@/features/graph';
 import { QueryBoundary } from '@/shared/ui';
 import type { Movement, MovementContent, MovementItem } from '../api';
+import { KEY_FORMAT, keyFromName } from '../movementKey';
 import {
   movementKeys,
   useCreateMovement,
@@ -36,18 +35,13 @@ export function MovementEditorPage() {
 
 function EditMovement({ movementKey }: { movementKey: string }) {
   const movement = useMovement(movementKey);
-  const edges = useEdges(movementKey);
   const queryClient = useQueryClient();
 
   return (
     <QueryBoundary query={movement}>
       {(data) => (
         <Stack gap="xl">
-          <QueryBoundary query={edges}>
-            {(related) => (
-              <MovementForm movement={data} outgoing={related.outgoing} />
-            )}
-          </QueryBoundary>
+          <MovementForm movement={data} />
           <IllustrationPanel
             movementKey={data.key}
             illustrations={data.illustrations}
@@ -70,11 +64,7 @@ type FormValues = {
   comments: string[];
   otherItems: MovementItem[];
   tags: string[];
-  // Edges leaving this movement. They are stored in the graph, not in the movement.
-  links: { target: string; type: string }[];
 };
-
-const KEY_FORMAT = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** Tags already added, plus any text still typed in the tag field. */
 function withPendingTag(tags: string[], pending: string): string[] {
@@ -107,17 +97,12 @@ function contentsOf(movement: Movement | undefined, type: string): string[] {
   );
 }
 
-function MovementForm({
-  movement,
-  outgoing,
-}: {
-  movement?: Movement;
-  outgoing?: Edge[];
-}) {
+function MovementForm({ movement }: { movement?: Movement }) {
   const navigate = useNavigate();
   const create = useCreateMovement();
   const update = useUpdateMovement();
-  const setOutgoing = useSetOutgoing(movement?.key ?? '');
+  // Whether the maintainer has written the key themselves, which stops it following the name.
+  const [keyTouched, setKeyTouched] = useState(false);
   // Text typed in the tag field but not yet turned into a tag with Enter.
   const [pendingTag, setPendingTag] = useState('');
 
@@ -133,31 +118,27 @@ function MovementForm({
           (i) => i.type !== 'CUE' && i.type !== 'COMMENT',
         ) ?? [],
       tags: movement?.tags ?? [],
-      links: outgoing?.map((e) => ({ target: e.target, type: e.type })) ?? [],
     },
     validate: {
       key: (v) =>
         movement || KEY_FORMAT.test(v)
           ? null
-          : 'Use lowercase letters, digits and hyphens',
+          : 'Use lowercase letters, digits, hyphens and underscores',
       name: (v) => (v.trim() ? null : 'Enter a name'),
     },
   });
 
-  const busy = create.isPending || update.isPending || setOutgoing.isPending;
-  const error = create.error ?? update.error ?? setOutgoing.error;
+  const busy = create.isPending || update.isPending;
+  const error = create.error ?? update.error;
 
   async function save(values: FormValues) {
     const content = toContent(values, pendingTag);
     if (movement) {
       await update.mutateAsync({ key: movement.key, content });
-      await setOutgoing.mutateAsync(
-        values.links.filter((link) => link.target.trim() && link.type.trim()),
-      );
       navigate(`/movements/${movement.key}`);
     } else {
       await create.mutateAsync({ key: values.key, content });
-      // Illustrations and links are added on the edit page, which a new movement opens next.
+      // Illustrations are added on the edit page, which a new movement opens next.
       navigate(`/movements/${values.key}/edit`);
     }
   }
@@ -168,14 +149,29 @@ function MovementForm({
         <Title order={1}>
           {movement ? `Edit ${movement.name}` : 'New movement'}
         </Title>
+        <TextInput
+          label="Name"
+          {...form.getInputProps('name')}
+          onChange={(event) => {
+            const name = event.currentTarget.value;
+            form.setFieldValue('name', name);
+            // Suggest a key from the name until the maintainer writes their own.
+            if (!keyTouched) form.setFieldValue('key', keyFromName(name));
+          }}
+        />
         {!movement && (
           <TextInput
             label="Key"
-            description="Stable identifier used in the address, e.g. front-plank"
+            description="Identifier used in the address. Suggested from the name; you can change it."
             {...form.getInputProps('key')}
+            onChange={(event) => {
+              const key = event.currentTarget.value;
+              form.setFieldValue('key', key);
+              // Emptying the field hands control back to the name.
+              setKeyTouched(key !== '');
+            }}
           />
         )}
-        <TextInput label="Name" {...form.getInputProps('name')} />
         <Textarea
           label="Description"
           autosize
@@ -199,48 +195,6 @@ function MovementForm({
           onSearchChange={setPendingTag}
           {...form.getInputProps('tags')}
         />
-
-        {movement && (
-          <Stack gap="xs">
-            <Text fw={500} size="sm">
-              Links to other movements (the target must already exist)
-            </Text>
-            {form.values.links.map((_, index) => (
-              <Group key={index} align="flex-end" wrap="nowrap">
-                <TextInput
-                  aria-label="Target movement key"
-                  placeholder="movement-key"
-                  style={{ flex: 1 }}
-                  {...form.getInputProps(`links.${index}.target`)}
-                />
-                <TextInput
-                  aria-label="Relationship"
-                  placeholder="progression"
-                  style={{ flex: 1 }}
-                  {...form.getInputProps(`links.${index}.type`)}
-                />
-                <ActionIcon
-                  variant="subtle"
-                  color="red"
-                  aria-label="Remove link"
-                  onClick={() => form.removeListItem('links', index)}
-                >
-                  <IconTrash size={16} />
-                </ActionIcon>
-              </Group>
-            ))}
-            <Button
-              variant="default"
-              size="xs"
-              w="fit-content"
-              onClick={() =>
-                form.insertListItem('links', { target: '', type: '' })
-              }
-            >
-              Add link
-            </Button>
-          </Stack>
-        )}
 
         {error && <Alert color="red">{error.message}</Alert>}
         <Group>

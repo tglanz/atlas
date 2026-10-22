@@ -18,7 +18,7 @@ export const features: { title: string; text: string; icon: Icon }[] = [
   {
     title: 'Visual Representation',
     icon: IconPhoto,
-    text: 'Configurable illustrations with consistent figures and viewpoints that help you understand positions and techniques.',
+    text: 'Every movement is illustrated step by step in one consistent visual style, so positions and techniques are easy to understand and compare.',
   },
   {
     title: 'Connected Movements',

@@ -14,9 +14,9 @@ import { useForm } from '@mantine/form';
 import { IconArrowDown, IconArrowUp, IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
+import { MovementPickerModal } from '@/features/movements';
 import { QueryBoundary } from '@/shared/ui';
 import type { RoutineInput } from '../api';
-import { MoviePicker } from '../components/MoviePicker';
 import { MovementRefName } from '../components/MovementRefName';
 import { useCreateRoutine, useRoutine, useUpdateRoutine } from '../queries';
 
@@ -214,7 +214,7 @@ function RoutineForm({ id, initial }: { id?: string; initial?: RoutineInput }) {
         </Group>
       </Stack>
 
-      <MoviePicker
+      <MovementPickerModal
         opened={pickerSection !== null}
         onClose={() => setPickerSection(null)}
         onPick={(movementKey) =>

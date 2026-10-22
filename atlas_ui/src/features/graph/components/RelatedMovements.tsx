@@ -1,7 +1,7 @@
 import { Anchor, Badge, Group, Stack, Title } from '@mantine/core';
 import { Link } from 'react-router';
 import type { Edge } from '../api';
-import { useEdges } from '../queries';
+import { useEdgeTypes, useEdges } from '../queries';
 
 const capitalize = (text: string) =>
   text.charAt(0).toUpperCase() + text.slice(1);
@@ -9,7 +9,12 @@ const capitalize = (text: string) =>
 /** The movements this one points to, grouped by relationship, and the ones that point to it. */
 export function RelatedMovements({ movementKey }: { movementKey: string }) {
   const edges = useEdges(movementKey);
+  const types = useEdgeTypes();
   if (!edges.data) return null;
+
+  // Use the type's label when it is a known type; otherwise show the type as written.
+  const labelOf = (type: string) =>
+    types.data?.find((t) => t.name === type)?.label ?? capitalize(type);
 
   const { outgoing, incoming } = edges.data;
   const groups = [
@@ -26,7 +31,7 @@ export function RelatedMovements({ movementKey }: { movementKey: string }) {
       {groups.map(([type, group]) => (
         <section key={type}>
           <Title order={2} size="h3" mb="xs">
-            {capitalize(type)}
+            {labelOf(type)}
           </Title>
           <Group gap="md">
             {group.map((edge) => (
@@ -52,7 +57,7 @@ export function RelatedMovements({ movementKey }: { movementKey: string }) {
                 <Anchor component={Link} to={`/movements/${edge.source}`}>
                   {edge.source}
                 </Anchor>
-                <Badge variant="light">{edge.type}</Badge>
+                <Badge variant="light">{labelOf(edge.type)}</Badge>
               </Group>
             ))}
           </Stack>

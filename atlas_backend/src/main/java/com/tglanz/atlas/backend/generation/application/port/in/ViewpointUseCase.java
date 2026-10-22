@@ -13,5 +13,8 @@ public interface ViewpointUseCase {
 
   Viewpoint update(UUID id, String name, String specification);
 
+  /** Makes the Viewpoint the default, replacing the previous default. */
+  Viewpoint makeDefault(UUID id);
+
   void delete(UUID id);
 }

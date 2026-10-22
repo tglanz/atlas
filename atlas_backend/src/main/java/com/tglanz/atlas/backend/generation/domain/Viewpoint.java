@@ -2,8 +2,11 @@ package com.tglanz.atlas.backend.generation.domain;
 
 import java.util.UUID;
 
-/** A predefined way to specify the viewing angle of a generated Illustration. */
-public record Viewpoint(UUID id, String name, String specification) {
+/**
+ * A predefined way to specify the viewing angle of a generated Illustration. At most one Viewpoint
+ * is the default, which the user interface preselects.
+ */
+public record Viewpoint(UUID id, String name, String specification, boolean isDefault) {
   public Viewpoint {
     if (id == null) {
       throw new IllegalArgumentException("Id is required");
@@ -18,10 +21,14 @@ public record Viewpoint(UUID id, String name, String specification) {
   }
 
   public static Viewpoint create(String name, String specification) {
-    return new Viewpoint(UUID.randomUUID(), name, specification);
+    return new Viewpoint(UUID.randomUUID(), name, specification, false);
   }
 
   public Viewpoint edit(String newName, String newSpecification) {
-    return new Viewpoint(id, newName, newSpecification);
+    return new Viewpoint(id, newName, newSpecification, isDefault);
+  }
+
+  public Viewpoint withDefault(boolean value) {
+    return new Viewpoint(id, name, specification, value);
   }
 }

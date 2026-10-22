@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getEdges, setOutgoing } from './api';
+import { getEdgeTypes, getEdges, setOutgoing } from './api';
 import type { OutgoingEdge } from './api';
 
 const edgesKey = (movementKey: string) =>
@@ -9,6 +9,14 @@ export const useEdges = (movementKey: string) =>
   useQuery({
     queryKey: edgesKey(movementKey),
     queryFn: () => getEdges(movementKey),
+  });
+
+/** The types to offer. They rarely change, so they are fetched once. */
+export const useEdgeTypes = () =>
+  useQuery({
+    queryKey: ['graph', 'edge-types'],
+    queryFn: getEdgeTypes,
+    staleTime: Infinity,
   });
 
 export function useSetOutgoing(movementKey: string) {

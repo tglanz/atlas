@@ -7,6 +7,11 @@ export type MovementEdges = { outgoing: Edge[]; incoming: Edge[] };
 
 export type OutgoingEdge = { target: string; type: string };
 
+/** A relationship type to offer. Edges may carry other types; this list is not a restriction. */
+export type EdgeType = { name: string; label: string; bidirectional: boolean };
+
+export const getEdgeTypes = () => apiFetch<EdgeType[]>('/graph/edge-types');
+
 export const getEdges = (movementKey: string) =>
   apiFetch<MovementEdges>(`/graph/movements/${movementKey}/edges`);
 

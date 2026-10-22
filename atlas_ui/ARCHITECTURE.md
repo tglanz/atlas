@@ -39,8 +39,9 @@ Inside a feature:
 4. `shared` imports nothing from `features` or `app`.
 5. A feature imports other features only through their `index.ts`, never their internals, and never imports from `app`.
 6. Dependencies between features point one way: `movements` uses `generation` (which uses `avatars`) and `graph`; `routines` uses `movements`. Features that need to combine two features that don't depend on each other are composed in `app/pages`.
-7. Only `shared/api` calls `fetch`.
-8. Route guards only shape the UI. The backend enforces access.
+7. Reusable components live in the feature that owns the data and are exported by its `index.ts` (for example the movement picker in `movements`). Components with no product knowledge live in `shared/ui`.
+8. Only `shared/api` calls `fetch`.
+9. Route guards only shape the UI. The backend enforces access.
 
 The import rules are checked by `oxlint` (see `.oxlintrc.json`).
 

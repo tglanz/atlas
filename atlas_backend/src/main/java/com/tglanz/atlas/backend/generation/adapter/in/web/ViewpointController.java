@@ -24,9 +24,9 @@ class ViewpointController {
 
   record Request(@NotBlank @Size(max = 100) String name, @NotBlank String specification) {}
 
-  record Response(UUID id, String name, String specification) {
+  record Response(UUID id, String name, String specification, boolean isDefault) {
     static Response from(Viewpoint v) {
-      return new Response(v.id(), v.name(), v.specification());
+      return new Response(v.id(), v.name(), v.specification(), v.isDefault());
     }
   }
 
@@ -56,6 +56,11 @@ class ViewpointController {
   @PutMapping("/{id}")
   Response update(@PathVariable UUID id, @Valid @RequestBody Request request) {
     return Response.from(useCase.update(id, request.name(), request.specification()));
+  }
+
+  @PutMapping("/{id}/default")
+  Response makeDefault(@PathVariable UUID id) {
+    return Response.from(useCase.makeDefault(id));
   }
 
   @DeleteMapping("/{id}")

@@ -35,13 +35,23 @@ function MovementView({ movement }: { movement: Movement }) {
       <Group justify="space-between" align="flex-start">
         <Title order={1}>{movement.name}</Title>
         {user.data?.role === 'MAINTAINER' && (
-          <Button
-            component={Link}
-            to={`/movements/${movement.key}/edit`}
-            size="xs"
-          >
-            Edit
-          </Button>
+          <Group gap="xs">
+            <Button
+              component={Link}
+              to={`/movements/${movement.key}/relationships`}
+              variant="default"
+              size="xs"
+            >
+              Relationships
+            </Button>
+            <Button
+              component={Link}
+              to={`/movements/${movement.key}/edit`}
+              size="xs"
+            >
+              Edit
+            </Button>
+          </Group>
         )}
       </Group>
 
@@ -91,7 +101,6 @@ function MovementView({ movement }: { movement: Movement }) {
           ))}
         </Group>
       )}
-
       <RelatedMovements movementKey={movement.key} />
     </Stack>
   );
