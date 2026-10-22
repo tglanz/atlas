@@ -11,12 +11,13 @@ src/
     layout/           app shell, header, navigation
     pages/            landing page, not-found page, pages that combine several features
     theme.ts
-  shared/           code with no product knowledge
+  shared/           what more than one page needs; imports nothing from features or app
     api/              the only code that calls fetch; ApiError
-    ui/               small reusable components
+    ui/               reusable components, including ones that show a resource such as a movement card
+    movements/        the data for movements: types and hooks, used across the app
   features/
     auth/             sign in, register, current user, route guard, account menu
-    movements/        library, details, editor
+    movements/        index, details, editor
     graph/            relationships between movements
     avatars/          Avatar settings
     generation/       Viewpoint settings, setting a movement's Illustrations (generate or static images)
@@ -38,8 +39,8 @@ Inside a feature:
 3. Filters and search live in the URL as search params.
 4. `shared` imports nothing from `features` or `app`.
 5. A feature imports other features only through their `index.ts`, never their internals, and never imports from `app`.
-6. Dependencies between features point one way: `movements` uses `generation` (which uses `avatars`) and `graph`; `routines` uses `movements`. Features that need to combine two features that don't depend on each other are composed in `app/pages`.
-7. Reusable components live in the feature that owns the data and are exported by its `index.ts` (for example the movement picker in `movements`). Components with no product knowledge live in `shared/ui`.
+6. Dependencies between features point one way: `movements` uses `generation` (which uses `avatars`) and `graph`. Features that need to combine two features that don't depend on each other are composed in `app/pages`.
+7. A component that more than one page or feature may need lives in `shared/ui`, even when it shows a resource: the movement card, picker and select are there, built on the data in `shared/movements`. Features hold their own pages and workflows, and reuse shared components instead of building their own.
 8. Only `shared/api` calls `fetch`.
 9. Route guards only shape the UI. The backend enforces access.
 

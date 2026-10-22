@@ -1,20 +1,11 @@
-import {
-  Badge,
-  Button,
-  Group,
-  Image,
-  List,
-  Stack,
-  Text,
-  Title,
-} from '@mantine/core';
+import { Button, Group, Image, List, Stack, Text, Title } from '@mantine/core';
 import { Link, useParams } from 'react-router';
 import { useCurrentUser } from '@/features/auth';
 import { RelatedMovements } from '@/features/graph';
-import { QueryBoundary } from '@/shared/ui';
-import type { Movement } from '../api';
+import { QueryBoundary, TagLink } from '@/shared/ui';
+import type { Movement } from '@/shared/movements';
 import { groupItems } from '../itemTypes';
-import { useMovement } from '../queries';
+import { useMovement } from '@/shared/movements';
 
 export function MovementDetailsPage() {
   const { key = '' } = useParams();
@@ -35,23 +26,13 @@ function MovementView({ movement }: { movement: Movement }) {
       <Group justify="space-between" align="flex-start">
         <Title order={1}>{movement.name}</Title>
         {user.data?.role === 'MAINTAINER' && (
-          <Group gap="xs">
-            <Button
-              component={Link}
-              to={`/movements/${movement.key}/relationships`}
-              variant="default"
-              size="xs"
-            >
-              Relationships
-            </Button>
-            <Button
-              component={Link}
-              to={`/movements/${movement.key}/edit`}
-              size="xs"
-            >
-              Edit
-            </Button>
-          </Group>
+          <Button
+            component={Link}
+            to={`/movements/${movement.key}/edit`}
+            size="xs"
+          >
+            Edit
+          </Button>
         )}
       </Group>
 
@@ -90,14 +71,7 @@ function MovementView({ movement }: { movement: Movement }) {
       {movement.tags.length > 0 && (
         <Group gap="xs">
           {movement.tags.map((tag) => (
-            <Badge
-              key={tag}
-              variant="light"
-              component={Link}
-              to={`/movements?tag=${encodeURIComponent(tag)}`}
-            >
-              {tag}
-            </Badge>
+            <TagLink key={tag} tag={tag} />
           ))}
         </Group>
       )}

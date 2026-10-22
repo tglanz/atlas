@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/graph/edge-types")
 class EdgeTypeController {
 
-  record EdgeTypeResponse(String name, String label, boolean bidirectional) {}
+  record EdgeTypeResponse(String name, String label, String plural, String inverse) {}
 
   private final GraphUseCase useCase;
 
@@ -22,7 +22,7 @@ class EdgeTypeController {
   @GetMapping
   List<EdgeTypeResponse> list() {
     return useCase.edgeTypes().stream()
-        .map(t -> new EdgeTypeResponse(t.name(), t.label(), t.bidirectional()))
+        .map(t -> new EdgeTypeResponse(t.name(), t.label(), t.plural(), t.inverse()))
         .toList();
   }
 }

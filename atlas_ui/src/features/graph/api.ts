@@ -8,7 +8,14 @@ export type MovementEdges = { outgoing: Edge[]; incoming: Edge[] };
 export type OutgoingEdge = { target: string; type: string };
 
 /** A relationship type to offer. Edges may carry other types; this list is not a restriction. */
-export type EdgeType = { name: string; label: string; bidirectional: boolean };
+export type EdgeType = {
+  name: string;
+  label: string;
+  /** The section title when a movement has several, such as Progressions. */
+  plural: string;
+  /** The type the other movement gets when this one is added; null for a one-way type. */
+  inverse: string | null;
+};
 
 export const getEdgeTypes = () => apiFetch<EdgeType[]>('/graph/edge-types');
 

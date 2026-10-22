@@ -16,16 +16,28 @@ import type { UseFormReturnType } from '@mantine/form';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { IllustrationPanel } from '@/features/generation';
+import {
+  IllustrationInput,
+  IllustrationStatus,
+  useIllustrationInput,
+  useRequestGeneration,
+} from '@/features/generation';
+import { useEdges, useSetOutgoing } from '@/features/graph';
+import type { Edge } from '@/features/graph';
 import { QueryBoundary } from '@/shared/ui';
-import type { Movement, MovementContent, MovementItem } from '../api';
+import type {
+  Movement,
+  MovementContent,
+  MovementItem,
+} from '@/shared/movements';
+import { LinkRows } from '../components/LinkRows';
 import { KEY_FORMAT, keyFromName } from '../movementKey';
 import {
   movementKeys,
   useCreateMovement,
   useMovement,
   useUpdateMovement,
-} from '../queries';
+} from '@/shared/movements';
 
 /** /movements/new creates a movement; /movements/:key/edit changes one. */
 export function MovementEditorPage() {
@@ -35,21 +47,16 @@ export function MovementEditorPage() {
 
 function EditMovement({ movementKey }: { movementKey: string }) {
   const movement = useMovement(movementKey);
-  const queryClient = useQueryClient();
+  const edges = useEdges(movementKey);
 
   return (
     <QueryBoundary query={movement}>
       {(data) => (
-        <Stack gap="xl">
-          <MovementForm movement={data} />
-          <IllustrationPanel
-            movementKey={data.key}
-            illustrations={data.illustrations}
-            onChanged={() =>
-              queryClient.invalidateQueries({ queryKey: movementKeys.all })
-            }
-          />
-        </Stack>
+        <QueryBoundary query={edges}>
+          {(related) => (
+            <MovementForm movement={data} outgoing={related.outgoing} />
+          )}
+        </QueryBoundary>
       )}
     </QueryBoundary>
   );
@@ -64,6 +71,8 @@ type FormValues = {
   comments: string[];
   otherItems: MovementItem[];
   tags: string[];
+  // Edges leaving this movement. They are stored in the graph, not in the movement.
+  links: { target: string; type: string }[];
 };
 
 /** Tags already added, plus any text still typed in the tag field. */
@@ -97,10 +106,23 @@ function contentsOf(movement: Movement | undefined, type: string): string[] {
   );
 }
 
-function MovementForm({ movement }: { movement?: Movement }) {
+function MovementForm({
+  movement,
+  outgoing,
+}: {
+  movement?: Movement;
+  outgoing?: Edge[];
+}) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const create = useCreateMovement();
   const update = useUpdateMovement();
+  const setOutgoing = useSetOutgoing();
+  const requestGeneration = useRequestGeneration();
+  const illustrations = useIllustrationInput();
+  // Set once a new movement has been created, so a later save updates it instead of creating again.
+  const [createdKey, setCreatedKey] = useState<string | null>(null);
+  const existingKey = movement?.key ?? createdKey;
   // Whether the maintainer has written the key themselves, which stops it following the name.
   const [keyTouched, setKeyTouched] = useState(false);
   // Text typed in the tag field but not yet turned into a tag with Enter.
@@ -118,29 +140,58 @@ function MovementForm({ movement }: { movement?: Movement }) {
           (i) => i.type !== 'CUE' && i.type !== 'COMMENT',
         ) ?? [],
       tags: movement?.tags ?? [],
+      links: outgoing?.map((e) => ({ target: e.target, type: e.type })) ?? [],
     },
     validate: {
       key: (v) =>
-        movement || KEY_FORMAT.test(v)
+        existingKey || KEY_FORMAT.test(v)
           ? null
           : 'Use lowercase letters, digits, hyphens and underscores',
       name: (v) => (v.trim() ? null : 'Enter a name'),
+      links: (rows) =>
+        rows.every((row) => row.target && row.type)
+          ? null
+          : 'Choose a movement and a type for every relationship',
     },
   });
 
-  const busy = create.isPending || update.isPending;
-  const error = create.error ?? update.error;
+  const busy =
+    create.isPending ||
+    update.isPending ||
+    setOutgoing.isPending ||
+    requestGeneration.isPending;
+  const error =
+    create.error ??
+    update.error ??
+    setOutgoing.error ??
+    requestGeneration.error;
 
+  /** Saves the details, the relationships, and, if any were entered, requests the illustrations. */
   async function save(values: FormValues) {
+    if (illustrations.problem) return;
     const content = toContent(values, pendingTag);
-    if (movement) {
-      await update.mutateAsync({ key: movement.key, content });
-      navigate(`/movements/${movement.key}`);
+    let key = existingKey;
+    if (key) {
+      await update.mutateAsync({ key, content });
     } else {
-      await create.mutateAsync({ key: values.key, content });
-      // Illustrations are added on the edit page, which a new movement opens next.
-      navigate(`/movements/${values.key}/edit`);
+      key = values.key;
+      await create.mutateAsync({ key, content });
+      setCreatedKey(key);
     }
+    if (existingKey || values.links.length > 0) {
+      await setOutgoing.mutateAsync({ movementKey: key, edges: values.links });
+    }
+    if (illustrations.form) {
+      await requestGeneration.mutateAsync({
+        movementKey: key,
+        form: illustrations.form,
+      });
+      illustrations.reset();
+      // Generation runs in the background; stay here, where its progress is shown.
+      navigate(`/movements/${key}/edit`);
+      return;
+    }
+    navigate(`/movements/${key}`);
   }
 
   return (
@@ -163,6 +214,7 @@ function MovementForm({ movement }: { movement?: Movement }) {
           <TextInput
             label="Key"
             description="Identifier used in the address. Suggested from the name; you can change it."
+            disabled={createdKey !== null}
             {...form.getInputProps('key')}
             onChange={(event) => {
               const key = event.currentTarget.value;
@@ -195,6 +247,36 @@ function MovementForm({ movement }: { movement?: Movement }) {
           onSearchChange={setPendingTag}
           {...form.getInputProps('tags')}
         />
+
+        <LinkRows
+          value={form.values.links}
+          onChange={(rows) => form.setFieldValue('links', rows)}
+          error={
+            typeof form.errors.links === 'string'
+              ? form.errors.links
+              : undefined
+          }
+        />
+
+        <Stack gap="sm">
+          <Title order={2} size="h3">
+            Illustrations
+          </Title>
+          {movement && (
+            <IllustrationStatus
+              movementKey={movement.key}
+              illustrations={movement.illustrations}
+              onChanged={() =>
+                queryClient.invalidateQueries({ queryKey: movementKeys.all })
+              }
+            />
+          )}
+          <Text size="sm" c="dimmed">
+            One picture per stage. Leave this empty to keep the current
+            illustrations; otherwise they are replaced when you save.
+          </Text>
+          <IllustrationInput input={illustrations} />
+        </Stack>
 
         {error && <Alert color="red">{error.message}</Alert>}
         <Group>

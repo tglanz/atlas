@@ -72,30 +72,32 @@ export type GenerationForm =
   | { mode: 'static'; stages: StageInput[] };
 
 /** Uploads the pictures first, then requests the generation with their urls. */
-export function useRequestGeneration(movementKey: string) {
+export function useRequestGeneration() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (form: GenerationForm) => {
+    mutationFn: async (v: { movementKey: string; form: GenerationForm }) => {
       const stages: StageSpec[] = await Promise.all(
-        form.stages.map(async (stage): Promise<StageSpec> => {
+        v.form.stages.map(async (stage): Promise<StageSpec> => {
           const url = stage.file ? await uploadMedia(stage.file) : undefined;
-          if (form.mode === 'static') {
+          if (v.form.mode === 'static') {
             return { staticImage: { imageUrl: url ?? '' } };
           }
           return {
             avatar: {
-              avatarId: form.avatarId,
-              viewpointId: form.viewpointId,
+              avatarId: v.form.avatarId,
+              viewpointId: v.form.viewpointId,
               instructions: stage.instructions.trim() || undefined,
               referenceImageUrl: url,
             },
           };
         }),
       );
-      return requestGeneration(movementKey, stages);
+      return requestGeneration(v.movementKey, stages);
     },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: generationsKey(movementKey) }),
+    onSuccess: (_data, v) =>
+      queryClient.invalidateQueries({
+        queryKey: generationsKey(v.movementKey),
+      }),
   });
 }
 

@@ -6,6 +6,9 @@ import com.tglanz.atlas.backend.movement.domain.Movement;
 import com.tglanz.atlas.backend.movement.domain.MovementContent;
 import com.tglanz.atlas.backend.movement.domain.MovementItem;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
+import com.tglanz.atlas.backend.movement.domain.MovementName;
+import com.tglanz.atlas.backend.movement.domain.TagCount;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,8 +34,24 @@ class MovementPersistenceAdapter implements MovementRepository {
   }
 
   @Override
-  public List<Movement> search(String text, String tag) {
-    return jpa.search(text, tag).stream().map(this::toDomain).toList();
+  public List<Movement> search(String text, Set<String> tags) {
+    // An empty list cannot be bound in a query, so a placeholder stands in when no tags are given.
+    Collection<String> bound = tags.isEmpty() ? List.of("") : tags;
+    return jpa.search(text, bound, tags.size()).stream().map(this::toDomain).toList();
+  }
+
+  @Override
+  public List<MovementName> findAllNames() {
+    return jpa.findNames().stream()
+        .map(row -> new MovementName(new MovementKey((String) row[0]), (String) row[1]))
+        .toList();
+  }
+
+  @Override
+  public List<TagCount> countTags() {
+    return jpa.countTags().stream()
+        .map(row -> new TagCount((String) row[0], ((Number) row[1]).longValue()))
+        .toList();
   }
 
   @Override

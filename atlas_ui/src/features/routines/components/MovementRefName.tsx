@@ -1,6 +1,6 @@
 import { Anchor, Text } from '@mantine/core';
 import { Link } from 'react-router';
-import { useMovement } from '@/features/movements';
+import { useMovement } from '@/shared/movements';
 
 /** Shows a movement's current name, optionally linking to it. */
 export function MovementRefName({

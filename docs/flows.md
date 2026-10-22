@@ -2,7 +2,7 @@
 
 ## Browse Movements
 
-Browse and search the Movement library by name and tags.
+Find Movements in the Movement Index by name, with suggestions while typing, and by toggling tags.
 
 ## View a Movement
 
@@ -24,7 +24,7 @@ View the Routine and its ordered Sections and Movements.
 
 ## Create a Movement
 
-Create a Movement with its name, description, items, and tags. Illustrations and relationships can be added afterwards.
+Create a Movement with its name, description, items, and tags. Relationships and Illustrations can be added at the same time or afterwards.
 
 ## Edit a Movement
 
@@ -32,7 +32,7 @@ Change a Movement's details, relationships, or Illustrations. The change is visi
 
 ## Relate Movements
 
-From a Movement, define its relationships to other existing Movements, each with a type chosen from the offered types, such as progression or variant. Relationships of a bidirectional type appear on both Movements. Relationships of other types are shown on the target Movement but defined from the source.
+In the Movement editor, define the Movement's relationships to other existing Movements, each with a type chosen from the offered types, such as progression or variant. Adding a relationship also adds its inverse on the other Movement, for example a regression for a progression. A Movement shows the Movements it is related to in one section per type, such as Progressions.
 
 ## Set Movement Illustrations
 

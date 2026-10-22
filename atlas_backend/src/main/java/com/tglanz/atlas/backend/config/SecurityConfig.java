@@ -79,7 +79,11 @@ class SecurityConfig {
                     .authenticated()
                     .requestMatchers(HttpMethod.GET, "/api/movements/*/generations/**")
                     .hasRole(MAINTAINER)
-                    .requestMatchers(HttpMethod.GET, "/api/movements/**", "/api/graph/**")
+                    .requestMatchers(
+                        HttpMethod.GET,
+                        "/api/movements/**",
+                        "/api/movement-index/**",
+                        "/api/graph/**")
                     .permitAll()
                     .requestMatchers(
                         "/api/movements/**",

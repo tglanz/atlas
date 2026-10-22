@@ -19,10 +19,11 @@ export const useEdgeTypes = () =>
     staleTime: Infinity,
   });
 
-export function useSetOutgoing(movementKey: string) {
+export function useSetOutgoing() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (edges: OutgoingEdge[]) => setOutgoing(movementKey, edges),
+    mutationFn: (v: { movementKey: string; edges: OutgoingEdge[] }) =>
+      setOutgoing(v.movementKey, v.edges),
     // Edges touch other movements' incoming lists too, so refresh every graph query.
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['graph'] }),
   });

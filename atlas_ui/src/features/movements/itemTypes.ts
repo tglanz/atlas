@@ -1,4 +1,4 @@
-import type { MovementItem } from './api';
+import type { MovementItem } from '@/shared/movements';
 
 /**
  * The item types the UI offers and how they are shown. The model allows any type; this is where

@@ -17,8 +17,8 @@ public record Edge(String source, String target, String type) {
     type = type.strip().toLowerCase();
   }
 
-  /** The same relationship seen from the other end. */
-  public Edge mirror() {
-    return new Edge(target, source, type);
+  /** The relationship seen from the other end, with the type that end gets. */
+  public Edge reversedAs(String otherType) {
+    return new Edge(target, source, otherType);
   }
 }

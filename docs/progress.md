@@ -4,11 +4,11 @@ Last reviewed 2026-10-22.
 
 ## Where we are
 
-A proof of concept. Movements, illustrations (uploaded or generated), routines, and accounts work end to end in the backend and are wired into the web app. Picture storage and illustration generation are stubs. The web app has been built and checked against the API but not used in a browser.
+A proof of concept. Movements, illustrations (uploaded or generated), routines, and accounts work end to end in the backend and are wired into the web app. Image storage and illustration generation are stubs. The web app has been built and checked against the API but not used in a browser.
 
 ## Missing
 
-- Real picture storage and a real illustration generator.
+- Real image storage and a real illustration generator.
 - Account management: password reset, email verification, login throttling.
 - Recovery and cleanup of generation requests interrupted by a restart.
 - Movement: deleting a Movement, pagination, removing a single Illustration.
@@ -22,7 +22,7 @@ A proof of concept. Movements, illustrations (uploaded or generated), routines, 
 - **First maintainer.** The first registered user becomes a Maintainer. On a fresh deployment whoever registers first gets full control, and simultaneous first registrations on PostgreSQL could both succeed.
 - **Open registration** without verification invites spam accounts, and reveals which emails exist.
 - **Same origin only.** The API has no CORS or cross-site cookie support, so the web app must be served by the backend.
-- **Illustrations are stored as addresses, not storage keys.** Private buckets or signed addresses will likely need keys instead, which changes the schema.
+- **Illustrations are stored as URLs, not storage keys.** Private buckets or signed URLs will likely need keys instead, which changes the schema.
 - **Heavy structure for a proof of concept.** Ports, adapters and mappers in every feature add boilerplate. Whether to simplify is undecided.
 - **Thin automated tests, by choice.** API behavior is not covered, although `AGENTS.md` asks for tests on changed behavior.
 - **Single-connection SQLite** is fine locally and not for production load.

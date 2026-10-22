@@ -23,12 +23,17 @@ export type MovementSummary = {
   representativeIllustration: string | null;
 };
 
-export type MovementFilters = { text?: string; tag?: string };
+/** A Movement must contain the text in its name and have all of the tags. */
+export type MovementFilters = { text?: string; tags?: string[] };
+
+export type MovementName = { key: string; name: string };
+
+export type TagCount = { tag: string; count: number };
 
 export function listMovements(filters: MovementFilters, signal?: AbortSignal) {
   const params = new URLSearchParams();
   if (filters.text) params.set('text', filters.text);
-  if (filters.tag) params.set('tag', filters.tag);
+  filters.tags?.forEach((tag) => params.append('tags', tag));
   const query = params.size > 0 ? `?${params}` : '';
   return apiFetch<MovementSummary[]>(`/movements${query}`, { signal });
 }
@@ -41,3 +46,11 @@ export const createMovement = (key: string, content: MovementContent) =>
 
 export const updateMovement = (key: string, content: MovementContent) =>
   apiFetch<Movement>(`/movements/${key}`, { method: 'PUT', body: content });
+
+/** Every movement's name, for suggesting while typing. */
+export const getMovementNames = () =>
+  apiFetch<MovementName[]>('/movement-index/names');
+
+/** Every tag in use, with how many movements have it. */
+export const getMovementTags = () =>
+  apiFetch<TagCount[]>('/movement-index/tags');

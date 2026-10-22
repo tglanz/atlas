@@ -7,7 +7,7 @@
 
 - **Key**: Stable identifier.
 - **Name**: String.
-- **Description**: Text.
+- **Description**: Text saying what the movement is generally for. How it relates to other movements belongs in the Movement Graph, not here.
 - **Items**: Ordered collection of typed pieces of text, such as cues and comments.
 - **Tags**: Set of keywords.
 - **Illustrations**: Ordered collection of Illustrations.
@@ -29,13 +29,13 @@ An **Edge** is a directed relationship from a source Movement to a target Moveme
 
 - Both ends of an Edge must be existing Movements.
 - A Movement cannot be related to itself.
-- A relationship that goes both ways is two Edges, one in each direction. The system knows which types are bidirectional, such as variant: creating one also creates the opposite Edge, and removing one removes both.
+- Some types have an inverse: adding an Edge of the type also adds the inverse Edge in the other direction, and removing one removes both. A progression from X to Y comes with a regression from Y to X, and a variant is its own inverse. The system knows which types have inverses.
 
 The graph can be traversed: from a start Movement, follow Edges outgoing, incoming, or both, optionally only of given types and up to a given number of steps, to find the Movements reachable from it.
 
 # Illustration
 
-A picture of a Movement. A Movement's Illustrations are ordered, for example the bottom and top phases of a push-up.
+An image created for a Movement and shown on it. A Movement's Illustrations are ordered, for example the bottom and top phases of a push-up.
 
 ## Illustrations Generation Spec
 
@@ -43,7 +43,7 @@ Describes how a Movement's whole Illustration sequence is produced. It is an ord
 
 A Stage Spec is one of:
 
-- **Avatar Image Spec**: a picture generated from an Avatar and a Viewpoint, plus Instructions, a reference Image, or both.
+- **Avatar Image Spec**: an image generated from an Avatar and a Viewpoint, plus Instructions, a reference Image, or both.
 - **Static Image Spec**: an image used as is.
 
 The model does not require the Stage Specs of a sequence to be of the same kind. The user interface offers one pattern per Movement, either all generated or all static, so the rules can change without changing the data.

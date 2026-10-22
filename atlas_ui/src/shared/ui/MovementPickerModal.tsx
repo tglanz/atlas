@@ -7,8 +7,9 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
+import { useDebouncedValue } from '@mantine/hooks';
 import { useState } from 'react';
-import { useMovements } from '../queries';
+import { useMovements } from '../movements';
 
 /** A modal with a searchable list of movements; picking one reports its key and closes. */
 export function MovementPickerModal({
@@ -21,7 +22,9 @@ export function MovementPickerModal({
   onPick: (movementKey: string) => void;
 }) {
   const [text, setText] = useState('');
-  const movements = useMovements({ text });
+  // The box updates at once; the request waits until typing pauses.
+  const [searchText] = useDebouncedValue(text, 300);
+  const movements = useMovements({ text: searchText });
 
   return (
     <Modal opened={opened} onClose={onClose} title="Add a movement">

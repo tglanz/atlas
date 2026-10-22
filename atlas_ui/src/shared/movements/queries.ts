@@ -1,6 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   createMovement,
+  getMovementNames,
+  getMovementTags,
   getMovement,
   listMovements,
   updateMovement,
@@ -10,6 +17,8 @@ import type { MovementContent, MovementFilters } from './api';
 export const movementKeys = {
   all: ['movements'] as const,
   list: (filters: MovementFilters) => ['movements', 'list', filters] as const,
+  names: ['movements', 'index', 'names'] as const,
+  tags: ['movements', 'index', 'tags'] as const,
   detail: (key: string) => ['movements', 'detail', key] as const,
 };
 
@@ -17,13 +26,23 @@ export function useMovements(filters: MovementFilters) {
   return useQuery({
     queryKey: movementKeys.list(filters),
     queryFn: ({ signal }) => listMovements(filters, signal),
+    // Keep showing the previous results while a new search loads, so the list does not flicker.
+    placeholderData: keepPreviousData,
   });
 }
 
-export const useMovement = (key: string) =>
+/** Both lists change when a movement is created or edited, which refreshes them with the rest. */
+export const useMovementNames = () =>
+  useQuery({ queryKey: movementKeys.names, queryFn: getMovementNames });
+
+export const useMovementTags = () =>
+  useQuery({ queryKey: movementKeys.tags, queryFn: getMovementTags });
+
+export const useMovement = (key: string, enabled = true) =>
   useQuery({
     queryKey: movementKeys.detail(key),
     queryFn: () => getMovement(key),
+    enabled: enabled && key !== '',
   });
 
 /** A change to a movement can affect lists and details, so refresh them all. */

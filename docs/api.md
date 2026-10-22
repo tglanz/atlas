@@ -4,7 +4,7 @@ The web application talks to the backend over an HTTP API under `/api`. The cont
 
 ## Conventions
 
-- JSON bodies, except picture uploads, which are multipart.
+- JSON bodies, except image uploads, which are multipart.
 - Errors are RFC 9457 problem details.
 - Status codes carry meaning: 400 invalid input, 401 not signed in, 403 not allowed, 404 not found, 409 conflicts with the current state (duplicate, invalid transition, still in use).
 
@@ -23,8 +23,9 @@ The web application talks to the backend over an HTTP API under `/api`. The cont
 ## Rules
 
 - A Movement's key is fixed when it is created and cannot be changed.
+- Searching Movements by several tags returns those that have all of them.
 - A Routine can only reference existing Movements.
 - Relationships between Movements are managed through the graph, not the Movement. Both ends must exist, and a Movement cannot relate to itself.
 - Generation is asynchronous. A request returns immediately and its status is polled. A successful request replaces the Movement's whole sequence of Illustrations.
-- Pictures are uploaded separately, and a generation spec refers to the returned address.
+- Images are uploaded separately, and a generation spec refers to the returned URL.
 - An Avatar or Viewpoint that a generation request uses cannot be deleted.

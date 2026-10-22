@@ -22,6 +22,13 @@ Migrations are still edited in place until the first deployment. If startup fail
 
 For PostgreSQL, set `SPRING_PROFILES_ACTIVE=postgres`, `ATLAS_DB_URL`, `ATLAS_DB_USER` and `ATLAS_DB_PASSWORD`.
 
+## Environment
+
+Secrets come from the environment, never from source control.
+
+- `ATLAS_ROOT_USER_EMAIL`, `ATLAS_ROOT_USER_PASSWORD`: a maintainer created at startup when no user has that email. An existing user is left as it is.
+- `ATLAS_FAL_AI_API_KEY`: the fal.ai key, for image generation.
+
 ## More
 
 - `ARCHITECTURE.md`: how the code is organized.

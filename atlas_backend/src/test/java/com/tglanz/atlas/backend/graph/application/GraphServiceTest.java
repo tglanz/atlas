@@ -44,13 +44,26 @@ class GraphServiceTest {
   private final GraphService graph = new GraphService(edges, existing::contains);
 
   @Test
-  void aOneWayTypeStoresOneEdge() {
+  void aProgressionAlsoAddsTheRegressionTheOtherWay() {
     graph.setOutgoing("push-up", List.of(new Edge("push-up", "pseudo-planche", "progression")));
-    assertThat(edges.stored).containsExactly(new Edge("push-up", "pseudo-planche", "progression"));
+    assertThat(edges.stored)
+        .containsExactlyInAnyOrder(
+            new Edge("push-up", "pseudo-planche", "progression"),
+            new Edge("pseudo-planche", "push-up", "regression"));
   }
 
   @Test
-  void aBidirectionalTypeStoresBothDirections() {
+  void aRegressionAlsoAddsTheProgressionTheOtherWay() {
+    graph.setOutgoing(
+        "pseudo-planche", List.of(new Edge("pseudo-planche", "push-up", "regression")));
+    assertThat(edges.stored)
+        .containsExactlyInAnyOrder(
+            new Edge("pseudo-planche", "push-up", "regression"),
+            new Edge("push-up", "pseudo-planche", "progression"));
+  }
+
+  @Test
+  void aTypeThatIsItsOwnInverseGivesTwoEdgesOfTheSameType() {
     graph.setOutgoing("pull-up", List.of(new Edge("pull-up", "supinated", "variant")));
     assertThat(edges.stored)
         .containsExactlyInAnyOrder(
@@ -59,26 +72,27 @@ class GraphServiceTest {
   }
 
   @Test
-  void removingABidirectionalEdgeRemovesTheOtherDirectionToo() {
-    graph.setOutgoing("pull-up", List.of(new Edge("pull-up", "supinated", "variant")));
-    graph.setOutgoing("pull-up", List.of());
+  void removingARelationshipRemovesItsInverseToo() {
+    graph.setOutgoing("push-up", List.of(new Edge("push-up", "pseudo-planche", "progression")));
+    graph.setOutgoing("push-up", List.of());
+    assertThat(edges.stored).isEmpty();
+  }
+
+  @Test
+  void theOtherEndSeesTheInverseAndCanRemoveTheRelationship() {
+    graph.setOutgoing("push-up", List.of(new Edge("push-up", "pseudo-planche", "progression")));
+    assertThat(graph.edgesOf("pseudo-planche").outgoing())
+        .containsExactly(new Edge("pseudo-planche", "push-up", "regression"));
+    graph.setOutgoing("pseudo-planche", List.of());
     assertThat(edges.stored).isEmpty();
   }
 
   @Test
   void savingTheSameEdgesAgainChangesNothing() {
-    var variant = new Edge("pull-up", "supinated", "variant");
-    graph.setOutgoing("pull-up", List.of(variant));
-    graph.setOutgoing("pull-up", List.of(variant));
+    var progression = new Edge("push-up", "pseudo-planche", "progression");
+    graph.setOutgoing("push-up", List.of(progression));
+    graph.setOutgoing("push-up", List.of(progression));
     assertThat(edges.stored).hasSize(2);
-  }
-
-  @Test
-  void theOtherEndSeesAndCanRemoveTheMirror() {
-    graph.setOutgoing("pull-up", List.of(new Edge("pull-up", "supinated", "variant")));
-    assertThat(graph.edgesOf("supinated").outgoing()).hasSize(1);
-    graph.setOutgoing("supinated", List.of());
-    assertThat(edges.stored).isEmpty();
   }
 
   @Test
@@ -99,7 +113,11 @@ class GraphServiceTest {
   }
 
   @Test
-  void offersTheKnownTypes() {
+  void offersTheKnownTypesWithTheirInverses() {
     assertThat(graph.edgeTypes()).extracting(t -> t.name()).contains("progression", "variant");
+    assertThat(graph.edgeTypes())
+        .filteredOn(t -> t.name().equals("progression"))
+        .extracting(t -> t.inverse())
+        .containsExactly("regression");
   }
 }

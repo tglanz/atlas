@@ -5,7 +5,9 @@ import com.tglanz.atlas.backend.movement.application.port.in.MovementQueryUseCas
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,8 +33,10 @@ class MovementController {
 
   @GetMapping
   List<MovementSummaryResponse> search(
-      @RequestParam(required = false) String text, @RequestParam(required = false) String tag) {
-    return queries.search(text, tag).stream().map(MovementSummaryResponse::from).toList();
+      @RequestParam(required = false) String text,
+      @RequestParam(required = false) List<String> tags) {
+    Set<String> wanted = tags == null ? Set.of() : new LinkedHashSet<>(tags);
+    return queries.search(text, wanted).stream().map(MovementSummaryResponse::from).toList();
   }
 
   @GetMapping("/{key}")

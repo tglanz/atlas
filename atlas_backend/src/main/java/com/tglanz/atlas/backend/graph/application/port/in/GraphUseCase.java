@@ -18,7 +18,7 @@ public interface GraphUseCase {
 
   /**
    * Replaces all edges leaving a Movement. Every edge must start at that Movement and end at an
-   * existing one. For a bidirectional type the opposite edge is added or removed too.
+   * existing one. For a type with an inverse, the inverse edge is added or removed too.
    */
   void setOutgoing(String movement, List<Edge> edges);
 

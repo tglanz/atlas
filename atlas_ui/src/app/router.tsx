@@ -3,7 +3,7 @@ import { LoginPage, RegisterPage, RequireAuth } from '@/features/auth';
 import {
   MovementDetailsPage,
   MovementEditorPage,
-  MovementLibraryPage,
+  MovementIndexPage,
 } from '@/features/movements';
 import {
   RoutineDetailsPage,
@@ -12,7 +12,6 @@ import {
 } from '@/features/routines';
 import { AppLayout } from './layout/AppLayout';
 import { IllustrationSettingsPage } from './pages/IllustrationSettingsPage';
-import { MovementRelationshipsPage } from './pages/MovementRelationshipsPage';
 import { LandingPage } from './pages/LandingPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
@@ -25,7 +24,7 @@ export const router = createBrowserRouter([
       { path: 'register', element: <RegisterPage /> },
 
       // Public
-      { path: 'movements', element: <MovementLibraryPage /> },
+      { path: 'movements', element: <MovementIndexPage /> },
       { path: 'movements/:key', element: <MovementDetailsPage /> },
 
       // Maintainers
@@ -34,10 +33,6 @@ export const router = createBrowserRouter([
         children: [
           { path: 'movements/new', element: <MovementEditorPage /> },
           { path: 'movements/:key/edit', element: <MovementEditorPage /> },
-          {
-            path: 'movements/:key/relationships',
-            element: <MovementRelationshipsPage />,
-          },
           {
             path: 'settings/illustrations',
             element: <IllustrationSettingsPage />,

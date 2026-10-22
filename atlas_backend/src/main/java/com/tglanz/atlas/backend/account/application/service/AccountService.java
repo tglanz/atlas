@@ -34,6 +34,34 @@ public class AccountService implements AccountUseCase {
   @Override
   public User register(String email, String rawPassword) {
     String normalized = User.normalizeEmail(email);
+    requireAcceptablePassword(rawPassword);
+    if (users.findByEmail(normalized).isPresent()) {
+      throw new ConflictException("Email already registered");
+    }
+    Role role = users.count() == 0 ? Role.MAINTAINER : Role.PRACTITIONER;
+    return create(normalized, rawPassword, role);
+  }
+
+  @Override
+  public boolean ensureMaintainer(String email, String rawPassword) {
+    String normalized = User.normalizeEmail(email);
+    if (users.findByEmail(normalized).isPresent()) {
+      return false;
+    }
+    requireAcceptablePassword(rawPassword);
+    create(normalized, rawPassword, Role.MAINTAINER);
+    return true;
+  }
+
+  private User create(String normalizedEmail, String rawPassword, Role role) {
+    User user =
+        new User(
+            UUID.randomUUID(), normalizedEmail, hasher.hash(rawPassword), role, clock.instant());
+    users.save(user);
+    return user;
+  }
+
+  private static void requireAcceptablePassword(String rawPassword) {
     if (rawPassword == null
         || rawPassword.length() < MIN_PASSWORD_LENGTH
         || rawPassword.length() > MAX_PASSWORD_LENGTH) {
@@ -41,14 +69,6 @@ public class AccountService implements AccountUseCase {
           "Password must be %d to %d characters"
               .formatted(MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH));
     }
-    if (users.findByEmail(normalized).isPresent()) {
-      throw new ConflictException("Email already registered");
-    }
-    Role role = users.count() == 0 ? Role.MAINTAINER : Role.PRACTITIONER;
-    User user =
-        new User(UUID.randomUUID(), normalized, hasher.hash(rawPassword), role, clock.instant());
-    users.save(user);
-    return user;
   }
 
   @Override

@@ -1,68 +1,53 @@
-import { Anchor, Badge, Group, Stack, Title } from '@mantine/core';
-import { Link } from 'react-router';
+import { SimpleGrid, Title } from '@mantine/core';
+import { MovementCardByKey } from '@/shared/ui';
 import type { Edge } from '../api';
 import { useEdgeTypes, useEdges } from '../queries';
 
 const capitalize = (text: string) =>
   text.charAt(0).toUpperCase() + text.slice(1);
 
-/** The movements this one points to, grouped by relationship, and the ones that point to it. */
+/**
+ * The movements this one is related to, one section per relationship type: if X is related to Y by
+ * a progression, X shows a Progressions section with Y's card.
+ */
 export function RelatedMovements({ movementKey }: { movementKey: string }) {
   const edges = useEdges(movementKey);
   const types = useEdgeTypes();
   if (!edges.data) return null;
 
-  // Use the type's label when it is a known type; otherwise show the type as written.
-  const labelOf = (type: string) =>
-    types.data?.find((t) => t.name === type)?.label ?? capitalize(type);
-
-  const { outgoing, incoming } = edges.data;
+  const known = types.data ?? [];
   const groups = [
-    ...outgoing
+    ...edges.data.outgoing
       .reduce((map, edge) => {
         map.set(edge.type, [...(map.get(edge.type) ?? []), edge]);
         return map;
       }, new Map<string, Edge[]>())
       .entries(),
-  ];
+  ]
+    // Known types first, in their usual order; other types after, in the order found.
+    .map(([type, group]) => ({
+      type,
+      group,
+      order: known.findIndex((t) => t.name === type),
+    }))
+    .sort(
+      (a, b) => (a.order < 0 ? 99 : a.order) - (b.order < 0 ? 99 : b.order),
+    );
 
   return (
     <>
-      {groups.map(([type, group]) => (
+      {groups.map(({ type, group }) => (
         <section key={type}>
           <Title order={2} size="h3" mb="xs">
-            {labelOf(type)}
+            {known.find((t) => t.name === type)?.plural ?? capitalize(type)}
           </Title>
-          <Group gap="md">
+          <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
             {group.map((edge) => (
-              <Anchor
-                key={edge.target}
-                component={Link}
-                to={`/movements/${edge.target}`}
-              >
-                {edge.target}
-              </Anchor>
+              <MovementCardByKey key={edge.target} movementKey={edge.target} />
             ))}
-          </Group>
+          </SimpleGrid>
         </section>
       ))}
-      {incoming.length > 0 && (
-        <section>
-          <Title order={2} size="h3" mb="xs">
-            Linked from
-          </Title>
-          <Stack gap={4}>
-            {incoming.map((edge) => (
-              <Group key={`${edge.source}-${edge.type}`} gap="xs">
-                <Anchor component={Link} to={`/movements/${edge.source}`}>
-                  {edge.source}
-                </Anchor>
-                <Badge variant="light">{labelOf(edge.type)}</Badge>
-              </Group>
-            ))}
-          </Stack>
-        </section>
-      )}
     </>
   );
 }

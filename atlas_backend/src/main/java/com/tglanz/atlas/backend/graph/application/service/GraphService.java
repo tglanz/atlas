@@ -55,9 +55,9 @@ public class GraphService implements GraphUseCase {
     Set<Edge> toAdd = new LinkedHashSet<>(desired);
     toAdd.removeAll(existing);
 
-    // A bidirectional relationship is two edges, so its opposite edge changes with it.
-    Set<Edge> remove = withMirrors(toRemove);
-    Set<Edge> add = withMirrors(toAdd);
+    // A relationship and its inverse are two edges, so the inverse changes with it.
+    Set<Edge> remove = withInverses(toRemove);
+    Set<Edge> add = withInverses(toAdd);
     edges.remove(remove);
     edges.add(add);
   }
@@ -74,12 +74,10 @@ public class GraphService implements GraphUseCase {
     return EdgeTypes.ALL;
   }
 
-  private static Set<Edge> withMirrors(Set<Edge> changed) {
+  private static Set<Edge> withInverses(Set<Edge> changed) {
     Set<Edge> all = new LinkedHashSet<>(changed);
     for (Edge edge : changed) {
-      if (EdgeTypes.isBidirectional(edge.type())) {
-        all.add(edge.mirror());
-      }
+      EdgeTypes.inverseOf(edge.type()).ifPresent(inverse -> all.add(edge.reversedAs(inverse)));
     }
     return all;
   }

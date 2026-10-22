@@ -7,9 +7,13 @@ import com.tglanz.atlas.backend.movement.domain.Illustration;
 import com.tglanz.atlas.backend.movement.domain.Movement;
 import com.tglanz.atlas.backend.movement.domain.MovementContent;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
+import com.tglanz.atlas.backend.movement.domain.MovementName;
+import com.tglanz.atlas.backend.movement.domain.TagCount;
 import com.tglanz.atlas.backend.shared.error.ConflictException;
 import com.tglanz.atlas.backend.shared.error.NotFoundException;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +29,27 @@ public class MovementService implements MovementQueryUseCase, MovementCommandUse
 
   @Override
   @Transactional(readOnly = true)
-  public List<Movement> search(String text, String tag) {
-    return repository.search(blankToEmpty(text), blankToEmpty(tag).toLowerCase());
+  public List<Movement> search(String text, Set<String> tags) {
+    Set<String> wanted =
+        tags == null
+            ? Set.of()
+            : tags.stream()
+                .map(t -> t.strip().toLowerCase())
+                .filter(t -> !t.isEmpty())
+                .collect(Collectors.toSet());
+    return repository.search(blankToEmpty(text), wanted);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<MovementName> names() {
+    return repository.findAllNames();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<TagCount> tags() {
+    return repository.countTags();
   }
 
   @Override
