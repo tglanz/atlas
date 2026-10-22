@@ -4,14 +4,15 @@ Last reviewed 2026-10-22.
 
 ## Where we are
 
-A proof of concept. Movements, revisions, illustrations (uploaded or generated), routines, and accounts work end to end in the backend and are wired into the web app. Picture storage and illustration generation are stubs. The web app has been built and checked against the API but not used in a browser.
+A proof of concept. Movements, illustrations (uploaded or generated), routines, and accounts work end to end in the backend and are wired into the web app. Picture storage and illustration generation are stubs. The web app has been built and checked against the API but not used in a browser.
 
 ## Missing
 
 - Real picture storage and a real illustration generator.
 - Account management: password reset, email verification, login throttling.
 - Recovery and cleanup of generation requests interrupted by a restart.
-- Movement: discarding a draft, validating link targets, pagination, removing a single Illustration.
+- Movement: deleting a Movement, validating link targets, pagination, removing a single Illustration.
+- Change history for Movements, and a way to keep a Movement hidden while it is being built. Both were deferred on purpose; see `technicalities.md`.
 - "Add to routine" from a Movement page.
 - Deployment: container image, hosting, a verified PostgreSQL setup.
 
@@ -33,4 +34,4 @@ A proof of concept. Movements, revisions, illustrations (uploaded or generated),
 4. Deploy the backend and database.
 5. Implement real storage and generation behind the existing ports.
 6. Harden accounts.
-7. Add a small set of API tests for authorization and publishing.
+7. Add a small set of API tests for authorization and movement editing.

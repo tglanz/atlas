@@ -25,9 +25,6 @@ class GenerationRequestEntity {
   @Column(name = "movement_key")
   String movementKey;
 
-  @Column(name = "draft_revision")
-  int draftRevision;
-
   @Enumerated(EnumType.STRING)
   GenerationStatus status;
 

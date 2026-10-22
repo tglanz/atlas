@@ -1,15 +1,17 @@
-# Movement Revisioning and Publishing
+# Movement Changes
 
-A Movement is identified by a stable Key and has numbered revisions starting at 1.
+Movements are edited in place by maintainers. There are no drafts, revisions, or publishing: a change is visible to everyone immediately, and Routines show a Movement's current content.
 
-A new Movement begins as a draft at revision 1. Drafts can be edited in place and may exist without illustrations.
+## Why
 
-Publishing a draft makes that revision immutable and available in the Movement library.
+The first version has a single maintainer, and a draft, publish, and revise cycle costs a lot for that: more screens, a state machine, frozen Illustrations, and pinned Routine references. Editing in place is enough to get the product in use.
 
-Revising a published Movement creates a new draft with the same Key and the next revision number. The published revision remains available until the new draft is published.
+## What this gives up
 
-Publishing the new draft makes it the current revision. Previous published revisions remain unchanged and available for historical references.
+- A history of how a Movement changed.
+- Stable Routines: a Routine changes when the Movements in it change. This matters most if trainers sell Routines.
+- Preparing a change out of public view.
 
-Routines reference exact published Movement revisions, so publishing a new revision does not alter existing Routines.
+## Adding them later
 
-A revision's Illustrations are part of the revision and are immutable once it is published. This is what makes a Routine always show the same Illustrations. Changing a Movement's Illustrations therefore requires a new revision.
+History can be added by saving a snapshot of a Movement whenever it changes, with Routines optionally pinning a snapshot. A hidden state can be a single flag on a Movement.

@@ -52,7 +52,7 @@ export const useGenerations = (movementKey: string) =>
   });
 
 /** What a stage looks like in the form, before any picture is uploaded. */
-export type StageDraft = {
+export type StageInput = {
   instructions: string;
   /** A reference image (avatar-based stages) or the image itself (static stages). */
   file: File | null;
@@ -63,9 +63,9 @@ export type GenerationForm =
       mode: 'avatar';
       avatarId: string;
       viewpointId: string;
-      stages: StageDraft[];
+      stages: StageInput[];
     }
-  | { mode: 'static'; stages: StageDraft[] };
+  | { mode: 'static'; stages: StageInput[] };
 
 /** Uploads the pictures first, then requests the generation with their urls. */
 export function useRequestGeneration(movementKey: string) {

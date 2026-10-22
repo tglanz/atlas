@@ -6,72 +6,46 @@ import com.tglanz.atlas.backend.movement.domain.Movement;
 import com.tglanz.atlas.backend.movement.domain.MovementContent;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.movement.domain.MovementLink;
-import com.tglanz.atlas.backend.movement.domain.RevisionStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
 class MovementPersistenceAdapter implements MovementRepository {
 
-  private final MovementRevisionJpaRepository jpa;
+  private final MovementJpaRepository jpa;
 
-  MovementPersistenceAdapter(MovementRevisionJpaRepository jpa) {
+  MovementPersistenceAdapter(MovementJpaRepository jpa) {
     this.jpa = jpa;
   }
 
   @Override
-  public boolean existsKey(MovementKey key) {
-    return jpa.existsByMovementKey(key.value());
+  public boolean exists(MovementKey key) {
+    return jpa.existsById(key.value());
   }
 
   @Override
-  public Optional<Movement> find(MovementKey key, int revision) {
-    return jpa.findByMovementKeyAndRevision(key.value(), revision).map(this::toDomain);
+  public Optional<Movement> find(MovementKey key) {
+    return jpa.findById(key.value()).map(this::toDomain);
   }
 
   @Override
-  public Optional<Movement> findLatestPublished(MovementKey key) {
-    return jpa.findFirstByMovementKeyAndStatusOrderByRevisionDesc(
-            key.value(), RevisionStatus.PUBLISHED)
-        .map(this::toDomain);
-  }
-
-  @Override
-  public Optional<Movement> findDraft(MovementKey key) {
-    return jpa.findFirstByMovementKeyAndStatusOrderByRevisionDesc(key.value(), RevisionStatus.DRAFT)
-        .map(this::toDomain);
-  }
-
-  @Override
-  public List<Movement> findAllRevisions(MovementKey key) {
-    return jpa.findByMovementKeyOrderByRevisionAsc(key.value()).stream()
-        .map(this::toDomain)
-        .toList();
-  }
-
-  @Override
-  public List<Movement> searchCurrentPublished(String text, String tag) {
-    return jpa.searchCurrentPublished(text, tag).stream().map(this::toDomain).toList();
+  public List<Movement> search(String text, String tag) {
+    return jpa.search(text, tag).stream().map(this::toDomain).toList();
   }
 
   @Override
   public void save(Movement movement) {
-    MovementRevisionEntity entity =
-        jpa.findByMovementKeyAndRevision(movement.key().value(), movement.revision())
+    MovementEntity entity =
+        jpa.findById(movement.key().value())
             .orElseGet(
                 () -> {
-                  var created = new MovementRevisionEntity();
-                  created.id = UUID.randomUUID().toString();
+                  var created = new MovementEntity();
                   created.movementKey = movement.key().value();
-                  created.revision = movement.revision();
                   return created;
                 });
-    entity.status = movement.status();
-    entity.publishedAt = movement.publishedAt();
     MovementContent content = movement.content();
     entity.name = content.name();
     entity.description = content.description();
@@ -81,21 +55,21 @@ class MovementPersistenceAdapter implements MovementRepository {
     entity.tags.addAll(content.tags());
     entity.links.clear();
     for (MovementLink link : content.links()) {
-      var row = new MovementRevisionEntity.LinkRow();
+      var row = new MovementEntity.LinkRow();
       row.targetKey = link.target().value();
       row.relationType = link.relationType();
       entity.links.add(row);
     }
     entity.illustrations.clear();
     for (Illustration illustration : movement.illustrations()) {
-      var row = new MovementRevisionEntity.IllustrationRow();
+      var row = new MovementEntity.IllustrationRow();
       row.url = illustration.url();
       entity.illustrations.add(row);
     }
     jpa.saveAndFlush(entity);
   }
 
-  private Movement toDomain(MovementRevisionEntity e) {
+  private Movement toDomain(MovementEntity e) {
     List<MovementLink> links = new ArrayList<>();
     for (var row : e.links) {
       links.add(new MovementLink(new MovementKey(row.targetKey), row.relationType));
@@ -104,12 +78,6 @@ class MovementPersistenceAdapter implements MovementRepository {
         new MovementContent(e.name, e.description, List.copyOf(e.cues), Set.copyOf(e.tags), links);
     List<Illustration> illustrations =
         e.illustrations.stream().map(row -> new Illustration(row.url)).toList();
-    return Movement.restore(
-        new MovementKey(e.movementKey),
-        e.revision,
-        e.status,
-        e.publishedAt,
-        content,
-        illustrations);
+    return Movement.restore(new MovementKey(e.movementKey), content, illustrations);
   }
 }

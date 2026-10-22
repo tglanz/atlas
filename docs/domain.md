@@ -6,8 +6,6 @@
 # Movement
 
 - **Key**: Stable identifier.
-- **Revision**: Revision number, starting at 1.
-- **Status**: Draft or Published. Published revisions have a publication time.
 - **Name**: String.
 - **Description**: Text.
 - **Cues**: Ordered collection of performance instructions.
@@ -15,15 +13,15 @@
 - **Links**: Collection of directed links, each containing a target Movement Key and a relationship type.
 - **Illustrations**: Ordered collection of Illustrations.
 
-Revisioning rules are in `technicalities.md`.
+Movements are edited in place; see `technicalities.md`.
 
 # Illustration
 
-A picture of a Movement. A revision's Illustrations are ordered, for example the bottom and top phases of a push-up. They are part of the revision and are frozen when it is published.
+A picture of a Movement. A Movement's Illustrations are ordered, for example the bottom and top phases of a push-up.
 
 ## Illustrations Generation Spec
 
-Describes how a draft's whole Illustration sequence is produced. It is an ordered collection of Stage Specs, and one Illustration results per Stage Spec, in order.
+Describes how a Movement's whole Illustration sequence is produced. It is an ordered collection of Stage Specs, and one Illustration results per Stage Spec, in order.
 
 A Stage Spec is one of:
 
@@ -34,7 +32,7 @@ The model does not require the Stage Specs of a sequence to be of the same kind.
 
 ## Generation Request
 
-A request to produce a draft's Illustration sequence from a spec. It moves from pending to running to succeeded or failed. A failed request records why and can be retried. A successful request replaces the draft's whole sequence.
+A request to produce a Movement's Illustration sequence from a spec. It moves from pending to running to succeeded or failed. A failed request records why and can be retried. A successful request replaces the Movement's whole sequence.
 
 ## Avatar
 
@@ -55,4 +53,4 @@ A predefined way to specify the viewing angle when generating an Illustration. I
 
 - **Name**: String.
 - **Description**: Text.
-- **Movements**: Ordered collection of references to Movement revisions.
+- **Movements**: Ordered collection of references to Movements.

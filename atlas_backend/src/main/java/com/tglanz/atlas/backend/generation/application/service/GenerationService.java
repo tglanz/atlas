@@ -4,7 +4,7 @@ import com.tglanz.atlas.backend.generation.application.port.in.GenerationUseCase
 import com.tglanz.atlas.backend.generation.application.port.out.AvatarSpecifications;
 import com.tglanz.atlas.backend.generation.application.port.out.GenerationRepository;
 import com.tglanz.atlas.backend.generation.application.port.out.GenerationScheduler;
-import com.tglanz.atlas.backend.generation.application.port.out.MovementDrafts;
+import com.tglanz.atlas.backend.generation.application.port.out.Movements;
 import com.tglanz.atlas.backend.generation.application.port.out.ViewpointRepository;
 import com.tglanz.atlas.backend.generation.domain.AvatarImageSpec;
 import com.tglanz.atlas.backend.generation.domain.GenerationRequest;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class GenerationService implements GenerationUseCase {
 
   private final GenerationRepository requests;
-  private final MovementDrafts drafts;
+  private final Movements movements;
   private final AvatarSpecifications avatars;
   private final ViewpointRepository viewpoints;
   private final GenerationScheduler scheduler;
@@ -30,13 +30,13 @@ public class GenerationService implements GenerationUseCase {
 
   public GenerationService(
       GenerationRepository requests,
-      MovementDrafts drafts,
+      Movements movements,
       AvatarSpecifications avatars,
       ViewpointRepository viewpoints,
       GenerationScheduler scheduler,
       Clock clock) {
     this.requests = requests;
-    this.drafts = drafts;
+    this.movements = movements;
     this.avatars = avatars;
     this.viewpoints = viewpoints;
     this.scheduler = scheduler;
@@ -45,10 +45,9 @@ public class GenerationService implements GenerationUseCase {
 
   @Override
   public GenerationRequest request(String movementKey, IllustrationsGenerationSpec spec) {
-    var draft =
-        drafts
-            .findDraft(movementKey)
-            .orElseThrow(() -> new NotFoundException("No draft for movement " + movementKey));
+    if (movements.find(movementKey).isEmpty()) {
+      throw new NotFoundException("No movement " + movementKey);
+    }
     for (StageSpec stage : spec.stages()) {
       if (stage instanceof AvatarImageSpec avatarStage) {
         if (avatars.find(avatarStage.avatarId()).isEmpty()) {
@@ -59,8 +58,7 @@ public class GenerationService implements GenerationUseCase {
         }
       }
     }
-    GenerationRequest request =
-        GenerationRequest.create(movementKey, draft.revision(), spec, clock.instant());
+    GenerationRequest request = GenerationRequest.create(movementKey, spec, clock.instant());
     requests.save(request);
     scheduler.schedule(request.id());
     return request;

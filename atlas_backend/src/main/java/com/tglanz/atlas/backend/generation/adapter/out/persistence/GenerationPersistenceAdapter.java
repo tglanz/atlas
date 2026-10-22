@@ -44,7 +44,6 @@ class GenerationPersistenceAdapter implements GenerationRepository {
                   var created = new GenerationRequestEntity();
                   created.id = request.id().toString();
                   created.movementKey = request.movementKey();
-                  created.draftRevision = request.draftRevision();
                   created.createdAt = request.createdAt();
                   request.spec().stages().forEach(stage -> created.stages.add(toRow(stage)));
                   return created;
@@ -98,7 +97,6 @@ class GenerationPersistenceAdapter implements GenerationRepository {
     return GenerationRequest.restore(
         UUID.fromString(e.id),
         e.movementKey,
-        e.draftRevision,
         spec,
         e.status,
         e.failureReason,

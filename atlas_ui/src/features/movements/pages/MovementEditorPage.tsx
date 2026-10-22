@@ -13,65 +13,42 @@ import {
 import { useForm } from '@mantine/form';
 import { IconTrash } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { IllustrationPanel } from '@/features/generation';
 import { QueryBoundary } from '@/shared/ui';
-import type { MovementContent, Movement } from '../api';
+import type { Movement, MovementContent } from '../api';
 import {
   movementKeys,
   useCreateMovement,
-  useCreateRevision,
-  useDraft,
-  usePublishDraft,
-  useUpdateDraft,
+  useMovement,
+  useUpdateMovement,
 } from '../queries';
 
-/** /movements/new creates a draft; /movements/:key/edit edits the open draft. */
+/** /movements/new creates a movement; /movements/:key/edit changes one. */
 export function MovementEditorPage() {
   const { key } = useParams();
-  return key ? <EditDraft movementKey={key} /> : <MovementForm />;
+  return key ? <EditMovement movementKey={key} /> : <MovementForm />;
 }
 
-function EditDraft({ movementKey }: { movementKey: string }) {
-  const draft = useDraft(movementKey);
-  const createRevision = useCreateRevision();
+function EditMovement({ movementKey }: { movementKey: string }) {
+  const movement = useMovement(movementKey);
   const queryClient = useQueryClient();
 
   return (
-    <QueryBoundary query={draft}>
-      {(data) =>
-        data ? (
-          <Stack gap="xl">
-            <MovementForm draft={data} />
-            <IllustrationPanel
-              movementKey={data.key}
-              illustrations={data.illustrations}
-              onChanged={() =>
-                queryClient.invalidateQueries({
-                  queryKey: movementKeys.draft(movementKey),
-                })
-              }
-            />
-          </Stack>
-        ) : (
-          <Alert color="blue" title="No open draft">
-            <Stack align="flex-start" gap="xs">
-              <Text>
-                This movement has no draft. Create a new revision to edit it.
-              </Text>
-              <Button
-                loading={createRevision.isPending}
-                onClick={() => createRevision.mutate(movementKey)}
-              >
-                Create revision
-              </Button>
-              {createRevision.isError && (
-                <Text c="red">{createRevision.error.message}</Text>
-              )}
-            </Stack>
-          </Alert>
-        )
-      }
+    <QueryBoundary query={movement}>
+      {(data) => (
+        <Stack gap="xl">
+          <MovementForm movement={data} />
+          <IllustrationPanel
+            movementKey={data.key}
+            illustrations={data.illustrations}
+            onChanged={() =>
+              queryClient.invalidateQueries({ queryKey: movementKeys.all })
+            }
+          />
+        </Stack>
+      )}
     </QueryBoundary>
   );
 }
@@ -87,7 +64,14 @@ type FormValues = {
 
 const KEY_FORMAT = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-function toContent(values: FormValues): MovementContent {
+/** Tags already added, plus any text still typed in the tag field. */
+function withPendingTag(tags: string[], pending: string): string[] {
+  const text = pending.trim();
+  const exists = tags.some((tag) => tag.toLowerCase() === text.toLowerCase());
+  return text && !exists ? [...tags, text] : tags;
+}
+
+function toContent(values: FormValues, pendingTag: string): MovementContent {
   return {
     name: values.name,
     description: values.description,
@@ -95,60 +79,58 @@ function toContent(values: FormValues): MovementContent {
       .split('\n')
       .map((cue) => cue.trim())
       .filter(Boolean),
-    tags: values.tags,
+    tags: withPendingTag(values.tags, pendingTag),
     links: values.links.filter((link) => link.target && link.relationType),
   };
 }
 
-function MovementForm({ draft }: { draft?: Movement }) {
+function MovementForm({ movement }: { movement?: Movement }) {
   const navigate = useNavigate();
   const create = useCreateMovement();
-  const update = useUpdateDraft();
-  const publish = usePublishDraft();
+  const update = useUpdateMovement();
+  // Text typed in the tag field but not yet turned into a tag with Enter.
+  const [pendingTag, setPendingTag] = useState('');
 
   const form = useForm<FormValues>({
     initialValues: {
-      key: draft?.key ?? '',
-      name: draft?.name ?? '',
-      description: draft?.description ?? '',
-      cues: draft?.cues.join('\n') ?? '',
-      tags: draft?.tags ?? [],
-      links: draft?.links ?? [],
+      key: movement?.key ?? '',
+      name: movement?.name ?? '',
+      description: movement?.description ?? '',
+      cues: movement?.cues.join('\n') ?? '',
+      tags: movement?.tags ?? [],
+      links: movement?.links ?? [],
     },
     validate: {
       key: (v) =>
-        draft || KEY_FORMAT.test(v)
+        movement || KEY_FORMAT.test(v)
           ? null
           : 'Use lowercase letters, digits and hyphens',
       name: (v) => (v.trim() ? null : 'Enter a name'),
     },
   });
 
-  const busy = create.isPending || update.isPending || publish.isPending;
-  const error = create.error ?? update.error ?? publish.error;
+  const busy = create.isPending || update.isPending;
+  const error = create.error ?? update.error;
 
-  /** Saves the draft; resolves to the movement key. */
-  async function save(values: FormValues): Promise<string> {
-    if (draft) {
-      await update.mutateAsync({ key: draft.key, content: toContent(values) });
-      return draft.key;
+  async function save(values: FormValues) {
+    const content = toContent(values, pendingTag);
+    if (movement) {
+      await update.mutateAsync({ key: movement.key, content });
+      navigate(`/movements/${movement.key}`);
+    } else {
+      await create.mutateAsync({ key: values.key, content });
+      // Illustrations are added on the edit page, which a new movement opens next.
+      navigate(`/movements/${values.key}/edit`);
     }
-    await create.mutateAsync({ key: values.key, content: toContent(values) });
-    return values.key;
   }
 
   return (
-    <form
-      onSubmit={form.onSubmit(async (values) =>
-        navigate(`/movements/${await save(values)}/edit`),
-      )}
-    >
+    <form onSubmit={form.onSubmit(save)}>
       <Stack gap="md">
         <Title order={1}>
-          {draft ? `Edit ${draft.name || draft.key}` : 'New movement'}
+          {movement ? `Edit ${movement.name}` : 'New movement'}
         </Title>
-        {draft && <Text c="dimmed">Draft of revision {draft.revision}</Text>}
-        {!draft && (
+        {!movement && (
           <TextInput
             label="Key"
             description="Stable identifier used in the address, e.g. front-plank"
@@ -169,7 +151,16 @@ function MovementForm({ draft }: { draft?: Movement }) {
           minRows={3}
           {...form.getInputProps('cues')}
         />
-        <TagsInput label="Tags" {...form.getInputProps('tags')} />
+        <TagsInput
+          label="Tags"
+          description="Press Enter to add a tag"
+          // A tag is only created with Enter: not by a comma, a paste, or leaving the field.
+          splitChars={[]}
+          acceptValueOnBlur={false}
+          searchValue={pendingTag}
+          onSearchChange={setPendingTag}
+          {...form.getInputProps('tags')}
+        />
 
         <Stack gap="xs">
           <Text fw={500} size="sm">
@@ -214,20 +205,7 @@ function MovementForm({ draft }: { draft?: Movement }) {
         {error && <Alert color="red">{error.message}</Alert>}
         <Group>
           <Button type="submit" loading={busy}>
-            Save draft
-          </Button>
-          <Button
-            variant="light"
-            loading={busy}
-            onClick={() =>
-              form.onSubmit(async (values) => {
-                const key = await save(values);
-                await publish.mutateAsync(key);
-                navigate(`/movements/${key}`);
-              })()
-            }
-          >
-            Publish
+            Save
           </Button>
           <Button variant="default" onClick={() => navigate(-1)}>
             Cancel

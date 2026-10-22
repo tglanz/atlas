@@ -16,9 +16,9 @@ src/
     ui/               small reusable components
   features/
     auth/             sign in, register, current user, route guard, account menu
-    movements/        library, details, revision history, editor
+    movements/        library, details, editor
     avatars/          Avatar settings
-    generation/       Viewpoint settings, setting a draft's Illustrations (generate or static images)
+    generation/       Viewpoint settings, setting a movement's Illustrations (generate or static images)
     routines/         routine library, details, editor
 ```
 

@@ -8,22 +8,10 @@ import java.util.List;
 
 public interface MovementCommandUseCase {
 
-  Movement createDraft(MovementKey key, MovementContent content);
+  Movement create(MovementKey key, MovementContent content);
 
-  Movement updateDraft(MovementKey key, MovementContent content);
+  Movement update(MovementKey key, MovementContent content);
 
-  /** Opens a new draft from the latest published revision. */
-  Movement createRevision(MovementKey key);
-
-  Movement publish(MovementKey key);
-
-  /** Appends an Illustration to the end of the open draft's sequence. */
-  Movement addIllustration(MovementKey key, Illustration illustration);
-
-  /** Replaces the open draft's sequence. The open draft must be the expected revision. */
-  Movement replaceIllustrations(
-      MovementKey key, int expectedRevision, List<Illustration> illustrations);
-
-  /** Removes all Illustrations from the open draft. */
-  Movement clearIllustrations(MovementKey key);
+  /** Replaces the Movement's whole sequence of Illustrations; empty removes them all. */
+  Movement replaceIllustrations(MovementKey key, List<Illustration> illustrations);
 }

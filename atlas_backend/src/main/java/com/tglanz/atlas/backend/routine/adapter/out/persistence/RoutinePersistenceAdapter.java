@@ -1,7 +1,6 @@
 package com.tglanz.atlas.backend.routine.adapter.out.persistence;
 
 import com.tglanz.atlas.backend.routine.application.port.out.RoutineRepository;
-import com.tglanz.atlas.backend.routine.domain.MovementRef;
 import com.tglanz.atlas.backend.routine.domain.Routine;
 import com.tglanz.atlas.backend.routine.domain.RoutineContent;
 import com.tglanz.atlas.backend.routine.domain.Section;
@@ -52,12 +51,7 @@ class RoutinePersistenceAdapter implements RoutineRepository {
       row.position = position++;
       row.name = section.name();
       row.description = section.description();
-      for (MovementRef ref : section.movements()) {
-        var movement = new RoutineEntity.MovementRefRow();
-        movement.movementKey = ref.key();
-        movement.movementRevision = ref.revision();
-        row.movements.add(movement);
-      }
+      row.movements.addAll(section.movements());
       entity.sections.add(row);
     }
     jpa.saveAndFlush(entity);
@@ -72,14 +66,7 @@ class RoutinePersistenceAdapter implements RoutineRepository {
   private Routine toDomain(RoutineEntity e) {
     List<Section> sections =
         e.sections.stream()
-            .map(
-                s ->
-                    new Section(
-                        s.name,
-                        s.description,
-                        s.movements.stream()
-                            .map(m -> new MovementRef(m.movementKey, m.movementRevision))
-                            .toList()))
+            .map(s -> new Section(s.name, s.description, List.copyOf(s.movements)))
             .toList();
     return Routine.restore(
         UUID.fromString(e.id), e.ownerId, new RoutineContent(e.name, e.description, sections));

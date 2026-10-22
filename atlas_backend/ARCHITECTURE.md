@@ -20,7 +20,7 @@ com.tglanz.atlas.backend
 ## Rules
 
 1. Dependencies point inward: adapters depend on the application layer, the application layer on the domain, the domain on nothing but the standard library and `shared`.
-2. Domain classes enforce domain invariants (revision immutability, revision numbering, input validity). Services orchestrate and do not hold rules.
+2. Domain classes enforce domain invariants (input validity, state transitions). Services orchestrate and do not hold rules.
 3. Ports are owned by the application layer. Adapters implement outbound ports and call inbound ports.
 4. JPA entities exist only in `adapter/out/persistence` and are mapped to domain objects. The domain has no framework annotations.
 5. Transactions are declared on application services.
@@ -32,10 +32,10 @@ These rules are enforced by ArchUnit tests in `ArchitectureTest`.
 
 ## Features and dependencies
 
-- `movement`: Movements, revisions, publishing, and the ordered Illustrations held by each revision.
+- `movement`: Movements and their ordered Illustrations.
 - `avatar`: Avatars, the looks used to generate Illustrations.
 - `generation`: Viewpoints, generation requests (a spec of stages, each avatar-based or a static image), and picture uploads.
-- `routine`: Routines that pin published Movement revisions.
+- `routine`: Routines, which list Movements by key.
 - `account`: users and roles.
 
 ```
@@ -51,7 +51,7 @@ A generation request runs in the background on the application task executor. Th
 
 1. `GenerationLifecycle.begin` marks the request running and resolves each stage into a step: use a static image as is, or generate a picture.
 2. The generator and picture storage are called outside any transaction, once per generated stage.
-3. `GenerationLifecycle.complete` replaces the draft's Illustrations with one per stage, or `fail` records the reason.
+3. `GenerationLifecycle.complete` replaces the Movement's Illustrations with one per stage, or `fail` records the reason.
 
 `IllustrationGenerator` and `PictureStorage` are ports. Their current adapters are stubs; the storage target is S3.
 
@@ -68,7 +68,6 @@ Errors are returned as RFC 9457 problem details.
 - SQLite by default; PostgreSQL through the `postgres` profile.
 - Flyway migrations are plain, portable SQL.
 - Identifiers are stored as `VARCHAR(36)`; timestamps as `TIMESTAMP`.
-- A partial unique index guarantees at most one draft per Movement.
 
 ## Stack
 

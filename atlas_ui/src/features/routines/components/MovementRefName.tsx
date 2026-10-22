@@ -1,26 +1,21 @@
 import { Anchor, Text } from '@mantine/core';
 import { Link } from 'react-router';
-import { useRevision } from '@/features/movements';
-import type { MovementRef } from '../api';
+import { useMovement } from '@/features/movements';
 
-/** Shows the name of the pinned revision, linking to that exact revision. */
+/** Shows a movement's current name, optionally linking to it. */
 export function MovementRefName({
-  movement,
+  movementKey,
   link = true,
 }: {
-  movement: MovementRef;
+  movementKey: string;
   link?: boolean;
 }) {
-  const revision = useRevision(movement.key, movement.revision);
-  const name = revision.data?.name ?? movement.key;
-  const label = `${name} (revision ${movement.revision})`;
-  if (!link) return <Text span>{label}</Text>;
+  const movement = useMovement(movementKey);
+  const name = movement.data?.name ?? movementKey;
+  if (!link) return <Text span>{name}</Text>;
   return (
-    <Anchor
-      component={Link}
-      to={`/movements/${movement.key}/revisions/${movement.revision}`}
-    >
-      {label}
+    <Anchor component={Link} to={`/movements/${movementKey}`}>
+      {name}
     </Anchor>
   );
 }

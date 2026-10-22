@@ -1,14 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createMovement,
-  createRevision,
-  getDraft,
   getMovement,
-  getRevision,
   listMovements,
-  listRevisions,
-  publishDraft,
-  updateDraft,
+  updateMovement,
 } from './api';
 import type { MovementContent, MovementFilters } from './api';
 
@@ -16,10 +11,6 @@ export const movementKeys = {
   all: ['movements'] as const,
   list: (filters: MovementFilters) => ['movements', 'list', filters] as const,
   detail: (key: string) => ['movements', 'detail', key] as const,
-  revisions: (key: string) => ['movements', 'revisions', key] as const,
-  revision: (key: string, revision: number) =>
-    ['movements', 'revision', key, revision] as const,
-  draft: (key: string) => ['movements', 'draft', key] as const,
 };
 
 export function useMovements(filters: MovementFilters) {
@@ -35,26 +26,7 @@ export const useMovement = (key: string) =>
     queryFn: () => getMovement(key),
   });
 
-export const useRevision = (key: string, revision: number) =>
-  useQuery({
-    queryKey: movementKeys.revision(key, revision),
-    queryFn: () => getRevision(key, revision),
-  });
-
-export const useRevisions = (key: string) =>
-  useQuery({
-    queryKey: movementKeys.revisions(key),
-    queryFn: () => listRevisions(key),
-  });
-
-export const useDraft = (key: string, enabled = true) =>
-  useQuery({
-    queryKey: movementKeys.draft(key),
-    queryFn: () => getDraft(key),
-    enabled,
-  });
-
-/** Any change to a Movement can affect lists, details and history, so refresh them all. */
+/** A change to a movement can affect lists and details, so refresh them all. */
 function useMovementMutation<V>(fn: (v: V) => Promise<unknown>) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -69,13 +41,7 @@ export const useCreateMovement = () =>
     createMovement(v.key, v.content),
   );
 
-export const useUpdateDraft = () =>
+export const useUpdateMovement = () =>
   useMovementMutation((v: { key: string; content: MovementContent }) =>
-    updateDraft(v.key, v.content),
+    updateMovement(v.key, v.content),
   );
-
-export const useCreateRevision = () =>
-  useMovementMutation((key: string) => createRevision(key));
-
-export const usePublishDraft = () =>
-  useMovementMutation((key: string) => publishDraft(key));

@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface GenerationUseCase {
 
-  /** Queues production of the open draft's Illustration sequence from the spec. */
+  /** Queues production of the Movement's Illustration sequence from the spec. */
   GenerationRequest request(String movementKey, IllustrationsGenerationSpec spec);
 
   GenerationRequest get(String movementKey, UUID id);

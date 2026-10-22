@@ -10,10 +10,6 @@ A structured catalog of movements, each presented with clear descriptions, pract
 
 Movements are illustrated through configurable visual representations, with consistent figures and viewpoints that help practitioners understand positions and techniques. The illustration system provides a unified visual language across the library.
 
-## Movement Evolution
-
-Movements evolve over time while preserving their history. Each published version remains available, providing a reliable record of how movement knowledge develops without changing previously established references.
-
 ## Routine Building
 
-Practitioners can organize movements into personalized routines, grouping them into ordered sections to suit their goals and practice. Routines preserve references to specific published movement versions, ensuring their contents remain consistent over time.
+Practitioners can organize movements into personalized routines, grouping them into ordered sections to suit their goals and practice.

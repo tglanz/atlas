@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** The editable content of a Movement revision. */
+/** The editable content of a Movement. */
 public record MovementContent(
     String name,
     String description,

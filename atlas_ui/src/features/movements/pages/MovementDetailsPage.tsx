@@ -1,5 +1,4 @@
 import {
-  Alert,
   Anchor,
   Badge,
   Button,
@@ -10,46 +9,27 @@ import {
   Text,
   Title,
 } from '@mantine/core';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { useCurrentUser } from '@/features/auth';
 import { QueryBoundary } from '@/shared/ui';
 import type { Movement, MovementLink } from '../api';
-import {
-  useCreateRevision,
-  useDraft,
-  useMovement,
-  useRevision,
-} from '../queries';
+import { useMovement } from '../queries';
 
-/** Current published revision at /movements/:key, or a specific one at .../revisions/:revision. */
 export function MovementDetailsPage() {
-  const { key = '', revision } = useParams();
-  const current = useMovement(key);
-  const historical = useRevision(key, Number(revision));
-  const isHistorical = revision !== undefined;
+  const { key = '' } = useParams();
+  const movement = useMovement(key);
 
   return (
-    <QueryBoundary query={isHistorical ? historical : current}>
-      {(movement) => (
-        <MovementView movement={movement} historical={isHistorical} />
-      )}
+    <QueryBoundary query={movement}>
+      {(data) => <MovementView movement={data} />}
     </QueryBoundary>
   );
 }
 
-function MovementView({
-  movement,
-  historical,
-}: {
-  movement: Movement;
-  historical: boolean;
-}) {
+function MovementView({ movement }: { movement: Movement }) {
   const user = useCurrentUser();
-  const isMaintainer = user.data?.role === 'MAINTAINER';
-  const draft = useDraft(movement.key, isMaintainer);
-  const createRevision = useCreateRevision();
-  const navigate = useNavigate();
 
+  // Links are grouped by relationship, such as progression or variant.
   const linksByType = [
     ...movement.links
       .reduce((groups, link) => {
@@ -65,59 +45,17 @@ function MovementView({
   return (
     <Stack gap="lg">
       <Group justify="space-between" align="flex-start">
-        <div>
-          <Title order={1}>{movement.name}</Title>
-          <Text c="dimmed" size="sm">
-            Revision {movement.revision}
-            {movement.publishedAt &&
-              ` · published ${new Date(movement.publishedAt).toLocaleDateString()}`}
-          </Text>
-        </div>
-        <Group gap="xs">
+        <Title order={1}>{movement.name}</Title>
+        {user.data?.role === 'MAINTAINER' && (
           <Button
             component={Link}
-            to={`/movements/${movement.key}/revisions`}
-            variant="default"
+            to={`/movements/${movement.key}/edit`}
             size="xs"
           >
-            Revision history
+            Edit
           </Button>
-          {isMaintainer && !historical && draft.data && (
-            <Button
-              component={Link}
-              to={`/movements/${movement.key}/edit`}
-              size="xs"
-            >
-              Edit draft
-            </Button>
-          )}
-          {isMaintainer && !historical && draft.data === null && (
-            <Button
-              size="xs"
-              loading={createRevision.isPending}
-              onClick={() =>
-                createRevision.mutate(movement.key, {
-                  onSuccess: () => navigate(`/movements/${movement.key}/edit`),
-                })
-              }
-            >
-              Create revision
-            </Button>
-          )}
-        </Group>
+        )}
       </Group>
-
-      {historical && (
-        <Alert color="blue">
-          This is an earlier revision.{' '}
-          <Anchor component={Link} to={`/movements/${movement.key}`}>
-            View the current revision
-          </Anchor>
-        </Alert>
-      )}
-      {createRevision.isError && (
-        <Alert color="red">{createRevision.error.message}</Alert>
-      )}
 
       {movement.illustrations.length > 0 && (
         <Group gap="md" wrap="wrap">

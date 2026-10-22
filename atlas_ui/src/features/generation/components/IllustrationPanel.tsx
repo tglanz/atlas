@@ -19,7 +19,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAvatars } from '@/features/avatars';
 import { QueryBoundary } from '@/shared/ui';
 import type { GenerationRequest } from '../api';
-import type { StageDraft } from '../queries';
+import type { StageInput } from '../queries';
 import {
   useClearIllustrations,
   useGenerations,
@@ -34,14 +34,14 @@ type Mode = 'avatar' | 'static';
 
 type Props = {
   movementKey: string;
-  /** Urls of the draft's Illustrations, in order. */
+  /** Urls of the movement's Illustrations, in order. */
   illustrations: string[];
-  /** Called after the draft's Illustrations changed, so the draft can be reloaded. */
+  /** Called after the Illustrations changed, so the movement can be reloaded. */
   onChanged: () => void;
 };
 
 /**
- * Maintainer tools to set a draft's Illustrations. The data model allows any mix of stages; the UI
+ * Maintainer tools to set a movement's Illustrations. The data model allows any mix of stages; the UI
  * offers one pattern per movement: all stages generated with an avatar, or all static images.
  * Either way the whole sequence is replaced.
  */
@@ -56,7 +56,7 @@ export function IllustrationPanel({
     <Stack gap="lg">
       <Title order={2}>Illustrations</Title>
       {illustrations.length === 0 ? (
-        <Text c="dimmed">No illustrations on this draft yet.</Text>
+        <Text c="dimmed">No illustrations yet.</Text>
       ) : (
         <Stack gap="xs">
           <Group gap="sm">
@@ -88,7 +88,7 @@ export function IllustrationPanel({
   );
 }
 
-const emptyStage = (): StageDraft => ({ instructions: '', file: null });
+const emptyStage = (): StageInput => ({ instructions: '', file: null });
 
 function Producer({
   movementKey,
@@ -103,7 +103,7 @@ function Producer({
   const [mode, setMode] = useState<Mode>('avatar');
   const [avatarId, setAvatarId] = useState<string | null>(null);
   const [viewpointId, setViewpointId] = useState<string | null>(null);
-  const [stages, setStages] = useState<StageDraft[]>([emptyStage()]);
+  const [stages, setStages] = useState<StageInput[]>([emptyStage()]);
 
   // With a single avatar or viewpoint there is nothing to choose, so use it.
   const onlyId = (items: { id: string }[] | undefined) =>
@@ -111,7 +111,7 @@ function Producer({
   const chosenAvatarId = avatarId ?? onlyId(avatars.data);
   const chosenViewpointId = viewpointId ?? onlyId(viewpoints.data);
 
-  // Reload the draft whenever another request has finished successfully.
+  // Reload the movement whenever another request has finished successfully.
   const succeeded =
     generations.data?.filter((r) => r.status === 'SUCCEEDED').length ?? 0;
   const seen = useRef<number | null>(null);
@@ -120,7 +120,7 @@ function Producer({
     seen.current = succeeded;
   }, [succeeded, onChanged]);
 
-  function changeStage(index: number, change: Partial<StageDraft>) {
+  function changeStage(index: number, change: Partial<StageInput>) {
     setStages((all) =>
       all.map((s, i) => (i === index ? { ...s, ...change } : s)),
     );
@@ -157,8 +157,7 @@ function Producer({
         Set illustrations
       </Title>
       <Text size="sm" c="dimmed">
-        One picture per stage. This replaces the draft&apos;s current
-        illustrations.
+        One picture per stage. This replaces the current illustrations.
       </Text>
       <SegmentedControl
         w="fit-content"

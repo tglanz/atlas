@@ -3,14 +3,10 @@ package com.tglanz.atlas.backend.movement.adapter.in.web;
 import com.tglanz.atlas.backend.movement.domain.Illustration;
 import com.tglanz.atlas.backend.movement.domain.Movement;
 import com.tglanz.atlas.backend.movement.domain.MovementContent;
-import java.time.Instant;
 import java.util.List;
 
 record MovementResponse(
     String key,
-    int revision,
-    String status,
-    Instant publishedAt,
     String name,
     String description,
     List<String> cues,
@@ -24,9 +20,6 @@ record MovementResponse(
     MovementContent c = m.content();
     return new MovementResponse(
         m.key().value(),
-        m.revision(),
-        m.status().name(),
-        m.publishedAt(),
         c.name(),
         c.description(),
         c.cues(),

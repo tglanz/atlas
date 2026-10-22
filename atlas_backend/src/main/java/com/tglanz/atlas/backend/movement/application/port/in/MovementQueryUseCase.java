@@ -6,18 +6,10 @@ import java.util.List;
 
 public interface MovementQueryUseCase {
 
-  /** Current published revisions, optionally filtered by name text and tag. */
+  /** Movements, optionally filtered by name text and tag. */
   List<Movement> search(String text, String tag);
 
-  Movement getCurrent(MovementKey key);
+  Movement get(MovementKey key);
 
-  /** Published revisions of a Movement, oldest first. */
-  List<Movement> listPublishedRevisions(MovementKey key);
-
-  Movement getPublishedRevision(MovementKey key, int revision);
-
-  boolean isPublished(MovementKey key, int revision);
-
-  /** The open draft, for maintainers. */
-  Movement getDraft(MovementKey key);
+  boolean exists(MovementKey key);
 }

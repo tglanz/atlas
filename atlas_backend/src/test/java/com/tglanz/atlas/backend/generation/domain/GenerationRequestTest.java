@@ -21,7 +21,7 @@ class GenerationRequestTest {
                 new AvatarImageSpec(
                     UUID.randomUUID(), UUID.randomUUID(), "Chest near the floor", ""),
                 new StaticImageSpec("https://example.com/top.png")));
-    return GenerationRequest.create("push-up", 1, spec, NOW);
+    return GenerationRequest.create("push-up", spec, NOW);
   }
 
   @Test

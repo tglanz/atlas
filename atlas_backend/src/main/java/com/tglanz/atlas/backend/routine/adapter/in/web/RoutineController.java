@@ -1,12 +1,10 @@
 package com.tglanz.atlas.backend.routine.adapter.in.web;
 
 import com.tglanz.atlas.backend.routine.application.port.in.RoutineUseCase;
-import com.tglanz.atlas.backend.routine.domain.MovementRef;
 import com.tglanz.atlas.backend.routine.domain.Routine;
 import com.tglanz.atlas.backend.routine.domain.RoutineContent;
 import com.tglanz.atlas.backend.routine.domain.Section;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.net.URI;
@@ -27,12 +25,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/routines")
 class RoutineController {
 
-  record MovementRefDto(@NotBlank String key, @Min(1) int revision) {}
-
   record SectionDto(
       @NotBlank @Size(max = 200) String name,
       @Size(max = 20000) String description,
-      List<@Valid MovementRefDto> movements) {}
+      List<@NotBlank String> movements) {}
 
   record RoutineRequest(
       @NotBlank @Size(max = 200) String name,
@@ -44,16 +40,7 @@ class RoutineController {
           sections == null
               ? List.of()
               : sections.stream()
-                  .map(
-                      s ->
-                          new Section(
-                              s.name(),
-                              s.description(),
-                              s.movements() == null
-                                  ? List.of()
-                                  : s.movements().stream()
-                                      .map(m -> new MovementRef(m.key(), m.revision()))
-                                      .toList()))
+                  .map(s -> new Section(s.name(), s.description(), s.movements()))
                   .toList();
       return new RoutineContent(name, description, mapped);
     }
@@ -67,14 +54,7 @@ class RoutineController {
           c.name(),
           c.description(),
           c.sections().stream()
-              .map(
-                  s ->
-                      new SectionDto(
-                          s.name(),
-                          s.description(),
-                          s.movements().stream()
-                              .map(m -> new MovementRefDto(m.key(), m.revision()))
-                              .toList()))
+              .map(s -> new SectionDto(s.name(), s.description(), s.movements()))
               .toList());
     }
   }

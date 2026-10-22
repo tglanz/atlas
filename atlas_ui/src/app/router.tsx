@@ -4,7 +4,6 @@ import {
   MovementDetailsPage,
   MovementEditorPage,
   MovementLibraryPage,
-  RevisionHistoryPage,
 } from '@/features/movements';
 import {
   RoutineDetailsPage,
@@ -27,11 +26,6 @@ export const router = createBrowserRouter([
       // Public
       { path: 'movements', element: <MovementLibraryPage /> },
       { path: 'movements/:key', element: <MovementDetailsPage /> },
-      { path: 'movements/:key/revisions', element: <RevisionHistoryPage /> },
-      {
-        path: 'movements/:key/revisions/:revision',
-        element: <MovementDetailsPage />,
-      },
 
       // Maintainers
       {

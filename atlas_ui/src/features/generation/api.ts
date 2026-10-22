@@ -48,27 +48,27 @@ export async function uploadMedia(file: File): Promise<string> {
   return url;
 }
 
-const draftPath = (movementKey: string) => `/movements/${movementKey}/draft`;
+const movementPath = (movementKey: string) => `/movements/${movementKey}`;
 
 export const listGenerations = (movementKey: string) =>
-  apiFetch<GenerationRequest[]>(`${draftPath(movementKey)}/generations`);
+  apiFetch<GenerationRequest[]>(`${movementPath(movementKey)}/generations`);
 
-/** Produces the draft's whole Illustration sequence: one picture per stage. */
+/** Produces the movement's whole Illustration sequence: one picture per stage. */
 export const requestGeneration = (movementKey: string, stages: StageSpec[]) =>
-  apiFetch<GenerationRequest>(`${draftPath(movementKey)}/generations`, {
+  apiFetch<GenerationRequest>(`${movementPath(movementKey)}/generations`, {
     method: 'POST',
     body: { stages },
   });
 
 export const retryGeneration = (movementKey: string, id: string) =>
   apiFetch<GenerationRequest>(
-    `${draftPath(movementKey)}/generations/${id}/retry`,
+    `${movementPath(movementKey)}/generations/${id}/retry`,
     {
       method: 'POST',
     },
   );
 
 export const clearIllustrations = (movementKey: string) =>
-  apiFetch<unknown>(`${draftPath(movementKey)}/illustrations`, {
+  apiFetch<unknown>(`${movementPath(movementKey)}/illustrations`, {
     method: 'DELETE',
   });

@@ -12,7 +12,7 @@ public record RoutineContent(String name, String description, List<Section> sect
     sections = sections == null ? List.of() : List.copyOf(sections);
   }
 
-  public List<MovementRef> allReferences() {
+  public List<String> movementKeys() {
     return sections.stream().flatMap(s -> s.movements().stream()).toList();
   }
 }

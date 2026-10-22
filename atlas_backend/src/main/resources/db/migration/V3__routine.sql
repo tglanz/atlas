@@ -18,7 +18,6 @@ CREATE TABLE routine_section (
 CREATE TABLE routine_section_movement (
     section_id VARCHAR(36) NOT NULL REFERENCES routine_section (id) ON DELETE CASCADE,
     position INTEGER NOT NULL,
-    movement_key VARCHAR(100) NOT NULL,
-    movement_revision INTEGER NOT NULL,
+    movement_key VARCHAR(100) NOT NULL REFERENCES movement (movement_key),
     PRIMARY KEY (section_id, position)
 );

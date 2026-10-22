@@ -3,7 +3,7 @@ package com.tglanz.atlas.backend.generation.application.service;
 import com.tglanz.atlas.backend.generation.application.port.out.AvatarSpecifications;
 import com.tglanz.atlas.backend.generation.application.port.out.GenerationRepository;
 import com.tglanz.atlas.backend.generation.application.port.out.ImageRequest;
-import com.tglanz.atlas.backend.generation.application.port.out.MovementDrafts;
+import com.tglanz.atlas.backend.generation.application.port.out.Movements;
 import com.tglanz.atlas.backend.generation.application.port.out.ViewpointRepository;
 import com.tglanz.atlas.backend.generation.domain.AvatarImageSpec;
 import com.tglanz.atlas.backend.generation.domain.GenerationRequest;
@@ -26,23 +26,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class GenerationLifecycle {
 
-  private static final String DRAFT_CLOSED =
-      "The draft this request was made for is no longer open";
+  private static final String MOVEMENT_GONE = "The movement no longer exists";
 
   private final GenerationRepository requests;
-  private final MovementDrafts drafts;
+  private final Movements movements;
   private final AvatarSpecifications avatars;
   private final ViewpointRepository viewpoints;
   private final Clock clock;
 
   public GenerationLifecycle(
       GenerationRepository requests,
-      MovementDrafts drafts,
+      Movements movements,
       AvatarSpecifications avatars,
       ViewpointRepository viewpoints,
       Clock clock) {
     this.requests = requests;
-    this.drafts = drafts;
+    this.movements = movements;
     this.avatars = avatars;
     this.viewpoints = viewpoints;
     this.clock = clock;
@@ -55,9 +54,9 @@ public class GenerationLifecycle {
     if (request == null || request.status() != GenerationStatus.PENDING) {
       return Optional.empty();
     }
-    var draft = drafts.findDraft(request.movementKey()).orElse(null);
-    if (draft == null || draft.revision() != request.draftRevision()) {
-      return fail(request, DRAFT_CLOSED);
+    var movement = movements.find(request.movementKey()).orElse(null);
+    if (movement == null) {
+      return fail(request, MOVEMENT_GONE);
     }
     List<GenerationPlan.Step> steps = new ArrayList<>();
     for (StageSpec stage : request.spec().stages()) {
@@ -72,8 +71,8 @@ public class GenerationLifecycle {
           steps.add(
               new GenerationPlan.Generate(
                   new ImageRequest(
-                      draft.name(),
-                      draft.description(),
+                      movement.name(),
+                      movement.description(),
                       avatar,
                       viewpoint.specification(),
                       s.instructions(),
@@ -86,15 +85,14 @@ public class GenerationLifecycle {
     return Optional.of(new GenerationPlan(steps));
   }
 
-  /** Replaces the draft's sequence with the produced Illustrations, unless it has moved on. */
+  /** Replaces the Movement's Illustrations with the produced ones. */
   @Transactional
   public void complete(UUID id, List<String> urls) {
     GenerationRequest request = requests.findById(id).orElseThrow();
-    var draft = drafts.findDraft(request.movementKey()).orElse(null);
-    if (draft == null || draft.revision() != request.draftRevision()) {
-      request.fail(DRAFT_CLOSED, clock.instant());
+    if (movements.find(request.movementKey()).isEmpty()) {
+      request.fail(MOVEMENT_GONE, clock.instant());
     } else {
-      drafts.replaceIllustrations(request.movementKey(), draft.revision(), urls);
+      movements.replaceIllustrations(request.movementKey(), urls);
       request.succeed(urls, clock.instant());
     }
     requests.save(request);

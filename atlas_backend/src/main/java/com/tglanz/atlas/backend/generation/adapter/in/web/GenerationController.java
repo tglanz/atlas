@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/movements/{key}/draft/generations")
+@RequestMapping("/api/movements/{key}/generations")
 class GenerationController {
 
   record AvatarStage(
@@ -67,7 +67,6 @@ class GenerationController {
   record GenerationResponse(
       UUID id,
       String movementKey,
-      int draftRevision,
       List<StageBody> stages,
       String status,
       String failureReason,
@@ -78,7 +77,6 @@ class GenerationController {
       return new GenerationResponse(
           r.id(),
           r.movementKey(),
-          r.draftRevision(),
           r.spec().stages().stream().map(StageBody::from).toList(),
           r.status().name(),
           r.failureReason(),
@@ -101,7 +99,7 @@ class GenerationController {
         new IllustrationsGenerationSpec(body.stages().stream().map(StageBody::toSpec).toList());
     GenerationRequest created = useCase.request(key, spec);
     return ResponseEntity.accepted()
-        .location(URI.create("/api/movements/" + key + "/draft/generations/" + created.id()))
+        .location(URI.create("/api/movements/" + key + "/generations/" + created.id()))
         .body(GenerationResponse.from(created));
   }
 

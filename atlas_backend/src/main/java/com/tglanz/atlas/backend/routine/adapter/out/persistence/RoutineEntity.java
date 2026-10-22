@@ -4,7 +4,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -50,15 +49,7 @@ class RoutineEntity {
         name = "routine_section_movement",
         joinColumns = @JoinColumn(name = "section_id"))
     @OrderColumn(name = "position")
-    List<MovementRefRow> movements = new ArrayList<>();
-  }
-
-  @Embeddable
-  static class MovementRefRow {
     @Column(name = "movement_key")
-    String movementKey;
-
-    @Column(name = "movement_revision")
-    int movementRevision;
+    List<String> movements = new ArrayList<>();
   }
 }

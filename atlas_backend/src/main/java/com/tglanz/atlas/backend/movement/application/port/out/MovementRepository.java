@@ -7,19 +7,12 @@ import java.util.Optional;
 
 public interface MovementRepository {
 
-  boolean existsKey(MovementKey key);
+  boolean exists(MovementKey key);
 
-  Optional<Movement> find(MovementKey key, int revision);
+  Optional<Movement> find(MovementKey key);
 
-  Optional<Movement> findLatestPublished(MovementKey key);
-
-  Optional<Movement> findDraft(MovementKey key);
-
-  /** All revisions of a Movement, oldest first. */
-  List<Movement> findAllRevisions(MovementKey key);
-
-  /** Latest published revision of every Movement matching the filters; blank means no filter. */
-  List<Movement> searchCurrentPublished(String text, String tag);
+  /** Movements matching the filters, by name; blank means no filter. */
+  List<Movement> search(String text, String tag);
 
   void save(Movement movement);
 }

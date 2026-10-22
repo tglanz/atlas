@@ -7,7 +7,6 @@ CREATE TABLE viewpoint (
 CREATE TABLE generation_request (
     id VARCHAR(36) NOT NULL PRIMARY KEY,
     movement_key VARCHAR(100) NOT NULL,
-    draft_revision INTEGER NOT NULL,
     status VARCHAR(16) NOT NULL,
     failure_reason TEXT,
     created_at TIMESTAMP NOT NULL,

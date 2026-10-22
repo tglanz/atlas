@@ -9,9 +9,8 @@ import {
 } from '@mantine/core';
 import { useState } from 'react';
 import { useMovements } from '@/features/movements';
-import type { MovementRef } from '../api';
 
-/** Searchable list of movements. Picking one adds its current published revision. */
+/** Searchable list of movements. */
 export function MoviePicker({
   opened,
   onClose,
@@ -19,7 +18,7 @@ export function MoviePicker({
 }: {
   opened: boolean;
   onClose: () => void;
-  onPick: (movement: MovementRef) => void;
+  onPick: (movementKey: string) => void;
 }) {
   const [text, setText] = useState('');
   const movements = useMovements({ text });
@@ -45,7 +44,7 @@ export function MoviePicker({
               size="compact-sm"
               variant="light"
               onClick={() => {
-                onPick({ key: movement.key, revision: movement.revision });
+                onPick(movement.key);
                 onClose();
               }}
             >

@@ -38,7 +38,7 @@ export function RoutineDetailsPage() {
                 <List type="ordered" mt="xs">
                   {section.movements.map((movement, i) => (
                     <List.Item key={i}>
-                      <MovementRefName movement={movement} />
+                      <MovementRefName movementKey={movement} />
                     </List.Item>
                   ))}
                 </List>

@@ -1,4 +1,4 @@
-import { apiFetch, isApiError } from '@/shared/api';
+import { apiFetch } from '@/shared/api';
 
 export type MovementLink = { target: string; relationType: string };
 
@@ -10,27 +10,17 @@ export type MovementContent = {
   links: MovementLink[];
 };
 
-export type MovementSummary = {
-  key: string;
-  revision: number;
-  name: string;
-  tags: string[];
-  representativeIllustration: string | null;
-};
-
-/** One revision of a movement, with its Illustration urls in order. */
+/** A movement, with the urls of its Illustrations in order. */
 export type Movement = MovementContent & {
   key: string;
-  revision: number;
-  status: 'DRAFT' | 'PUBLISHED';
-  publishedAt: string | null;
   illustrations: string[];
 };
 
-export type RevisionSummary = {
-  revision: number;
+export type MovementSummary = {
+  key: string;
   name: string;
-  publishedAt: string;
+  tags: string[];
+  representativeIllustration: string | null;
 };
 
 export type MovementFilters = { text?: string; tag?: string };
@@ -46,38 +36,8 @@ export function listMovements(filters: MovementFilters, signal?: AbortSignal) {
 export const getMovement = (key: string) =>
   apiFetch<Movement>(`/movements/${key}`);
 
-export const getRevision = (key: string, revision: number) =>
-  apiFetch<Movement>(`/movements/${key}/revisions/${revision}`);
-
-export const listRevisions = (key: string) =>
-  apiFetch<RevisionSummary[]>(`/movements/${key}/revisions`);
-
-/** The open draft, or null when there is none. Maintainers only. */
-export async function getDraft(key: string): Promise<Movement | null> {
-  try {
-    return await apiFetch<Movement>(`/movements/${key}/draft`);
-  } catch (error) {
-    if (isApiError(error, 404)) return null;
-    throw error;
-  }
-}
-
 export const createMovement = (key: string, content: MovementContent) =>
-  apiFetch<Movement>('/movements', {
-    method: 'POST',
-    body: { key, content },
-  });
+  apiFetch<Movement>('/movements', { method: 'POST', body: { key, content } });
 
-export const updateDraft = (key: string, content: MovementContent) =>
-  apiFetch<Movement>(`/movements/${key}/draft`, {
-    method: 'PUT',
-    body: content,
-  });
-
-export const createRevision = (key: string) =>
-  apiFetch<Movement>(`/movements/${key}/revisions`, { method: 'POST' });
-
-export const publishDraft = (key: string) =>
-  apiFetch<Movement>(`/movements/${key}/draft/publish`, {
-    method: 'POST',
-  });
+export const updateMovement = (key: string, content: MovementContent) =>
+  apiFetch<Movement>(`/movements/${key}`, { method: 'PUT', body: content });

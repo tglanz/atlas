@@ -6,13 +6,12 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * A request to produce the Illustration sequence of an open Movement draft from a spec. A
- * successful request replaces the draft's sequence: one Illustration per stage, in order.
+ * A request to produce a Movement's Illustration sequence from a spec. A successful request
+ * replaces the Movement's sequence: one Illustration per stage, in order.
  */
 public final class GenerationRequest {
   private final UUID id;
   private final String movementKey;
-  private final int draftRevision;
   private final IllustrationsGenerationSpec spec;
   private final Instant createdAt;
   private GenerationStatus status;
@@ -23,7 +22,6 @@ public final class GenerationRequest {
   private GenerationRequest(
       UUID id,
       String movementKey,
-      int draftRevision,
       IllustrationsGenerationSpec spec,
       GenerationStatus status,
       String failureReason,
@@ -35,7 +33,6 @@ public final class GenerationRequest {
     }
     this.id = id;
     this.movementKey = movementKey;
-    this.draftRevision = draftRevision;
     this.spec = spec;
     this.status = status;
     this.failureReason = failureReason;
@@ -45,23 +42,14 @@ public final class GenerationRequest {
   }
 
   public static GenerationRequest create(
-      String movementKey, int draftRevision, IllustrationsGenerationSpec spec, Instant now) {
+      String movementKey, IllustrationsGenerationSpec spec, Instant now) {
     return new GenerationRequest(
-        UUID.randomUUID(),
-        movementKey,
-        draftRevision,
-        spec,
-        GenerationStatus.PENDING,
-        null,
-        List.of(),
-        now,
-        null);
+        UUID.randomUUID(), movementKey, spec, GenerationStatus.PENDING, null, List.of(), now, null);
   }
 
   public static GenerationRequest restore(
       UUID id,
       String movementKey,
-      int draftRevision,
       IllustrationsGenerationSpec spec,
       GenerationStatus status,
       String failureReason,
@@ -69,15 +57,7 @@ public final class GenerationRequest {
       Instant createdAt,
       Instant completedAt) {
     return new GenerationRequest(
-        id,
-        movementKey,
-        draftRevision,
-        spec,
-        status,
-        failureReason,
-        resultUrls,
-        createdAt,
-        completedAt);
+        id, movementKey, spec, status, failureReason, resultUrls, createdAt, completedAt);
   }
 
   public void start() {
@@ -124,10 +104,6 @@ public final class GenerationRequest {
 
   public String movementKey() {
     return movementKey;
-  }
-
-  public int draftRevision() {
-    return draftRevision;
   }
 
   public IllustrationsGenerationSpec spec() {

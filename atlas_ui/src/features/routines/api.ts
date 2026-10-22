@@ -1,12 +1,10 @@
 import { apiFetch } from '@/shared/api';
 
-/** Pins an exact published revision of a movement. */
-export type MovementRef = { key: string; revision: number };
-
+/** A section lists movements by key, in order. */
 export type Section = {
   name: string;
   description: string;
-  movements: MovementRef[];
+  movements: string[];
 };
 
 export type RoutineInput = {

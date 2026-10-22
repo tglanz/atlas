@@ -129,13 +129,13 @@ function RoutineForm({ id, initial }: { id?: string; initial?: RoutineInput }) {
               )}
               {section.movements.map((movement, i) => (
                 <Group
-                  key={`${movement.key}-${i}`}
+                  key={`${movement}-${i}`}
                   justify="space-between"
                   wrap="nowrap"
                 >
                   <Text size="sm">
                     {i + 1}.{' '}
-                    <MovementRefName movement={movement} link={false} />
+                    <MovementRefName movementKey={movement} link={false} />
                   </Text>
                   <Group gap={4} wrap="nowrap">
                     <ActionIcon
@@ -217,9 +217,12 @@ function RoutineForm({ id, initial }: { id?: string; initial?: RoutineInput }) {
       <MoviePicker
         opened={pickerSection !== null}
         onClose={() => setPickerSection(null)}
-        onPick={(movement) =>
+        onPick={(movementKey) =>
           pickerSection !== null &&
-          form.insertListItem(`sections.${pickerSection}.movements`, movement)
+          form.insertListItem(
+            `sections.${pickerSection}.movements`,
+            movementKey,
+          )
         }
       />
     </form>
