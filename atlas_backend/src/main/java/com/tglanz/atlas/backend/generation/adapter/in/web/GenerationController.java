@@ -1,12 +1,12 @@
 package com.tglanz.atlas.backend.generation.adapter.in.web;
 
 import com.tglanz.atlas.backend.generation.application.port.in.GenerationUseCase;
-import com.tglanz.atlas.backend.generation.domain.AvatarImageSpec;
-import com.tglanz.atlas.backend.generation.domain.GenerationRequest;
-import com.tglanz.atlas.backend.generation.domain.IllustrationsGenerationSpec;
-import com.tglanz.atlas.backend.generation.domain.StageSpec;
-import com.tglanz.atlas.backend.generation.domain.StaticImageSpec;
+import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations;
+import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations.StageDefinition;
+import com.tglanz.atlas.backend.generation.domain.IllustrationCandidate;
+import com.tglanz.atlas.backend.generation.domain.IllustrationStage;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -26,63 +26,55 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/movements/{key}/generations")
 class GenerationController {
 
-  record AvatarStage(
+  record IllustrationStageInput(
       @NotNull UUID avatarId,
       @NotNull UUID viewpointId,
-      @Size(max = 4000) String instructions,
-      @Size(max = 500) String referenceImageUrl) {}
+      @NotBlank @Size(max = 4000) String instructions) {}
 
-  record StaticStage(@NotNull @Size(max = 500) String imageUrl) {}
+  record GenerationMovementIllustrationsRequest(
+      @NotEmpty @Size(max = 20) List<@NotNull @Valid IllustrationStageInput> stages) {}
 
-  /** Exactly one of the two is set. */
-  record StageBody(@Valid AvatarStage avatar, @Valid StaticStage staticImage) {
-    StageSpec toSpec() {
-      if ((avatar == null) == (staticImage == null)) {
-        throw new IllegalArgumentException(
-            "A stage is either avatar-based or a static image, not both or neither");
-      }
-      return avatar != null
-          ? new AvatarImageSpec(
-              avatar.avatarId(),
-              avatar.viewpointId(),
-              avatar.instructions(),
-              avatar.referenceImageUrl())
-          : new StaticImageSpec(staticImage.imageUrl());
-    }
-
-    static StageBody from(StageSpec spec) {
-      return switch (spec) {
-        case AvatarImageSpec s ->
-            new StageBody(
-                new AvatarStage(
-                    s.avatarId(), s.viewpointId(), s.instructions(), s.referenceImageUrl()),
-                null);
-        case StaticImageSpec s -> new StageBody(null, new StaticStage(s.imageUrl()));
-      };
+  record IllustrationCandidateResponse(
+      String state, String imageUrl, String failureReason, String progress) {
+    static IllustrationCandidateResponse from(IllustrationCandidate c) {
+      return new IllustrationCandidateResponse(
+          c.state().name(), c.imageUrl(), c.failureReason(), c.progress());
     }
   }
 
-  record GenerateRequest(@NotEmpty @Size(max = 20) List<@NotNull @Valid StageBody> stages) {}
+  record IllustrationStageResponse(
+      int position,
+      UUID avatarId,
+      UUID viewpointId,
+      String instructions,
+      IllustrationCandidateResponse candidate) {
+    static IllustrationStageResponse from(IllustrationStage s) {
+      return new IllustrationStageResponse(
+          s.position(),
+          s.avatarId(),
+          s.viewpointId(),
+          s.instructions(),
+          IllustrationCandidateResponse.from(s.candidate()));
+    }
+  }
 
-  record GenerationResponse(
+  record GenerationMovementIllustrationsResponse(
       UUID id,
       String movementKey,
-      List<StageBody> stages,
       String status,
       String failureReason,
-      List<String> results,
       Instant createdAt,
-      Instant completedAt) {
-    static GenerationResponse from(GenerationRequest r) {
-      return new GenerationResponse(
-          r.id(),
-          r.movementKey(),
-          r.spec().stages().stream().map(StageBody::from).toList(),
-          r.status().name(),
-          r.failureReason(),
-          r.resultUrls(),
-          r.createdAt(),
-          r.completedAt());
+      Instant finishedAt,
+      List<IllustrationStageResponse> stages) {
+    static GenerationMovementIllustrationsResponse from(GenerationMovementIllustrations g) {
+      return new GenerationMovementIllustrationsResponse(
+          g.id(),
+          g.movementKey(),
+          g.status().name(),
+          g.failureReason(),
+          g.createdAt(),
+          g.finishedAt(),
+          g.stages().stream().map(IllustrationStageResponse::from).toList());
     }
   }
 
@@ -93,28 +85,36 @@ class GenerationController {
   }
 
   @PostMapping
-  ResponseEntity<GenerationResponse> request(
-      @PathVariable String key, @Valid @RequestBody GenerateRequest body) {
-    var spec =
-        new IllustrationsGenerationSpec(body.stages().stream().map(StageBody::toSpec).toList());
-    GenerationRequest created = useCase.request(key, spec);
+  ResponseEntity<GenerationMovementIllustrationsResponse> request(
+      @PathVariable String key, @Valid @RequestBody GenerationMovementIllustrationsRequest body) {
+    List<StageDefinition> stages =
+        body.stages().stream()
+            .map(s -> new StageDefinition(s.avatarId(), s.viewpointId(), s.instructions()))
+            .toList();
+    GenerationMovementIllustrations created = useCase.request(key, stages);
     return ResponseEntity.accepted()
         .location(URI.create("/api/movements/" + key + "/generations/" + created.id()))
-        .body(GenerationResponse.from(created));
+        .body(GenerationMovementIllustrationsResponse.from(created));
   }
 
   @GetMapping
-  List<GenerationResponse> list(@PathVariable String key) {
-    return useCase.list(key).stream().map(GenerationResponse::from).toList();
+  List<GenerationMovementIllustrationsResponse> list(@PathVariable String key) {
+    return useCase.list(key).stream().map(GenerationMovementIllustrationsResponse::from).toList();
   }
 
   @GetMapping("/{id}")
-  GenerationResponse get(@PathVariable String key, @PathVariable UUID id) {
-    return GenerationResponse.from(useCase.get(key, id));
+  GenerationMovementIllustrationsResponse get(@PathVariable String key, @PathVariable UUID id) {
+    return GenerationMovementIllustrationsResponse.from(useCase.get(key, id));
   }
 
-  @PostMapping("/{id}/retry")
-  ResponseEntity<GenerationResponse> retry(@PathVariable String key, @PathVariable UUID id) {
-    return ResponseEntity.accepted().body(GenerationResponse.from(useCase.retry(key, id)));
+  @PostMapping("/{id}/apply")
+  GenerationMovementIllustrationsResponse apply(@PathVariable String key, @PathVariable UUID id) {
+    return GenerationMovementIllustrationsResponse.from(useCase.apply(key, id));
+  }
+
+  @PostMapping("/{id}/discard")
+  ResponseEntity<Void> discard(@PathVariable String key, @PathVariable UUID id) {
+    useCase.discard(key, id);
+    return ResponseEntity.noContent().build();
   }
 }

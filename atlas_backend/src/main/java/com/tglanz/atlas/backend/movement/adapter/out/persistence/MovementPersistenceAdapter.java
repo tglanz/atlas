@@ -79,7 +79,7 @@ class MovementPersistenceAdapter implements MovementRepository {
     entity.illustrations.clear();
     for (Illustration illustration : movement.illustrations()) {
       var row = new MovementEntity.IllustrationRow();
-      row.url = illustration.url();
+      row.imageUrl = illustration.imageUrl();
       entity.illustrations.add(row);
     }
     jpa.saveAndFlush(entity);
@@ -90,7 +90,7 @@ class MovementPersistenceAdapter implements MovementRepository {
         e.items.stream().map(row -> new MovementItem(row.type, row.content)).toList();
     MovementContent content = new MovementContent(e.name, e.description, items, Set.copyOf(e.tags));
     List<Illustration> illustrations =
-        e.illustrations.stream().map(row -> new Illustration(row.url)).toList();
+        e.illustrations.stream().map(row -> new Illustration(row.imageUrl)).toList();
     return Movement.restore(new MovementKey(e.movementKey), content, illustrations);
   }
 }

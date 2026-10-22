@@ -6,14 +6,15 @@ import com.tglanz.atlas.backend.generation.application.port.out.GenerationReposi
 import com.tglanz.atlas.backend.generation.application.port.out.GenerationScheduler;
 import com.tglanz.atlas.backend.generation.application.port.out.Movements;
 import com.tglanz.atlas.backend.generation.application.port.out.ViewpointRepository;
-import com.tglanz.atlas.backend.generation.domain.AvatarImageSpec;
-import com.tglanz.atlas.backend.generation.domain.GenerationRequest;
-import com.tglanz.atlas.backend.generation.domain.IllustrationsGenerationSpec;
-import com.tglanz.atlas.backend.generation.domain.StageSpec;
+import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations;
+import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations.StageDefinition;
+import com.tglanz.atlas.backend.shared.error.ConflictException;
 import com.tglanz.atlas.backend.shared.error.NotFoundException;
 import java.time.Clock;
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class GenerationService implements GenerationUseCase {
 
-  private final GenerationRepository requests;
+  private static final Logger log = LoggerFactory.getLogger(GenerationService.class);
+
+  private final GenerationRepository generations;
   private final Movements movements;
   private final AvatarSpecifications avatars;
   private final ViewpointRepository viewpoints;
@@ -29,13 +32,13 @@ public class GenerationService implements GenerationUseCase {
   private final Clock clock;
 
   public GenerationService(
-      GenerationRepository requests,
+      GenerationRepository generations,
       Movements movements,
       AvatarSpecifications avatars,
       ViewpointRepository viewpoints,
       GenerationScheduler scheduler,
       Clock clock) {
-    this.requests = requests;
+    this.generations = generations;
     this.movements = movements;
     this.avatars = avatars;
     this.viewpoints = viewpoints;
@@ -44,47 +47,64 @@ public class GenerationService implements GenerationUseCase {
   }
 
   @Override
-  public GenerationRequest request(String movementKey, IllustrationsGenerationSpec spec) {
+  public GenerationMovementIllustrations request(String movementKey, List<StageDefinition> stages) {
     if (movements.find(movementKey).isEmpty()) {
       throw new NotFoundException("No movement " + movementKey);
     }
-    for (StageSpec stage : spec.stages()) {
-      if (stage instanceof AvatarImageSpec avatarStage) {
-        if (avatars.find(avatarStage.avatarId()).isEmpty()) {
-          throw new IllegalArgumentException("Unknown avatar");
-        }
-        if (viewpoints.findById(avatarStage.viewpointId()).isEmpty()) {
-          throw new IllegalArgumentException("Unknown viewpoint");
-        }
+    for (StageDefinition stage : stages) {
+      if (avatars.find(stage.avatarId()).isEmpty()) {
+        throw new IllegalArgumentException("Unknown avatar");
+      }
+      if (viewpoints.findById(stage.viewpointId()).isEmpty()) {
+        throw new IllegalArgumentException("Unknown viewpoint");
       }
     }
-    GenerationRequest request = GenerationRequest.create(movementKey, spec, clock.instant());
-    requests.save(request);
-    scheduler.schedule(request.id());
-    return request;
+    if (generations.existsInProgress(movementKey)) {
+      throw new ConflictException("This movement already has a generation in progress");
+    }
+    var generation = GenerationMovementIllustrations.create(movementKey, stages, clock.instant());
+    generations.save(generation);
+    scheduler.schedule(generation.id());
+    log.info(
+        "Generation {} requested for movement {} with {} stages",
+        generation.id(),
+        movementKey,
+        stages.size());
+    return generation;
   }
 
   @Override
   @Transactional(readOnly = true)
-  public GenerationRequest get(String movementKey, UUID id) {
-    return requests
+  public GenerationMovementIllustrations get(String movementKey, UUID id) {
+    return generations
         .findById(id)
-        .filter(r -> r.movementKey().equals(movementKey))
-        .orElseThrow(() -> new NotFoundException("Generation request not found"));
+        .filter(g -> g.movementKey().equals(movementKey))
+        .orElseThrow(() -> new NotFoundException("Generation not found"));
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<GenerationRequest> list(String movementKey) {
-    return requests.findByMovementKey(movementKey);
+  public List<GenerationMovementIllustrations> list(String movementKey) {
+    return generations.findByMovementKey(movementKey);
   }
 
   @Override
-  public GenerationRequest retry(String movementKey, UUID id) {
-    GenerationRequest request = get(movementKey, id);
-    request.retry();
-    requests.save(request);
-    scheduler.schedule(request.id());
-    return request;
+  public GenerationMovementIllustrations apply(String movementKey, UUID id) {
+    GenerationMovementIllustrations generation = get(movementKey, id);
+    if (movements.find(movementKey).isEmpty()) {
+      throw new NotFoundException("No movement " + movementKey);
+    }
+    movements.replaceIllustrations(movementKey, generation.approve());
+    generations.save(generation);
+    log.info("Generation {} applied to movement {}", id, movementKey);
+    return generation;
+  }
+
+  @Override
+  public void discard(String movementKey, UUID id) {
+    GenerationMovementIllustrations generation = get(movementKey, id);
+    generation.discard();
+    generations.save(generation);
+    log.info("Generation {} discarded for movement {}", id, movementKey);
   }
 }

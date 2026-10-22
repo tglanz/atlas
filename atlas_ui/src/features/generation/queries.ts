@@ -1,17 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  applyGeneration,
   clearIllustrations,
   createViewpoint,
   deleteViewpoint,
   listGenerations,
   listViewpoints,
   makeDefaultViewpoint,
+  discardGeneration,
   requestGeneration,
-  retryGeneration,
   updateViewpoint,
-  uploadMedia,
 } from './api';
-import type { StageSpec, ViewpointInput } from './api';
+import type { IllustrationStageInput, ViewpointInput } from './api';
 
 const viewpointsKey = ['viewpoints'] as const;
 const generationsKey = (movementKey: string) =>
@@ -42,7 +42,7 @@ export const useMakeDefaultViewpoint = () =>
 export const useDeleteViewpoint = () =>
   useViewpointMutation((id: string) => deleteViewpoint(id));
 
-/** Polls while any request is still running, so progress shows without a refresh. */
+/** Polls while a generation is in progress, so each image shows as soon as it is done. */
 export const useGenerations = (movementKey: string) =>
   useQuery({
     queryKey: generationsKey(movementKey),
@@ -55,60 +55,32 @@ export const useGenerations = (movementKey: string) =>
         : false,
   });
 
-/** What a stage looks like in the form, before any picture is uploaded. */
-export type StageInput = {
-  instructions: string;
-  /** A reference image (avatar-based stages) or the image itself (static stages). */
-  file: File | null;
-};
-
-export type GenerationForm =
-  | {
-      mode: 'avatar';
-      avatarId: string;
-      viewpointId: string;
-      stages: StageInput[];
-    }
-  | { mode: 'static'; stages: StageInput[] };
-
-/** Uploads the pictures first, then requests the generation with their urls. */
-export function useRequestGeneration() {
+function useGenerationMutation<V>(
+  movementKey: string,
+  fn: (v: V) => Promise<unknown>,
+) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (v: { movementKey: string; form: GenerationForm }) => {
-      const stages: StageSpec[] = await Promise.all(
-        v.form.stages.map(async (stage): Promise<StageSpec> => {
-          const url = stage.file ? await uploadMedia(stage.file) : undefined;
-          if (v.form.mode === 'static') {
-            return { staticImage: { imageUrl: url ?? '' } };
-          }
-          return {
-            avatar: {
-              avatarId: v.form.avatarId,
-              viewpointId: v.form.viewpointId,
-              instructions: stage.instructions.trim() || undefined,
-              referenceImageUrl: url,
-            },
-          };
-        }),
-      );
-      return requestGeneration(v.movementKey, stages);
-    },
-    onSuccess: (_data, v) =>
-      queryClient.invalidateQueries({
-        queryKey: generationsKey(v.movementKey),
-      }),
-  });
-}
-
-export function useRetryGeneration(movementKey: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => retryGeneration(movementKey, id),
+    mutationFn: fn,
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: generationsKey(movementKey) }),
   });
 }
+
+export const useRequestGeneration = (movementKey: string) =>
+  useGenerationMutation(movementKey, (stages: IllustrationStageInput[]) =>
+    requestGeneration(movementKey, stages),
+  );
+
+export const useApplyGeneration = (movementKey: string) =>
+  useGenerationMutation(movementKey, (id: string) =>
+    applyGeneration(movementKey, id),
+  );
+
+export const useDiscardGeneration = (movementKey: string) =>
+  useGenerationMutation(movementKey, (id: string) =>
+    discardGeneration(movementKey, id),
+  );
 
 export const useClearIllustrations = (movementKey: string) =>
   useMutation({ mutationFn: () => clearIllustrations(movementKey) });

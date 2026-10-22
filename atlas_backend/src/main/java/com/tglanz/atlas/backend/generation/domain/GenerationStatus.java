@@ -3,6 +3,8 @@ package com.tglanz.atlas.backend.generation.domain;
 public enum GenerationStatus {
   PENDING,
   RUNNING,
-  SUCCEEDED,
+  READY_FOR_REVIEW,
+  APPLIED,
+  DISCARDED,
   FAILED
 }

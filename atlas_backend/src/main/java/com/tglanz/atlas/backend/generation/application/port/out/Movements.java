@@ -5,7 +5,8 @@ import java.util.Optional;
 
 public interface Movements {
 
-  record Info(String name, String description) {}
+  /** What generation needs of a Movement. Cues are in the Movement's order. */
+  record Info(String name, String description, List<String> cues) {}
 
   Optional<Info> find(String movementKey);
 

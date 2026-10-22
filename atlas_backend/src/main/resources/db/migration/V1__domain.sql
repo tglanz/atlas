@@ -44,7 +44,7 @@ CREATE TABLE movement_tag (
 CREATE TABLE movement_illustration (
     movement_key VARCHAR(100) NOT NULL REFERENCES movement (movement_key) ON DELETE CASCADE,
     position INTEGER NOT NULL,
-    url VARCHAR(500) NOT NULL,
+    image_url TEXT NOT NULL,
     PRIMARY KEY (movement_key, position)
 );
 
@@ -59,37 +59,40 @@ CREATE TABLE movement_edge (
 
 CREATE INDEX idx_movement_edge_target ON movement_edge (target_key);
 
--- Illustration generation requests
+-- Illustration generation: one record per order to generate a Movement's Illustrations
 
-CREATE TABLE generation_request (
+CREATE TABLE generation_movement_illustrations_request (
     id VARCHAR(36) NOT NULL PRIMARY KEY,
-    movement_key VARCHAR(100) NOT NULL,
+    movement_key VARCHAR(100) NOT NULL REFERENCES movement (movement_key) ON DELETE CASCADE,
     status VARCHAR(16) NOT NULL,
     failure_reason TEXT,
     created_at TIMESTAMP NOT NULL,
-    completed_at TIMESTAMP
+    finished_at TIMESTAMP
 );
 
-CREATE INDEX idx_generation_request_movement ON generation_request (movement_key);
+CREATE INDEX idx_generation_request_movement ON generation_movement_illustrations_request (movement_key);
 
--- One row per stage. kind is AVATAR (avatar_id, viewpoint_id, instructions, reference_image_url)
--- or STATIC (image_url). Unused columns hold empty strings.
-CREATE TABLE generation_stage (
-    request_id VARCHAR(36) NOT NULL REFERENCES generation_request (id) ON DELETE CASCADE,
+-- At most one generation in progress per Movement.
+CREATE UNIQUE INDEX uq_generation_request_in_progress
+    ON generation_movement_illustrations_request (movement_key)
+    WHERE status IN ('PENDING', 'RUNNING');
+
+CREATE TABLE generation_illustration_stage (
+    request_id VARCHAR(36) NOT NULL REFERENCES generation_movement_illustrations_request (id) ON DELETE CASCADE,
     position INTEGER NOT NULL,
-    kind VARCHAR(16) NOT NULL,
-    avatar_id VARCHAR(36) REFERENCES avatar (id),
-    viewpoint_id VARCHAR(36) REFERENCES viewpoint (id),
+    avatar_id VARCHAR(36) NOT NULL REFERENCES avatar (id),
+    viewpoint_id VARCHAR(36) NOT NULL REFERENCES viewpoint (id),
     instructions TEXT NOT NULL,
-    reference_image_url VARCHAR(500) NOT NULL,
-    image_url VARCHAR(500) NOT NULL,
-    PRIMARY KEY (request_id, position)
-);
-
-CREATE TABLE generation_result (
-    request_id VARCHAR(36) NOT NULL REFERENCES generation_request (id) ON DELETE CASCADE,
-    position INTEGER NOT NULL,
-    url VARCHAR(500) NOT NULL,
+    candidate_state VARCHAR(16) NOT NULL,
+    candidate_image_url TEXT,
+    candidate_failure_reason TEXT,
+    candidate_progress TEXT,
+    provider VARCHAR(64),
+    model VARCHAR(128),
+    provider_request_id VARCHAR(128),
+    provider_status_url TEXT,
+    provider_result_url TEXT,
+    obtained_at TIMESTAMP,
     PRIMARY KEY (request_id, position)
 );
 

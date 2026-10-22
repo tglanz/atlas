@@ -16,12 +16,7 @@ import type { UseFormReturnType } from '@mantine/form';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import {
-  IllustrationInput,
-  IllustrationStatus,
-  useIllustrationInput,
-  useRequestGeneration,
-} from '@/features/generation';
+import { IllustrationGeneration } from '@/features/generation';
 import { useEdges, useSetOutgoing } from '@/features/graph';
 import type { Edge } from '@/features/graph';
 import { QueryBoundary } from '@/shared/ui';
@@ -118,8 +113,6 @@ function MovementForm({
   const create = useCreateMovement();
   const update = useUpdateMovement();
   const setOutgoing = useSetOutgoing();
-  const requestGeneration = useRequestGeneration();
-  const illustrations = useIllustrationInput();
   // Set once a new movement has been created, so a later save updates it instead of creating again.
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const existingKey = movement?.key ?? createdKey;
@@ -155,20 +148,11 @@ function MovementForm({
     },
   });
 
-  const busy =
-    create.isPending ||
-    update.isPending ||
-    setOutgoing.isPending ||
-    requestGeneration.isPending;
-  const error =
-    create.error ??
-    update.error ??
-    setOutgoing.error ??
-    requestGeneration.error;
+  const busy = create.isPending || update.isPending || setOutgoing.isPending;
+  const error = create.error ?? update.error ?? setOutgoing.error;
 
-  /** Saves the details, the relationships, and, if any were entered, requests the illustrations. */
+  /** Saves the details and the relationships. Illustrations are never changed by saving. */
   async function save(values: FormValues) {
-    if (illustrations.problem) return;
     const content = toContent(values, pendingTag);
     let key = existingKey;
     if (key) {
@@ -180,16 +164,6 @@ function MovementForm({
     }
     if (existingKey || values.links.length > 0) {
       await setOutgoing.mutateAsync({ movementKey: key, edges: values.links });
-    }
-    if (illustrations.form) {
-      await requestGeneration.mutateAsync({
-        movementKey: key,
-        form: illustrations.form,
-      });
-      illustrations.reset();
-      // Generation runs in the background; stay here, where its progress is shown.
-      navigate(`/movements/${key}/edit`);
-      return;
     }
     navigate(`/movements/${key}`);
   }
@@ -262,20 +236,19 @@ function MovementForm({
           <Title order={2} size="h3">
             Illustrations
           </Title>
-          {movement && (
-            <IllustrationStatus
+          {movement ? (
+            <IllustrationGeneration
               movementKey={movement.key}
               illustrations={movement.illustrations}
               onChanged={() =>
                 queryClient.invalidateQueries({ queryKey: movementKeys.all })
               }
             />
+          ) : (
+            <Text size="sm" c="dimmed">
+              Save the movement first, then edit it to generate illustrations.
+            </Text>
           )}
-          <Text size="sm" c="dimmed">
-            One picture per stage. Leave this empty to keep the current
-            illustrations; otherwise they are replaced when you save.
-          </Text>
-          <IllustrationInput input={illustrations} />
         </Stack>
 
         {error && <Alert color="red">{error.message}</Alert>}

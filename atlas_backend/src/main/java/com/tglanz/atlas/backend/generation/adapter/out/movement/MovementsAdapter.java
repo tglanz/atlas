@@ -4,7 +4,9 @@ import com.tglanz.atlas.backend.generation.application.port.out.Movements;
 import com.tglanz.atlas.backend.movement.application.port.in.MovementCommandUseCase;
 import com.tglanz.atlas.backend.movement.application.port.in.MovementQueryUseCase;
 import com.tglanz.atlas.backend.movement.domain.Illustration;
+import com.tglanz.atlas.backend.movement.domain.ItemType;
 import com.tglanz.atlas.backend.movement.domain.Movement;
+import com.tglanz.atlas.backend.movement.domain.MovementItem;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.shared.error.NotFoundException;
 import java.util.List;
@@ -27,7 +29,13 @@ class MovementsAdapter implements Movements {
   public Optional<Info> find(String movementKey) {
     try {
       Movement movement = queries.get(new MovementKey(movementKey));
-      return Optional.of(new Info(movement.content().name(), movement.content().description()));
+      var content = movement.content();
+      List<String> cues =
+          content.items().stream()
+              .filter(item -> item.type() == ItemType.CUE)
+              .map(MovementItem::content)
+              .toList();
+      return Optional.of(new Info(content.name(), content.description(), cues));
     } catch (NotFoundException | IllegalArgumentException e) {
       return Optional.empty();
     }

@@ -23,6 +23,6 @@ record MovementResponse(
         c.description(),
         c.items().stream().map(i -> new ItemResponse(i.type().name(), i.content())).toList(),
         c.tags().stream().sorted().toList(),
-        m.illustrations().stream().map(Illustration::url).toList());
+        m.illustrations().stream().map(Illustration::imageUrl).toList());
   }
 }

@@ -89,8 +89,7 @@ class SecurityConfig {
                         "/api/movements/**",
                         "/api/graph/**",
                         "/api/avatars/**",
-                        "/api/viewpoints/**",
-                        "/api/media/**")
+                        "/api/viewpoints/**")
                     .hasRole(MAINTAINER)
                     .requestMatchers("/api/**")
                     .denyAll()

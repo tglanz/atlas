@@ -8,27 +8,38 @@ export type Viewpoint = {
 };
 export type ViewpointInput = { name: string; specification: string };
 
-/** How one Illustration is produced. Exactly one of the two fields is set. */
-export type StageSpec =
-  | {
-      avatar: {
-        avatarId: string;
-        viewpointId: string;
-        instructions?: string;
-        referenceImageUrl?: string;
-      };
-    }
-  | { staticImage: { imageUrl: string } };
+export type GenerationStatus =
+  | 'PENDING'
+  | 'RUNNING'
+  | 'READY_FOR_REVIEW'
+  | 'APPLIED'
+  | 'DISCARDED'
+  | 'FAILED';
 
-export type GenerationStatus = 'PENDING' | 'RUNNING' | 'SUCCEEDED' | 'FAILED';
+export type IllustrationStageInput = {
+  avatarId: string;
+  viewpointId: string;
+  instructions: string;
+};
 
-export type GenerationRequest = {
+export type IllustrationCandidate = {
+  state: 'PENDING' | 'DONE' | 'FAILED';
+  imageUrl: string | null;
+  failureReason: string | null;
+  progress: string | null;
+};
+
+export type GenerationMovementIllustrations = {
   id: string;
-  stages: Partial<{ avatar: unknown; staticImage: unknown }>[];
+  movementKey: string;
   status: GenerationStatus;
   failureReason: string | null;
-  results: string[];
   createdAt: string;
+  finishedAt: string | null;
+  stages: (IllustrationStageInput & {
+    position: number;
+    candidate: IllustrationCandidate;
+  })[];
 };
 
 export const listViewpoints = () => apiFetch<Viewpoint[]>('/viewpoints');
@@ -45,36 +56,32 @@ export const makeDefaultViewpoint = (id: string) =>
 export const deleteViewpoint = (id: string) =>
   apiFetch<void>(`/viewpoints/${id}`, { method: 'DELETE' });
 
-/** Stores a picture and returns its url, to use as an image in a spec. */
-export async function uploadMedia(file: File): Promise<string> {
-  const body = new FormData();
-  body.append('file', file);
-  const { url } = await apiFetch<{ url: string }>('/media', {
-    method: 'POST',
-    body,
-  });
-  return url;
-}
-
 const movementPath = (movementKey: string) => `/movements/${movementKey}`;
 
 export const listGenerations = (movementKey: string) =>
-  apiFetch<GenerationRequest[]>(`${movementPath(movementKey)}/generations`);
-
-/** Produces the movement's whole Illustration sequence: one picture per stage. */
-export const requestGeneration = (movementKey: string, stages: StageSpec[]) =>
-  apiFetch<GenerationRequest>(`${movementPath(movementKey)}/generations`, {
-    method: 'POST',
-    body: { stages },
-  });
-
-export const retryGeneration = (movementKey: string, id: string) =>
-  apiFetch<GenerationRequest>(
-    `${movementPath(movementKey)}/generations/${id}/retry`,
-    {
-      method: 'POST',
-    },
+  apiFetch<GenerationMovementIllustrations[]>(
+    `${movementPath(movementKey)}/generations`,
   );
+
+export const requestGeneration = (
+  movementKey: string,
+  stages: IllustrationStageInput[],
+) =>
+  apiFetch<GenerationMovementIllustrations>(
+    `${movementPath(movementKey)}/generations`,
+    { method: 'POST', body: { stages } },
+  );
+
+export const applyGeneration = (movementKey: string, id: string) =>
+  apiFetch<GenerationMovementIllustrations>(
+    `${movementPath(movementKey)}/generations/${id}/apply`,
+    { method: 'POST' },
+  );
+
+export const discardGeneration = (movementKey: string, id: string) =>
+  apiFetch<void>(`${movementPath(movementKey)}/generations/${id}/discard`, {
+    method: 'POST',
+  });
 
 export const clearIllustrations = (movementKey: string) =>
   apiFetch<unknown>(`${movementPath(movementKey)}/illustrations`, {

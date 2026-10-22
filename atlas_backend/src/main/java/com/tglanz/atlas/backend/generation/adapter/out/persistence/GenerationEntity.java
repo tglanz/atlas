@@ -1,5 +1,6 @@
 package com.tglanz.atlas.backend.generation.adapter.out.persistence;
 
+import com.tglanz.atlas.backend.generation.domain.CandidateState;
 import com.tglanz.atlas.backend.generation.domain.GenerationStatus;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -17,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "generation_request")
-class GenerationRequestEntity {
+@Table(name = "generation_movement_illustrations_request")
+class GenerationEntity {
 
   @Id String id;
 
@@ -34,25 +35,18 @@ class GenerationRequestEntity {
   @Column(name = "created_at")
   Instant createdAt;
 
-  @Column(name = "completed_at")
-  Instant completedAt;
+  @Column(name = "finished_at")
+  Instant finishedAt;
 
   @ElementCollection
-  @CollectionTable(name = "generation_stage", joinColumns = @JoinColumn(name = "request_id"))
+  @CollectionTable(
+      name = "generation_illustration_stage",
+      joinColumns = @JoinColumn(name = "request_id"))
   @OrderColumn(name = "position")
   List<StageRow> stages = new ArrayList<>();
 
-  @ElementCollection
-  @CollectionTable(name = "generation_result", joinColumns = @JoinColumn(name = "request_id"))
-  @OrderColumn(name = "position")
-  @Column(name = "url")
-  List<String> results = new ArrayList<>();
-
-  /** One row per stage; the columns used depend on the kind (AVATAR or STATIC). */
   @Embeddable
   static class StageRow {
-    String kind;
-
     @Column(name = "avatar_id")
     String avatarId;
 
@@ -61,10 +55,32 @@ class GenerationRequestEntity {
 
     String instructions;
 
-    @Column(name = "reference_image_url")
-    String referenceImageUrl;
+    @Column(name = "candidate_state")
+    @Enumerated(EnumType.STRING)
+    CandidateState candidateState;
 
-    @Column(name = "image_url")
-    String imageUrl;
+    @Column(name = "candidate_image_url")
+    String candidateImageUrl;
+
+    @Column(name = "candidate_failure_reason")
+    String candidateFailureReason;
+
+    @Column(name = "candidate_progress")
+    String candidateProgress;
+
+    String provider;
+    String model;
+
+    @Column(name = "provider_request_id")
+    String providerRequestId;
+
+    @Column(name = "provider_status_url")
+    String providerStatusUrl;
+
+    @Column(name = "provider_result_url")
+    String providerResultUrl;
+
+    @Column(name = "obtained_at")
+    Instant obtainedAt;
   }
 }

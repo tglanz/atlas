@@ -1,0 +1,21 @@
+{{! The system prompt, sent as the provider's system prompt.
+    Rendered from the model built by GenerationTemplates (its Model record), the same one that
+    image-prompt.mustache gets. A section renders only when its value is not empty. }}
+Generate a figure performing the movement: {{movement.name}}.
+{{#movement.description}}
+
+Movement description: {{movement.description}}
+{{/movement.description}}
+{{#movement.cues}}
+{{#-first}}
+
+The figure should have perfect form - follow the cues:
+{{/-first}}
+- {{.}}
+{{/movement.cues}}
+
+General guidelines:
+{{avatar.specification}}
+
+Camera Viewpoint:
+{{viewpoint.specification}}

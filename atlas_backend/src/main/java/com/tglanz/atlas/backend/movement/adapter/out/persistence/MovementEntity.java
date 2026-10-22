@@ -53,7 +53,7 @@ class MovementEntity {
 
   @Embeddable
   static class IllustrationRow {
-    @Column(name = "url")
-    String url;
+    @Column(name = "image_url")
+    String imageUrl;
   }
 }

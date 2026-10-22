@@ -4,6 +4,9 @@ import java.util.UUID;
 
 public interface RunGenerationUseCase {
 
-  /** Performs a pending generation request. Failures are recorded on the request. */
-  void run(UUID requestId);
+  /** Generates the images of a pending generation, stopping at the first failure. */
+  void run(UUID generationId);
+
+  /** Fails what a restart left in progress, as nothing is running it anymore. */
+  void failInterrupted();
 }

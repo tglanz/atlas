@@ -1,107 +1,132 @@
 package com.tglanz.atlas.backend.generation.adapter.out.persistence;
 
 import com.tglanz.atlas.backend.generation.application.port.out.GenerationRepository;
-import com.tglanz.atlas.backend.generation.domain.AvatarImageSpec;
-import com.tglanz.atlas.backend.generation.domain.GenerationRequest;
-import com.tglanz.atlas.backend.generation.domain.IllustrationsGenerationSpec;
-import com.tglanz.atlas.backend.generation.domain.StageSpec;
-import com.tglanz.atlas.backend.generation.domain.StaticImageSpec;
+import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations;
+import com.tglanz.atlas.backend.generation.domain.GenerationStatus;
+import com.tglanz.atlas.backend.generation.domain.IllustrationCandidate;
+import com.tglanz.atlas.backend.generation.domain.IllustrationStage;
+import com.tglanz.atlas.backend.shared.error.ConflictException;
+import com.tglanz.atlas.backend.shared.persistence.ConstraintViolations;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 
 @Component
 class GenerationPersistenceAdapter implements GenerationRepository {
 
-  private static final String AVATAR = "AVATAR";
-  private static final String STATIC = "STATIC";
+  private static final Set<GenerationStatus> IN_PROGRESS =
+      Set.of(GenerationStatus.PENDING, GenerationStatus.RUNNING);
 
-  private final GenerationRequestJpaRepository jpa;
+  private final GenerationJpaRepository jpa;
 
-  GenerationPersistenceAdapter(GenerationRequestJpaRepository jpa) {
+  GenerationPersistenceAdapter(GenerationJpaRepository jpa) {
     this.jpa = jpa;
   }
 
   @Override
-  public Optional<GenerationRequest> findById(UUID id) {
+  public Optional<GenerationMovementIllustrations> findById(UUID id) {
     return jpa.findById(id.toString()).map(this::toDomain);
   }
 
   @Override
-  public List<GenerationRequest> findByMovementKey(String movementKey) {
+  public List<GenerationMovementIllustrations> findByMovementKey(String movementKey) {
     return jpa.findByMovementKeyOrderByCreatedAtDesc(movementKey).stream()
         .map(this::toDomain)
         .toList();
   }
 
   @Override
-  public void save(GenerationRequest request) {
-    GenerationRequestEntity entity =
-        jpa.findById(request.id().toString())
-            .orElseGet(
-                () -> {
-                  var created = new GenerationRequestEntity();
-                  created.id = request.id().toString();
-                  created.movementKey = request.movementKey();
-                  created.createdAt = request.createdAt();
-                  request.spec().stages().forEach(stage -> created.stages.add(toRow(stage)));
-                  return created;
-                });
-    entity.status = request.status();
-    entity.failureReason = request.failureReason();
-    entity.completedAt = request.completedAt();
-    entity.results.clear();
-    entity.results.addAll(request.resultUrls());
-    jpa.saveAndFlush(entity);
+  public boolean existsInProgress(String movementKey) {
+    return jpa.existsByMovementKeyAndStatusIn(movementKey, IN_PROGRESS);
   }
 
-  private static GenerationRequestEntity.StageRow toRow(StageSpec stage) {
-    var row = new GenerationRequestEntity.StageRow();
-    row.instructions = "";
-    row.referenceImageUrl = "";
-    row.imageUrl = "";
-    switch (stage) {
-      case AvatarImageSpec s -> {
-        row.kind = AVATAR;
-        row.avatarId = s.avatarId().toString();
-        row.viewpointId = s.viewpointId().toString();
-        row.instructions = s.instructions();
-        row.referenceImageUrl = s.referenceImageUrl();
+  @Override
+  public List<GenerationMovementIllustrations> findInProgress() {
+    return jpa.findByStatusIn(IN_PROGRESS).stream().map(this::toDomain).toList();
+  }
+
+  @Override
+  public void save(GenerationMovementIllustrations generation) {
+    GenerationEntity entity =
+        jpa.findById(generation.id().toString())
+            .orElseGet(
+                () -> {
+                  var created = new GenerationEntity();
+                  created.id = generation.id().toString();
+                  created.movementKey = generation.movementKey();
+                  created.createdAt = generation.createdAt();
+                  return created;
+                });
+    entity.status = generation.status();
+    entity.failureReason = generation.failureReason();
+    entity.finishedAt = generation.finishedAt();
+    entity.stages.clear();
+    generation.stages().forEach(s -> entity.stages.add(toRow(s)));
+    try {
+      jpa.saveAndFlush(entity);
+    } catch (DataAccessException e) {
+      if (!ConstraintViolations.isConstraintViolation(e)) {
+        throw e;
       }
-      case StaticImageSpec s -> {
-        row.kind = STATIC;
-        row.imageUrl = s.imageUrl();
-      }
+      throw new ConflictException("This movement already has a generation in progress");
     }
+  }
+
+  private static GenerationEntity.StageRow toRow(IllustrationStage stage) {
+    var row = new GenerationEntity.StageRow();
+    row.avatarId = stage.avatarId().toString();
+    row.viewpointId = stage.viewpointId().toString();
+    row.instructions = stage.instructions();
+    IllustrationCandidate c = stage.candidate();
+    row.candidateState = c.state();
+    row.candidateImageUrl = c.imageUrl();
+    row.candidateFailureReason = c.failureReason();
+    row.candidateProgress = c.progress();
+    row.provider = c.provider();
+    row.model = c.model();
+    row.providerRequestId = c.providerRequestId();
+    row.providerStatusUrl = c.providerStatusUrl();
+    row.providerResultUrl = c.providerResultUrl();
+    row.obtainedAt = c.obtainedAt();
     return row;
   }
 
-  private static StageSpec toStage(GenerationRequestEntity.StageRow row) {
-    return switch (row.kind) {
-      case AVATAR ->
-          new AvatarImageSpec(
-              UUID.fromString(row.avatarId),
-              UUID.fromString(row.viewpointId),
-              row.instructions,
-              row.referenceImageUrl);
-      case STATIC -> new StaticImageSpec(row.imageUrl);
-      default -> throw new IllegalStateException("Unknown stage kind " + row.kind);
-    };
-  }
-
-  private GenerationRequest toDomain(GenerationRequestEntity e) {
-    var spec =
-        new IllustrationsGenerationSpec(
-            e.stages.stream().map(GenerationPersistenceAdapter::toStage).toList());
-    return GenerationRequest.restore(
+  private GenerationMovementIllustrations toDomain(GenerationEntity e) {
+    List<IllustrationStage> stages =
+        java.util.stream.IntStream.range(0, e.stages.size())
+            .mapToObj(
+                i -> {
+                  var r = e.stages.get(i);
+                  var candidate =
+                      new IllustrationCandidate(
+                          r.candidateState,
+                          r.candidateImageUrl,
+                          r.candidateFailureReason,
+                          r.candidateProgress,
+                          r.provider,
+                          r.model,
+                          r.providerRequestId,
+                          r.providerStatusUrl,
+                          r.providerResultUrl,
+                          r.obtainedAt);
+                  return new IllustrationStage(
+                      i,
+                      UUID.fromString(r.avatarId),
+                      UUID.fromString(r.viewpointId),
+                      r.instructions,
+                      candidate);
+                })
+            .toList();
+    return GenerationMovementIllustrations.restore(
         UUID.fromString(e.id),
         e.movementKey,
-        spec,
         e.status,
         e.failureReason,
-        List.copyOf(e.results),
         e.createdAt,
-        e.completedAt);
+        e.finishedAt,
+        stages);
   }
 }

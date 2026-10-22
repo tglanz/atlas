@@ -34,7 +34,7 @@ Out of scope: images a maintainer provides themselves (they are not generation),
 
 ### P0: the first implementation
 
-- Generate one image per IllustrationStage. Its shared instruction is its own Avatar's and Viewpoint's specifications, and its prompt is the Movement's name and description plus the IllustrationStage's instructions.
+- Generate one image per IllustrationStage. Its system prompt is its own Avatar's and Viewpoint's specifications, and its image prompt is the Movement's name and description plus the IllustrationStage's instructions.
 - Generation only runs from an explicit Generate action by a maintainer.
 - A Movement has at most one generation in progress. Generate is disabled in the UI while a record of the Movement is `PENDING` or `RUNNING`, and the backend rejects it.
 - It runs in the background, one IllustrationStage at a time. A GenerationMovementIllustrations has a status that the UI can poll.
@@ -69,7 +69,7 @@ Out of scope: images a maintainer provides themselves (they are not generation),
 
 ### What fal.ai constrains
 
-- One provider request makes one image from one prompt, plus an optional shared instruction. Several different images need several provider requests, so each IllustrationStage makes its own.
+- One provider request makes one image from one image prompt, plus an optional system prompt. Several different images need several provider requests, so each IllustrationStage makes its own.
 - Provider requests go through fal.ai's queue: submit, poll the returned status URL, fetch the returned result URL. The key goes in an `Authorization: Key` header.
 - The queue keeps its result for only about an hour, so a finished result must be fetched promptly. The image file itself lives on fal.ai's CDN.
 - A new account runs only two provider requests at once; others wait. One IllustrationStage at a time stays within that.
@@ -205,7 +205,7 @@ Saving a Movement never changes its Illustrations. Only apply does.
 3. The UI polls the read endpoint while the status is `PENDING` or `RUNNING`. Generate stays disabled for that Movement meanwhile. Each IllustrationStage whose candidate is `PENDING` shows a spinner. When a poll returns a candidate as `DONE`, its spinner is replaced by the image, loaded from its `candidate_image_url`, before the other IllustrationStages have finished.
 4. A background worker takes the GenerationMovementIllustrations and sets it `RUNNING`.
 5. For each IllustrationStage, in position order:
-   1. Compose the shared instruction from its Avatar's and Viewpoint's specifications, and the prompt from the Movement's name and description and its instructions.
+   1. Compose the system prompt from its Avatar's and Viewpoint's specifications, and the image prompt from the Movement's name and description and its instructions.
    2. The connector submits one provider request to fal.ai's queue, asking for one image with the lifetime header set to no expiry. It stores `provider`, `model`, `provider_request_id` and the returned status and result URLs on the row at once.
    3. It polls the status URL until the provider request completes, within a time limit.
    4. It fetches the result right away and reads the image URL of the first image.

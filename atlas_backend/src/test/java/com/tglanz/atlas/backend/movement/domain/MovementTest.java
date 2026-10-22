@@ -30,7 +30,7 @@ class MovementTest {
     Movement m = movement();
     assertThat(m.illustrations()).isEmpty();
     m.replaceIllustrations(List.of(new Illustration("down"), new Illustration("up")));
-    assertThat(m.illustrations()).extracting(Illustration::url).containsExactly("down", "up");
+    assertThat(m.illustrations()).extracting(Illustration::imageUrl).containsExactly("down", "up");
     m.replaceIllustrations(List.of());
     assertThat(m.illustrations()).isEmpty();
   }

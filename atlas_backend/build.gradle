@@ -25,6 +25,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.flywaydb:flyway-database-postgresql'
+	implementation 'com.samskivert:jmustache'
 	runtimeOnly 'org.postgresql:postgresql'
 	runtimeOnly 'org.xerial:sqlite-jdbc:3.53.4.0'
 	runtimeOnly 'org.hibernate.orm:hibernate-community-dialects'

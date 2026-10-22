@@ -1,18 +1,21 @@
 package com.tglanz.atlas.backend.generation.application.port.in;
 
-import com.tglanz.atlas.backend.generation.domain.GenerationRequest;
-import com.tglanz.atlas.backend.generation.domain.IllustrationsGenerationSpec;
+import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations;
+import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations.StageDefinition;
 import java.util.List;
 import java.util.UUID;
 
 public interface GenerationUseCase {
 
-  /** Queues production of the Movement's Illustration sequence from the spec. */
-  GenerationRequest request(String movementKey, IllustrationsGenerationSpec spec);
+  /** Queues the generation of one image per stage for the Movement. */
+  GenerationMovementIllustrations request(String movementKey, List<StageDefinition> stages);
 
-  GenerationRequest get(String movementKey, UUID id);
+  GenerationMovementIllustrations get(String movementKey, UUID id);
 
-  List<GenerationRequest> list(String movementKey);
+  List<GenerationMovementIllustrations> list(String movementKey);
 
-  GenerationRequest retry(String movementKey, UUID id);
+  /** Puts the images on the Movement, replacing its Illustrations. */
+  GenerationMovementIllustrations apply(String movementKey, UUID id);
+
+  void discard(String movementKey, UUID id);
 }
