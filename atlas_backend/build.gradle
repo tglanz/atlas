@@ -74,8 +74,14 @@ tasks.register('buildUi', Exec) {
 	})
 	outputs.dir(file("$uiDir/dist"))
 }
+bug
+// The plain jar is not runnable and not needed; the boot jar has a fixed name.
+tasks.named('jar') {
+	enabled = false
+}
 
 tasks.named('bootJar') {
+	archiveFileName = 'atlas_backend.jar'
 	dependsOn 'buildUi'
 	from(file("$uiDir/dist")) {
 		into 'BOOT-INF/classes/static'

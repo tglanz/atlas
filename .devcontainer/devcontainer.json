@@ -19,7 +19,7 @@
     "5173": { "label": "atlas_ui (Vite)" },
     "8080": { "label": "atlas_backend" }
   },
-  "postCreateCommand": "cd atlas_ui && pnpm install --frozen-lockfile && cd ../atlas_backend && ./gradlew --console=plain classes testClasses",
+  "postCreateCommand": "(command -v make >/dev/null || (sudo apt-get update && sudo apt-get install -y make)) && cd atlas_ui && pnpm install --frozen-lockfile && cd ../atlas_backend && ./gradlew --console=plain classes testClasses",
   "customizations": {
     "vscode": {
       "extensions": [

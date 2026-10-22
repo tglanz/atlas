@@ -6,11 +6,15 @@ Form Atlas: a visual library of human movements, with routines built from them.
 - `atlas_ui`: React web app.
 - `docs`: product, domain, API and tooling documentation. Start with `docs/abstract.md`.
 
-## Run locally
+## Commands
+
+Run these from the top directory. `make help` lists them.
 
 ```
-cd atlas_backend && ./gradlew bootRun    # API on :8080
-cd atlas_ui && pnpm install && pnpm dev # UI on :5173, proxies /api to the backend
+make run      # build the jar and run the app (backend serving the UI)
+make build    # build the single runnable jar, UI included
+make test     # backend and UI tests
+make format   # format all code
 ```
 
-See each project's README for the other commands.
+Each project's README has the tool-specific commands.

@@ -22,11 +22,11 @@ Gradle comes from the wrapper. Library and plugin versions are defined in `atlas
 ## How the pieces fit
 
 - The backend build also builds the frontend and packages it into the backend jar. This needs Node and pnpm, unless the build is told to skip the UI.
-- In development the frontend runs on its own dev server and proxies `/api` to the backend.
+- The app normally runs as that single jar. The frontend also has its own dev server, which proxies `/api` to the backend, for faster UI iteration.
 
 ## Commands
 
-Build, test, format, lint and run commands are in the README of each project.
+Common tasks (`run`, `build`, `test`, `format`) are `make` targets at the top directory; `make help` lists them. They only call the projects' own tools. Tool-specific commands are in the README of each project.
 
 ## Dev container
 

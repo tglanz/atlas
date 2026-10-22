@@ -1,6 +1,8 @@
 import {
   Alert,
+  Anchor,
   Badge,
+  Button,
   Card,
   Group,
   Image,
@@ -12,7 +14,8 @@ import {
   Title,
 } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
-import { useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
+import { useCurrentUser } from '@/features/auth';
 import { useMovements } from '../queries';
 
 export function MovementLibraryPage() {
@@ -21,6 +24,7 @@ export function MovementLibraryPage() {
   const text = params.get('text') ?? '';
   const tag = params.get('tag') ?? '';
   const { data, isPending, isError, error } = useMovements({ text, tag });
+  const user = useCurrentUser();
 
   function setFilter(name: 'text' | 'tag', value: string) {
     const next = new URLSearchParams(params);
@@ -31,7 +35,14 @@ export function MovementLibraryPage() {
 
   return (
     <Stack gap="lg">
-      <Title order={1}>Movements</Title>
+      <Group justify="space-between">
+        <Title order={1}>Movements</Title>
+        {user.data?.role === 'MAINTAINER' && (
+          <Button component={Link} to="/movements/new">
+            New movement
+          </Button>
+        )}
+      </Group>
       <Group align="flex-end">
         <TextInput
           label="Search by name"
@@ -72,9 +83,14 @@ export function MovementLibraryPage() {
                   />
                 </Card.Section>
               )}
-              <Text fw={700} mt="sm">
+              <Anchor
+                component={Link}
+                to={`/movements/${movement.key}`}
+                fw={700}
+                mt="sm"
+              >
                 {movement.name}
-              </Text>
+              </Anchor>
               <Group gap="xs" mt="xs">
                 {movement.tags.map((t) => (
                   <Badge
