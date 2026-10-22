@@ -1,4 +1,4 @@
-# Architecture
+# Stack
 
 - Frontend
   - Web application: React, TypeScript, Vite
@@ -18,6 +18,7 @@
 
 - Database
   - Relational database: PostgreSQL
+  - Local development: SQLite, swappable with PostgreSQL through configuration
   - Hosting: Aiven
 
 - Object Storage
@@ -29,12 +30,13 @@
   - Backend authorization: Spring Security
 
 - Infrastructure and Deployment
+  - Single deployable: the backend also serves the built web application, so both share one origin and session cookies and CSRF protection work without CORS
   - Backend hosting: Render
   - Reverse proxy and TLS: Render-managed HTTPS
   - Configuration and secrets: Render environment variables
   - CI/CD: GitHub Actions
 
 - Deferred
-  - Illustration generation provider: None for now (stubbed)
-  - Logging and monitoring: None for now
-  - Search engine: Deferred
+  - Illustration generation provider: Undecided
+  - Logging and monitoring: Undecided
+  - Search engine: Undecided

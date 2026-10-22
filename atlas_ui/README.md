@@ -1,25 +1,19 @@
 # atlas_ui
 
-React, TypeScript, Vite frontend for Atlas. See `../docs/tooling.md` for versions.
+React, TypeScript and Vite web app.
 
 ## Commands
 
-Run from this directory.
+```
+pnpm install
+pnpm dev            # dev server on :5173, proxies /api to the backend on :8080
+pnpm build          # type-check and bundle into dist
+pnpm test
+pnpm lint
+pnpm format         # format the code
+pnpm format:check
+```
 
-| Purpose                       | Command             |
-| ----------------------------- | ------------------- |
-| Install                       | `pnpm install`      |
-| Dev server                    | `pnpm dev`          |
-| Format                        | `pnpm format`       |
-| Check formatting              | `pnpm format:check` |
-| Lint                          | `pnpm lint`         |
-| Build (type-check and bundle) | `pnpm build`        |
-| Test                          | `pnpm test`         |
+## More
 
-## Development
-
-Start the backend (`./gradlew bootRun` in `atlas_backend`), then `pnpm dev`. Vite proxies `/api` to the backend on port 8080; set `VITE_DEV_API` to change it. See `ARCHITECTURE.md` for how the code is organized.
-
-## Deployment
-
-In production the backend serves the built UI, so both share one origin. `atlas_backend`'s Gradle build runs `pnpm build` and packages `dist` into the jar.
+- `ARCHITECTURE.md`: how the code is organized.

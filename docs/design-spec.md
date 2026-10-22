@@ -32,7 +32,7 @@ URLs: `/movements/new`, `/movements/:key/edit`
 
 - Data: Movement name, description, cues, tags, links, and the ordered illustrations.
 - Actions: Add and remove tags, manage links, set illustrations, remove all illustrations.
-- Setting illustrations offers two patterns. Generate with an Avatar: choose an Avatar and a Viewpoint, then per stage give instructions, a reference image, or both. Use my own images: give an image per stage. The result replaces the draft's illustrations; the status of generation requests is shown, and failed ones can be retried.
+- Setting illustrations follows the flow "Set Movement Illustrations". Generation progress is shown, and failed generations can be retried.
 - Buttons: Save Draft, Publish, Cancel.
 - Only maintainers can access this page.
 - Creating a revision from a published Movement creates a new draft with the same key and the next revision number.
@@ -104,7 +104,7 @@ URLs: `/routines/new`, `/routines/:id/edit`
 
 ## 10. Account
 
-- Registration, sign-in and sign-out are handled by the application. The first registered user is a Maintainer; later users are Practitioners.
+- Registration, sign-in and sign-out are handled by the application.
 - Actions: Register, Sign In, Sign Out.
 
 ## Access and Revision Rules

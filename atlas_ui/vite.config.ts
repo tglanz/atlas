@@ -9,6 +9,8 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   server: {
+    // Let the dev server answer on GitHub Codespaces forwarded addresses.
+    allowedHosts: ['.app.github.dev'],
     // In development the API is same-origin, so session cookies and CSRF work unchanged.
     proxy: { '/api': process.env.VITE_DEV_API ?? 'http://localhost:8080' },
   },

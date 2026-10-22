@@ -34,5 +34,5 @@ Create a new draft revision while preserving published revisions.
 
 For a Movement draft, choose one of two patterns and define the stages of the movement. One Illustration is produced per stage, and the result replaces the draft's sequence.
 
-- Generate with an Avatar: choose an Avatar and a Viewpoint, then give each stage instructions, a reference image, or both. A failed generation can be retried.
+- Generate with an Avatar: choose an Avatar and a Viewpoint, then give each stage instructions, a reference image, or both.
 - Use my own images: give each stage an image, which is used as is.

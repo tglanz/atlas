@@ -1,91 +1,30 @@
 # API
 
-Base path `/api`. JSON bodies. Errors are problem details.
+The web application talks to the backend over an HTTP API under `/api`. The controllers in each backend feature define the endpoints. This document records the conventions and rules behind them, not the endpoint list.
 
-## Access
+## Conventions
 
-| Role | Meaning |
-| --- | --- |
-| Public | No authentication |
-| Authenticated | Any signed-in user (practitioner) |
-| Maintainer | Signed-in user with the Maintainer role. The first registered user is a Maintainer. |
+- JSON bodies, except picture uploads, which are multipart.
+- Errors are RFC 9457 problem details.
+- Status codes carry meaning: 400 invalid input, 401 not signed in, 403 not allowed, 404 not found, 409 conflicts with the current state (duplicate, invalid transition, still in use).
 
 ## Authentication
 
-Session cookie based. Unsafe requests (POST, PUT, DELETE) must send the `XSRF-TOKEN` cookie value in the `X-XSRF-TOKEN` header.
+- Signing in sets a session cookie. The web application is served from the same origin as the API, so cookies work without tokens in browser storage or CORS.
+- Unsafe requests (anything that changes data) must send the value of the `XSRF-TOKEN` cookie in the `X-XSRF-TOKEN` header. The token changes when the session changes, for example on sign-in, so clients refresh it and retry once on a 403.
 
-| Method and path | Access | Purpose |
-| --- | --- | --- |
-| `POST /auth/register` | Public | JSON `email`, `password` (8 to 72 characters). Returns the user. |
-| `POST /auth/login` | Public | Form fields `email`, `password`. Returns 204 and sets the session cookie, or 401. |
-| `POST /auth/logout` | Authenticated | Ends the session. Returns 204. |
-| `GET /auth/me` | Authenticated | Current user: `id`, `email`, `role`. |
+## Access
 
-## Movements
+- Public: reading published Movements and their revisions, registering, and signing in.
+- Signed-in users (practitioners): managing their own Routines. Another user's Routine looks like it does not exist, so its existence is not revealed.
+- Maintainers: everything that creates or changes Movements, drafts, Illustrations, Avatars, and Viewpoints, and reading drafts and generation requests.
+- Access is enforced on the backend for every request, independent of the UI.
 
-| Method and path | Access | Purpose |
-| --- | --- | --- |
-| `GET /movements?text=&tag=` | Public | Current published Movements, filtered by name text and tag |
-| `GET /movements/{key}` | Public | Current published revision |
-| `GET /movements/{key}/revisions` | Public | Published revisions |
-| `GET /movements/{key}/revisions/{revision}` | Public | One published revision |
-| `GET /movements/{key}/draft` | Maintainer | The open draft |
-| `POST /movements` | Maintainer | Create a draft at revision 1. Body: `key`, `content` |
-| `PUT /movements/{key}/draft` | Maintainer | Replace the draft content |
-| `POST /movements/{key}/revisions` | Maintainer | Create a draft from the latest published revision |
-| `POST /movements/{key}/draft/publish` | Maintainer | Publish the draft |
+## Rules
 
-Movement content: `name`, `description`, `cues[]`, `tags[]`, `links[]` (`target`, `relationType`).
-
-Responses carry `illustrations`: the ordered urls of the revision's Illustrations. In the list, `representativeIllustration` is the first one.
-
-Draft Illustrations (Maintainer):
-
-| Method and path | Purpose |
-| --- | --- |
-| `POST /media` | Upload a picture (multipart `file`; PNG, JPEG or WebP up to 10 MB). Returns its `url`, to use as an image in a spec. |
-| `POST /movements/{key}/draft/generations` | Request production of the draft's Illustration sequence from a spec. Returns 202 with the request. |
-| `GET /movements/{key}/draft/generations` | Generation requests, newest first |
-| `GET /movements/{key}/draft/generations/{id}` | One request: `status`, `failureReason`, `results[]` |
-| `POST /movements/{key}/draft/generations/{id}/retry` | Run a failed request again |
-| `DELETE /movements/{key}/draft/illustrations` | Remove all Illustrations from the draft |
-
-The generation body is `{ "stages": [ ... ] }`, 1 to 20 stages. Each stage sets exactly one of:
-
-- `avatar`: `avatarId`, `viewpointId`, and `instructions` and/or `referenceImageUrl`.
-- `staticImage`: `imageUrl`.
-
-Stages of both kinds may be mixed in one request. One Illustration results per stage, and a successful run replaces the draft's sequence. A request fails if the draft it was made for is no longer open. Generation runs in the background. Storage and generation are currently stubs: every stored or generated picture gets the url `atlas.storage.stub-url`.
-
-Rules:
-- A key is lowercase letters, digits and hyphens.
-- Tags and relation types are stored lowercase.
-- A Movement has at most one draft.
-- Creating a revision requires a published revision and no open draft.
-
-## Avatars and Viewpoints
-
-Maintainer only, including reads. `/avatars` and `/viewpoints` have the same shape.
-
-- `GET /avatars`, `GET /avatars/{id}`
-- `POST /avatars`, `PUT /avatars/{id}`, `DELETE /avatars/{id}`
-
-Body: `name` (unique), `specification`. An Avatar or Viewpoint used by a generation request cannot be deleted (409).
-
-## Routines
-
-All routine endpoints require authentication and act on the caller's own Routines. Other users' Routines return 404.
-
-| Method and path | Purpose |
-| --- | --- |
-| `GET /routines` | The caller's Routines |
-| `GET /routines/{id}` | One Routine with sections and movement references |
-| `POST /routines` | Create |
-| `PUT /routines/{id}` | Replace name, description and sections |
-| `DELETE /routines/{id}` | Delete |
-
-Body: `name`, `description`, `sections[]` of `name`, `description`, `movements[]` (`key`, `revision`). Every reference must be an existing published revision.
-
-## Not yet available
-
-Real picture storage and generation (both are stubs), and removing or reordering a single Illustration.
+- A Movement has at most one open draft. Revising requires a published revision and no open draft.
+- Published revisions cannot be changed through the API.
+- A Routine can only reference existing published revisions.
+- Generation is asynchronous. A request returns immediately and its status is polled. It fails if its draft is no longer the open draft. A successful request replaces the draft's whole sequence.
+- Pictures are uploaded separately, and a generation spec refers to the returned address.
+- An Avatar or Viewpoint that a generation request uses cannot be deleted.

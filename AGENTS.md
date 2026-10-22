@@ -19,6 +19,18 @@
 - Update relevant documentation when agreed decisions change.
 - Keep domain specifications free of implementation commentary.
 
+## Documentation
+
+Docs record what stays true as the code changes. The code, migrations, and configuration are the source of truth for everything else.
+
+- Put in docs: goals, domain concepts and invariants, decisions and the reasons for them, and commands that rarely change.
+- Keep out of docs: lists of files, classes, endpoints, fields, or tables; ids, names, or contents of seeded data; limits and other constants; counts; versions (except in the tooling doc); and snapshots of current status or behavior that go stale.
+- Do not describe what the code already shows. Explain why, not what.
+- READMEs show the commands to build, test, format, and run, and point to deeper docs. They are not state descriptions.
+- Prefer a pointer to the code, or to a reference generated from it, over copying details into prose.
+- When a change would make a doc stale, remove the volatile detail instead of updating it.
+- When in doubt, leave it out.
+
 ## UI and UX
 
 - Prioritize clarity, consistency, accessibility, and usability.

@@ -105,6 +105,12 @@ function Producer({
   const [viewpointId, setViewpointId] = useState<string | null>(null);
   const [stages, setStages] = useState<StageDraft[]>([emptyStage()]);
 
+  // With a single avatar or viewpoint there is nothing to choose, so use it.
+  const onlyId = (items: { id: string }[] | undefined) =>
+    items?.length === 1 ? items[0].id : null;
+  const chosenAvatarId = avatarId ?? onlyId(avatars.data);
+  const chosenViewpointId = viewpointId ?? onlyId(viewpoints.data);
+
   // Reload the draft whenever another request has finished successfully.
   const succeeded =
     generations.data?.filter((r) => r.status === 'SUCCEEDED').length ?? 0;
@@ -126,15 +132,20 @@ function Producer({
       mode === 'static' ? s.file !== null : s.instructions.trim() || s.file,
     );
   const canSubmit = Boolean(
-    stagesReady && (mode === 'static' || (avatarId && viewpointId)),
+    stagesReady && (mode === 'static' || (chosenAvatarId && chosenViewpointId)),
   );
 
   function submit() {
     const form =
       mode === 'static'
         ? { mode, stages }
-        : avatarId && viewpointId
-          ? { mode, avatarId, viewpointId, stages }
+        : chosenAvatarId && chosenViewpointId
+          ? {
+              mode,
+              avatarId: chosenAvatarId,
+              viewpointId: chosenViewpointId,
+              stages,
+            }
           : null;
     if (!form) return;
     request.mutate(form, { onSuccess: () => setStages([emptyStage()]) });
@@ -180,7 +191,7 @@ function Producer({
                         value: a.id,
                         label: a.name,
                       }))}
-                      value={avatarId}
+                      value={chosenAvatarId}
                       onChange={setAvatarId}
                     />
                     <Select
@@ -189,7 +200,7 @@ function Producer({
                         value: v.id,
                         label: v.name,
                       }))}
-                      value={viewpointId}
+                      value={chosenViewpointId}
                       onChange={setViewpointId}
                     />
                   </Group>

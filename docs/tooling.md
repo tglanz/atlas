@@ -2,79 +2,36 @@
 
 ## Runtimes
 
-| Tool | Version |
-| --- | --- |
-| Java (JDK) | 25 (LTS) |
-| Node.js | 24.21.0 |
-| pnpm | 12.3.4 |
+- Java 25 (LTS)
+- Node.js 24
+- pnpm 12
 
-## Backend: `atlas_backend`
+Gradle comes from the wrapper. Library and plugin versions are defined in `atlas_backend/build.gradle` and `atlas_ui/package.json`, which are the source of truth.
 
-- Build tool: Gradle 9.8.2 (Groovy DSL, via wrapper `./gradlew`)
-- Spring Boot 4.1.1
-- Group: `com.tglanz.atlas`; base package: `com.tglanz.atlas.backend`
-- Persistence: Spring Data JPA (Hibernate), Flyway; SQLite (default, xerial `sqlite-jdbc` 3.53.4.0) or PostgreSQL via the `postgres` profile
-- Formatter: Spotless with google-java-format (`./gradlew spotlessApply`)
-- Lint: javac `-Xlint:all -Werror`
-- Architecture rules: ArchUnit 1.5.1 (`ArchitectureTest`)
-- Security: Spring Security (session login, CSRF cookie, BCrypt)
-- Validation: Spring Boot validation starter
-- Tests: JUnit Platform, Spring Boot test starters, in-memory SQLite
+## Backend
 
-Commands, from `atlas_backend/`:
+- Gradle builds the project. Flyway runs database migrations on startup.
+- Spotless formats the code. The compiler treats warnings as errors.
+- ArchUnit tests enforce the layering rules in `atlas_backend/ARCHITECTURE.md`.
 
-| Purpose | Command |
-| --- | --- |
-| Build and test | `./gradlew build` |
-| Run tests | `./gradlew test` |
-| Run a single test class | `./gradlew test --tests 'com.tglanz.atlas.backend.SomeTest'` |
-| Compile only | `./gradlew compileJava compileTestJava` |
-| Run the application | `./gradlew bootRun` |
-| Reset the local database | delete `atlas.db` (see the backend README) |
-| Format | `./gradlew spotlessApply` |
-| Check formatting | `./gradlew spotlessCheck` |
-| Build executable jar | `./gradlew bootJar` |
-| Clean | `./gradlew clean` |
-| List dependencies | `./gradlew dependencies` |
+## Frontend
 
-## Frontend: `atlas_ui`
+- Vite builds and serves the app. Vitest runs tests.
+- Prettier formats the code. oxlint lints it, including the import rules in `atlas_ui/ARCHITECTURE.md`.
 
-- Package manager: pnpm
-- Build tool: Vite 8.3.4
-- Language: TypeScript 6.0.3
-- Libraries:
-  - React 19.3.1, React DOM 19.3.1
-  - React Router 8.5.0
-  - TanStack Query 5.104.5
-  - Zustand 5.0.15
-  - Mantine 9.7.3 (`@mantine/core`, `@mantine/hooks`)
-  - Tabler Icons 3.49.0 (`@tabler/icons-react`)
-- Lint: oxlint 1.89.0
-- Formatter: Prettier 3.9.10 (single quotes)
-- Plugin: `@vitejs/plugin-react` 6.1.2
+## How the pieces fit
 
-Commands, from `atlas_ui/`:
+- The backend build also builds the frontend and packages it into the backend jar. This needs Node and pnpm, unless the build is told to skip the UI.
+- In development the frontend runs on its own dev server and proxies `/api` to the backend.
 
-| Purpose | Command |
-| --- | --- |
-| Install dependencies | `pnpm install` |
-| Dev server | `pnpm dev` |
-| Type-check and build | `pnpm build` |
-| Lint | `pnpm lint` |
-| Format | `pnpm format` |
-| Check formatting | `pnpm format:check` |
-| Preview production build | `pnpm preview` |
-| Add a dependency | `pnpm add <package>` |
-| Add a dev dependency | `pnpm add -D <package>` |
+## Commands
 
-Test runner: Vitest 5.0.5 (`pnpm test`).
+Build, test, format, lint and run commands are in the README of each project.
 
 ## Dev container
 
-`.devcontainer/devcontainer.json` provisions Java 25 (Temurin), Node.js 24.21.0, pnpm 12.3.4 and the GitHub CLI, installs frontend dependencies, and compiles the backend. Gradle comes from the wrapper.
+`.devcontainer/devcontainer.json` provides the runtimes above and prepares both projects.
 
 ## CI
 
-`.github/workflows/ci.yml` builds and tests both projects on push to `main` and on pull requests.
-
-The backend serves the UI. `./gradlew bootJar` (and `build`) runs `pnpm install` and `pnpm build` in `atlas_ui` and packages `dist` into the jar, so Node and pnpm are required unless `-PskipUi` is passed. The built UI is served from the same origin as `/api`; unknown paths without a file extension get `index.html` so client-side routes work.
+`.github/workflows/ci.yml` builds and tests both projects on pushes to `main` and on pull requests.

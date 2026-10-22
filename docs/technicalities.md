@@ -12,5 +12,4 @@ Publishing the new draft makes it the current revision. Previous published revis
 
 Routines reference exact published Movement revisions, so publishing a new revision does not alter existing Routines.
 
-A revision's Illustrations are part of the revision and are immutable once it is published, so a Routine always shows the same Illustrations. Changing a Movement's Illustrations requires a new revision.
-
+A revision's Illustrations are part of the revision and are immutable once it is published. This is what makes a Routine always show the same Illustrations. Changing a Movement's Illustrations therefore requires a new revision.
