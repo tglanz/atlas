@@ -40,8 +40,6 @@ class UserPersistenceAdapter implements UserRepository {
     entity.email = user.email();
     entity.passwordHash = user.passwordHash();
     entity.role = user.role();
-    entity.preferredAvatarId =
-        user.preferredAvatarId() == null ? null : user.preferredAvatarId().toString();
     entity.createdAt = user.createdAt();
     try {
       jpa.saveAndFlush(entity);
@@ -54,12 +52,6 @@ class UserPersistenceAdapter implements UserRepository {
   }
 
   private User toDomain(UserEntity e) {
-    return new User(
-        UUID.fromString(e.id),
-        e.email,
-        e.passwordHash,
-        e.role,
-        e.preferredAvatarId == null ? null : UUID.fromString(e.preferredAvatarId),
-        e.createdAt);
+    return new User(UUID.fromString(e.id), e.email, e.passwordHash, e.role, e.createdAt);
   }
 }

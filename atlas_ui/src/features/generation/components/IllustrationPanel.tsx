@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Alert,
   Badge,
   Button,
@@ -7,109 +8,62 @@ import {
   Group,
   Image,
   Select,
+  SegmentedControl,
   Stack,
   Text,
   Textarea,
   Title,
 } from '@mantine/core';
+import { IconTrash } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { useAvatars } from '@/features/avatars';
-import type { Avatar } from '@/features/avatars';
 import { QueryBoundary } from '@/shared/ui';
-import type { GenerationRequest, Stage } from '../api';
+import type { GenerationRequest } from '../api';
+import type { StageDraft } from '../queries';
 import {
   useClearIllustrations,
   useGenerations,
   useRequestGeneration,
   useRetryGeneration,
-  useUploadIllustration,
   useViewpoints,
 } from '../queries';
 
+const IMAGE_TYPES = 'image/png,image/jpeg,image/webp';
+
+type Mode = 'avatar' | 'static';
+
 type Props = {
   movementKey: string;
-  /** The draft's Illustrations by Avatar id. */
-  illustrations: Record<string, { url: string }[]>;
-  /** Called after Illustrations of the draft changed, so the draft can be reloaded. */
+  /** Urls of the draft's Illustrations, in order. */
+  illustrations: string[];
+  /** Called after the draft's Illustrations changed, so the draft can be reloaded. */
   onChanged: () => void;
 };
 
-/** Maintainer tools to add Illustrations to a draft: upload a picture or generate a sequence. */
+/**
+ * Maintainer tools to set a draft's Illustrations. The data model allows any mix of stages; the UI
+ * offers one pattern per movement: all stages generated with an avatar, or all static images.
+ * Either way the whole sequence is replaced.
+ */
 export function IllustrationPanel({
   movementKey,
   illustrations,
   onChanged,
 }: Props) {
-  const avatars = useAvatars();
+  const clear = useClearIllustrations(movementKey);
+
   return (
     <Stack gap="lg">
       <Title order={2}>Illustrations</Title>
-      <QueryBoundary query={avatars}>
-        {(items) =>
-          items.length === 0 ? (
-            <Alert color="blue">
-              Create an avatar in Illustration settings first.
-            </Alert>
-          ) : (
-            <>
-              <Sequences
-                movementKey={movementKey}
-                avatars={items}
-                illustrations={illustrations}
-                onChanged={onChanged}
-              />
-              <Upload
-                movementKey={movementKey}
-                avatars={items}
-                onChanged={onChanged}
-              />
-              <Generate
-                movementKey={movementKey}
-                avatars={items}
-                onChanged={onChanged}
-              />
-            </>
-          )
-        }
-      </QueryBoundary>
-    </Stack>
-  );
-}
-
-function Sequences({
-  movementKey,
-  avatars,
-  illustrations,
-  onChanged,
-}: Props & { avatars: Avatar[] }) {
-  const clear = useClearIllustrations(movementKey);
-  const entries = Object.entries(illustrations);
-  if (entries.length === 0)
-    return <Text c="dimmed">No illustrations on this draft yet.</Text>;
-
-  return (
-    <Stack gap="sm">
-      {entries.map(([avatarId, sequence]) => (
-        <Card key={avatarId} withBorder padding="sm">
-          <Group justify="space-between" mb="xs">
-            <Text fw={600}>
-              {avatars.find((a) => a.id === avatarId)?.name ?? 'Unknown avatar'}
-            </Text>
-            <Button
-              size="compact-xs"
-              variant="subtle"
-              color="red"
-              loading={clear.isPending}
-              onClick={() => clear.mutate(avatarId, { onSuccess: onChanged })}
-            >
-              Remove all
-            </Button>
-          </Group>
+      {illustrations.length === 0 ? (
+        <Text c="dimmed">No illustrations on this draft yet.</Text>
+      ) : (
+        <Stack gap="xs">
           <Group gap="sm">
-            {sequence.map((illustration, index) => (
+            {illustrations.map((url, index) => (
               <Image
                 key={index}
-                src={illustration.url}
+                src={url}
                 alt={`Step ${index + 1}`}
                 h={90}
                 w="auto"
@@ -117,95 +71,39 @@ function Sequences({
               />
             ))}
           </Group>
-        </Card>
-      ))}
+          <Button
+            size="compact-xs"
+            variant="subtle"
+            color="red"
+            w="fit-content"
+            loading={clear.isPending}
+            onClick={() => clear.mutate(undefined, { onSuccess: onChanged })}
+          >
+            Remove all
+          </Button>
+        </Stack>
+      )}
+      <Producer movementKey={movementKey} onChanged={onChanged} />
     </Stack>
   );
 }
 
-const avatarOptions = (avatars: Avatar[]) =>
-  avatars.map((a) => ({
-    value: a.id,
-    label: a.isDefault ? `${a.name} (default)` : a.name,
-  }));
+const emptyStage = (): StageDraft => ({ instructions: '', file: null });
 
-function Upload({
+function Producer({
   movementKey,
-  avatars,
   onChanged,
-}: Pick<Props, 'movementKey' | 'onChanged'> & { avatars: Avatar[] }) {
-  const upload = useUploadIllustration(movementKey);
-  const [avatarId, setAvatarId] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-
-  return (
-    <Stack gap="xs">
-      <Title order={3} size="h4">
-        Upload a picture
-      </Title>
-      <Group align="flex-end">
-        <Select
-          label="Avatar"
-          data={avatarOptions(avatars)}
-          value={avatarId}
-          onChange={setAvatarId}
-        />
-        <FileInput
-          label="Picture"
-          accept="image/png,image/jpeg,image/webp"
-          value={file}
-          onChange={setFile}
-        />
-        <Button
-          disabled={!avatarId || !file}
-          loading={upload.isPending}
-          onClick={() =>
-            avatarId &&
-            file &&
-            upload.mutate(
-              { avatarId, file },
-              {
-                onSuccess: () => {
-                  setFile(null);
-                  onChanged();
-                },
-              },
-            )
-          }
-        >
-          Upload
-        </Button>
-      </Group>
-      {upload.isError && <Alert color="red">{upload.error.message}</Alert>}
-    </Stack>
-  );
-}
-
-/** One line per stage. A line that is a web address is a reference picture; others are words. */
-function parseStages(text: string): Stage[] {
-  return text
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) =>
-      /^https?:\/\//.test(line)
-        ? { description: '', referenceUrl: line }
-        : { description: line, referenceUrl: '' },
-    );
-}
-
-function Generate({
-  movementKey,
-  avatars,
-  onChanged,
-}: Pick<Props, 'movementKey' | 'onChanged'> & { avatars: Avatar[] }) {
+}: Pick<Props, 'movementKey' | 'onChanged'>) {
+  const avatars = useAvatars();
   const viewpoints = useViewpoints();
   const generations = useGenerations(movementKey);
   const request = useRequestGeneration(movementKey);
   const retry = useRetryGeneration(movementKey);
+
+  const [mode, setMode] = useState<Mode>('avatar');
   const [avatarId, setAvatarId] = useState<string | null>(null);
   const [viewpointId, setViewpointId] = useState<string | null>(null);
-  const [stages, setStages] = useState('');
+  const [stages, setStages] = useState<StageDraft[]>([emptyStage()]);
 
   // Reload the draft whenever another request has finished successfully.
   const succeeded =
@@ -216,61 +114,159 @@ function Generate({
     seen.current = succeeded;
   }, [succeeded, onChanged]);
 
-  const parsed = parseStages(stages);
+  function changeStage(index: number, change: Partial<StageDraft>) {
+    setStages((all) =>
+      all.map((s, i) => (i === index ? { ...s, ...change } : s)),
+    );
+  }
+
+  const stagesReady =
+    stages.length > 0 &&
+    stages.every((s) =>
+      mode === 'static' ? s.file !== null : s.instructions.trim() || s.file,
+    );
+  const canSubmit = Boolean(
+    stagesReady && (mode === 'static' || (avatarId && viewpointId)),
+  );
+
+  function submit() {
+    const form =
+      mode === 'static'
+        ? { mode, stages }
+        : avatarId && viewpointId
+          ? { mode, avatarId, viewpointId, stages }
+          : null;
+    if (!form) return;
+    request.mutate(form, { onSuccess: () => setStages([emptyStage()]) });
+  }
 
   return (
-    <Stack gap="xs">
+    <Stack gap="sm">
       <Title order={3} size="h4">
-        Generate a sequence
+        Set illustrations
       </Title>
       <Text size="sm" c="dimmed">
-        Replaces the avatar&apos;s current illustrations on this draft.
+        One picture per stage. This replaces the draft&apos;s current
+        illustrations.
       </Text>
-      <Group align="flex-end">
-        <Select
-          label="Avatar"
-          data={avatarOptions(avatars)}
-          value={avatarId}
-          onChange={setAvatarId}
-        />
-        <Select
-          label="Viewpoint"
-          data={(viewpoints.data ?? []).map((v) => ({
-            value: v.id,
-            label: v.name,
-          }))}
-          value={viewpointId}
-          onChange={setViewpointId}
-          placeholder={
-            viewpoints.data?.length === 0
-              ? 'Create a viewpoint first'
-              : undefined
-          }
-        />
-      </Group>
-      <Textarea
-        label="Stages"
-        description="One per line, in order: describe the stage in words, or paste a reference picture address."
-        autosize
-        minRows={3}
-        value={stages}
-        onChange={(e) => setStages(e.currentTarget.value)}
-      />
-      <Button
+      <SegmentedControl
         w="fit-content"
-        disabled={!avatarId || !viewpointId || parsed.length === 0}
-        loading={request.isPending}
-        onClick={() =>
-          avatarId &&
-          viewpointId &&
-          request.mutate(
-            { avatarId, viewpointId, stages: parsed },
-            { onSuccess: () => setStages('') },
-          )
-        }
-      >
-        Generate
-      </Button>
+        value={mode}
+        onChange={(value) => {
+          setMode(value as Mode);
+          setStages([emptyStage()]);
+        }}
+        data={[
+          { value: 'avatar', label: 'Generate with an avatar' },
+          { value: 'static', label: 'Use my own images' },
+        ]}
+      />
+
+      {mode === 'avatar' && (
+        <QueryBoundary query={avatars}>
+          {(avatarItems) => (
+            <QueryBoundary query={viewpoints}>
+              {(viewpointItems) =>
+                avatarItems.length === 0 || viewpointItems.length === 0 ? (
+                  <Alert color="blue">
+                    Create at least one avatar and one viewpoint in Illustration
+                    settings first.
+                  </Alert>
+                ) : (
+                  <Group>
+                    <Select
+                      label="Avatar"
+                      data={avatarItems.map((a) => ({
+                        value: a.id,
+                        label: a.name,
+                      }))}
+                      value={avatarId}
+                      onChange={setAvatarId}
+                    />
+                    <Select
+                      label="Viewpoint"
+                      data={viewpointItems.map((v) => ({
+                        value: v.id,
+                        label: v.name,
+                      }))}
+                      value={viewpointId}
+                      onChange={setViewpointId}
+                    />
+                  </Group>
+                )
+              }
+            </QueryBoundary>
+          )}
+        </QueryBoundary>
+      )}
+
+      {stages.map((stage, index) => (
+        <Card key={index} withBorder padding="sm">
+          <Group align="flex-start" wrap="nowrap">
+            <Text fw={600} w={60}>
+              Stage {index + 1}
+            </Text>
+            <Stack gap="xs" style={{ flex: 1 }}>
+              {mode === 'avatar' && (
+                <Textarea
+                  aria-label={`Stage ${index + 1} instructions`}
+                  placeholder="Instructions, e.g. chest an inch above the floor"
+                  autosize
+                  minRows={2}
+                  value={stage.instructions}
+                  onChange={(e) =>
+                    changeStage(index, { instructions: e.currentTarget.value })
+                  }
+                />
+              )}
+              <FileInput
+                aria-label={
+                  mode === 'avatar'
+                    ? `Stage ${index + 1} reference image`
+                    : `Stage ${index + 1} image`
+                }
+                placeholder={
+                  mode === 'avatar'
+                    ? 'Reference image (optional if instructions)'
+                    : 'Image'
+                }
+                accept={IMAGE_TYPES}
+                clearable
+                value={stage.file}
+                onChange={(file) => changeStage(index, { file })}
+              />
+            </Stack>
+            <ActionIcon
+              variant="subtle"
+              color="red"
+              aria-label={`Remove stage ${index + 1}`}
+              disabled={stages.length === 1}
+              onClick={() =>
+                setStages((all) => all.filter((_, i) => i !== index))
+              }
+            >
+              <IconTrash size={16} />
+            </ActionIcon>
+          </Group>
+        </Card>
+      ))}
+      <Group>
+        <Button
+          variant="default"
+          size="xs"
+          disabled={stages.length >= 20}
+          onClick={() => setStages((all) => [...all, emptyStage()])}
+        >
+          Add stage
+        </Button>
+        <Button
+          disabled={!canSubmit}
+          loading={request.isPending}
+          onClick={submit}
+        >
+          {mode === 'avatar' ? 'Generate' : 'Use these images'}
+        </Button>
+      </Group>
       {request.isError && <Alert color="red">{request.error.message}</Alert>}
 
       {generations.data && generations.data.length > 0 && (
@@ -280,7 +276,6 @@ function Generate({
             <RequestRow
               key={r.id}
               request={r}
-              avatars={avatars}
               onRetry={() => retry.mutate(r.id)}
             />
           ))}
@@ -297,13 +292,20 @@ const statusColor = {
   FAILED: 'red',
 } as const;
 
+function describeStages(request: GenerationRequest): string {
+  const generated = request.stages.filter((s) => s.avatar).length;
+  const fixed = request.stages.length - generated;
+  const parts = [];
+  if (generated) parts.push(`${generated} generated`);
+  if (fixed) parts.push(`${fixed} static`);
+  return parts.join(', ');
+}
+
 function RequestRow({
   request,
-  avatars,
   onRetry,
 }: {
   request: GenerationRequest;
-  avatars: Avatar[];
   onRetry: () => void;
 }) {
   return (
@@ -312,10 +314,8 @@ function RequestRow({
         {request.status.toLowerCase()}
       </Badge>
       <Text size="sm">
-        {avatars.find((a) => a.id === request.avatarId)?.name ??
-          'Unknown avatar'}
-        , {request.stages.length} stage{request.stages.length === 1 ? '' : 's'},{' '}
-        {new Date(request.createdAt).toLocaleTimeString()}
+        {new Date(request.createdAt).toLocaleTimeString()}:{' '}
+        {describeStages(request)}
       </Text>
       {request.failureReason && (
         <Text size="sm" c="red">

@@ -10,7 +10,6 @@ import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,14 +21,11 @@ class AuthController {
 
   record RegisterRequest(@NotBlank String email, @NotBlank String password) {}
 
-  record UserResponse(UUID id, String email, String role, UUID preferredAvatarId) {
+  record UserResponse(UUID id, String email, String role) {
     static UserResponse from(User user) {
-      return new UserResponse(
-          user.id(), user.email(), user.role().name(), user.preferredAvatarId());
+      return new UserResponse(user.id(), user.email(), user.role().name());
     }
   }
-
-  record PreferredAvatarRequest(UUID avatarId) {}
 
   private final AccountUseCase accounts;
 
@@ -46,12 +42,5 @@ class AuthController {
   @GetMapping("/me")
   UserResponse me(Principal principal) {
     return UserResponse.from(accounts.get(UUID.fromString(principal.getName())));
-  }
-
-  @PutMapping("/me/avatar")
-  UserResponse setPreferredAvatar(
-      Principal principal, @RequestBody PreferredAvatarRequest request) {
-    return UserResponse.from(
-        accounts.setPreferredAvatar(UUID.fromString(principal.getName()), request.avatarId()));
   }
 }

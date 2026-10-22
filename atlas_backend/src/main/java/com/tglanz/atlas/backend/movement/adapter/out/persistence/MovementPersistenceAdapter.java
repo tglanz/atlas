@@ -8,9 +8,7 @@ import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.movement.domain.MovementLink;
 import com.tglanz.atlas.backend.movement.domain.RevisionStatus;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -89,17 +87,11 @@ class MovementPersistenceAdapter implements MovementRepository {
       entity.links.add(row);
     }
     entity.illustrations.clear();
-    movement
-        .illustrations()
-        .forEach(
-            (avatarId, list) -> {
-              for (Illustration illustration : list) {
-                var row = new MovementRevisionEntity.IllustrationRow();
-                row.avatarId = avatarId.toString();
-                row.url = illustration.url();
-                entity.illustrations.add(row);
-              }
-            });
+    for (Illustration illustration : movement.illustrations()) {
+      var row = new MovementRevisionEntity.IllustrationRow();
+      row.url = illustration.url();
+      entity.illustrations.add(row);
+    }
     jpa.saveAndFlush(entity);
   }
 
@@ -110,12 +102,8 @@ class MovementPersistenceAdapter implements MovementRepository {
     }
     MovementContent content =
         new MovementContent(e.name, e.description, List.copyOf(e.cues), Set.copyOf(e.tags), links);
-    Map<UUID, List<Illustration>> illustrations = new LinkedHashMap<>();
-    for (var row : e.illustrations) {
-      illustrations
-          .computeIfAbsent(UUID.fromString(row.avatarId), id -> new ArrayList<>())
-          .add(new Illustration(row.url));
-    }
+    List<Illustration> illustrations =
+        e.illustrations.stream().map(row -> new Illustration(row.url)).toList();
     return Movement.restore(
         new MovementKey(e.movementKey),
         e.revision,

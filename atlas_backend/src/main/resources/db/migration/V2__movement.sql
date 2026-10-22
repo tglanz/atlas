@@ -35,7 +35,6 @@ CREATE TABLE movement_link (
 CREATE TABLE movement_illustration (
     revision_id VARCHAR(36) NOT NULL REFERENCES movement_revision (id) ON DELETE CASCADE,
     position INTEGER NOT NULL,
-    avatar_id VARCHAR(36) NOT NULL REFERENCES avatar (id),
     url VARCHAR(500) NOT NULL,
     PRIMARY KEY (revision_id, position)
 );

@@ -2,7 +2,6 @@
 
 - **Email**: Unique, case-insensitive.
 - **Role**: Practitioner or Maintainer. The first registered user is a Maintainer.
-- **Preferred Avatar**: The Avatar whose illustrations the user wants to see. Optional.
 
 # Movement
 
@@ -12,49 +11,54 @@
 - **Published at**: Publication time, present only when Published.
 - **Name**: String.
 - **Description**: Text.
-- **Illustrations**: Mapping from Avatar to an ordered collection of Illustrations.
+- **Illustrations**: Ordered collection of Illustrations.
 - **Cues**: Ordered collection of performance instructions.
 - **Tags**: Set of keywords.
 - **Links**: Collection of directed links, each containing a target Movement Key and relationship type.
 
 # Illustration
 
-An Illustration is a picture of a Movement. A Movement revision's Illustrations for an Avatar are ordered, for example the bottom and top phases of a push-up. Illustrations are part of the revision and are frozen once it is published.
-
-Illustrations get onto a Movement draft in two ways:
-- Generated: a Generation Request for an Avatar produces one Illustration per stage.
-- Uploaded: a picture is attached as is to an Avatar's sequence.
+An Illustration is a picture of a Movement. A Movement revision has an ordered sequence of Illustrations, for example the bottom and top phases of a push-up. Illustrations are part of the revision and are frozen once it is published.
 
 All pictures are stored in S3.
 
-## Avatar
+## Illustrations Generation Spec
 
-A kind of figure the user can choose to see, such as a sketch or a cartoon figure.
+Describes how a Movement draft's whole Illustration sequence is produced.
 
-- **Name**: Unique string.
-- **Specification**: Text used to generate Illustrations with this Avatar's look.
-- **Default**: Exactly one Avatar is the default. Defining an Avatar does not generate Illustrations.
+- **Stages**: Ordered collection of Stage Specs. One Illustration results per Stage Spec, in order.
 
-A user sees the Illustrations of their preferred Avatar. Visitors without a preference, and Movements with no Illustrations for the preferred Avatar, use the default Avatar.
+A Stage Spec is one of:
+
+- **Avatar Image Spec**: a picture generated from an Avatar, a Viewpoint, and Instructions, a reference Image, or both.
+  - **Avatar**
+  - **Viewpoint**
+  - **Instructions**: Free text. Optional.
+  - **Reference image**: Optional.
+- **Static Image Spec**: an image used as is.
+  - **Image**
+
+The model does not require every Stage Spec of a sequence to be the same kind. The user interface offers one pattern per Movement: all stages generated with an Avatar, or all stages static images.
 
 ## Generation Request
 
-A request to generate an Avatar's Illustration sequence for an open Movement draft.
+A request to produce a Movement draft's Illustration sequence from an Illustrations Generation Spec.
 
 - **Draft**: The Movement draft it applies to.
-- **Avatar**: Whose look to use.
-- **Viewpoint**: The viewing angle to use.
-- **Stages**: Ordered collection of Stages.
+- **Spec**: The Illustrations Generation Spec.
 - **Status**: Pending, Running, Succeeded or Failed. A failed request records the reason and can be retried.
-- **Results**: The generated Illustrations, one per stage, in stage order. A successful request replaces the Avatar's sequence on the draft.
+- **Results**: The produced Illustrations, in stage order. A successful request replaces the draft's sequence.
 
-## Stage
+## Avatar
 
-One phase of the movement to illustrate, given as a description in words, a reference picture, or both. A Stage is generation input only and is not stored on an Illustration.
+The look that generated Illustrations should have, such as a sketch or a cartoon figure. Avatars are used only to generate Illustrations; viewers do not see or choose them.
+
+- **Name**: Unique string.
+- **Specification**: Text used to generate Illustrations with this look.
 
 ## Viewpoint
 
-A predefined way to specify the viewing angle when generating Illustrations. It is not stored on an Illustration.
+A predefined way to specify the viewing angle when generating an Illustration. It is not stored on an Illustration.
 
 - **Name**: Unique string.
 - **Specification**: Text describing the viewing angle.

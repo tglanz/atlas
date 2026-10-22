@@ -19,8 +19,7 @@ Session cookie based. Unsafe requests (POST, PUT, DELETE) must send the `XSRF-TO
 | `POST /auth/register` | Public | JSON `email`, `password` (8 to 72 characters). Returns the user. |
 | `POST /auth/login` | Public | Form fields `email`, `password`. Returns 204 and sets the session cookie, or 401. |
 | `POST /auth/logout` | Authenticated | Ends the session. Returns 204. |
-| `GET /auth/me` | Authenticated | Current user: `id`, `email`, `role`, `preferredAvatarId`. |
-| `PUT /auth/me/avatar` | Authenticated | JSON `avatarId` (null clears). Sets the preferred Avatar. Unknown Avatar returns 400. |
+| `GET /auth/me` | Authenticated | Current user: `id`, `email`, `role`. |
 
 ## Movements
 
@@ -38,22 +37,25 @@ Session cookie based. Unsafe requests (POST, PUT, DELETE) must send the `XSRF-TO
 
 Movement content: `name`, `description`, `cues[]`, `tags[]`, `links[]` (`target`, `relationType`).
 
+Responses carry `illustrations`: the ordered urls of the revision's Illustrations. In the list, `representativeIllustration` is the first one.
+
 Draft Illustrations (Maintainer):
 
 | Method and path | Purpose |
 | --- | --- |
-| `POST /movements/{key}/draft/generations` | Request generation. Body: `avatarId`, `viewpointId`, `stages[]` (`description` and/or `referenceUrl`). Returns 202 with the request. |
+| `POST /media` | Upload a picture (multipart `file`; PNG, JPEG or WebP up to 10 MB). Returns its `url`, to use as an image in a spec. |
+| `POST /movements/{key}/draft/generations` | Request production of the draft's Illustration sequence from a spec. Returns 202 with the request. |
 | `GET /movements/{key}/draft/generations` | Generation requests, newest first |
 | `GET /movements/{key}/draft/generations/{id}` | One request: `status`, `failureReason`, `results[]` |
 | `POST /movements/{key}/draft/generations/{id}/retry` | Run a failed request again |
-| `POST /movements/{key}/draft/avatars/{avatarId}/illustrations` | Upload a picture (multipart `file`; PNG, JPEG or WebP up to 10 MB). Appended to the Avatar's sequence. |
-| `DELETE /movements/{key}/draft/avatars/{avatarId}/illustrations` | Remove the Avatar's whole sequence from the draft |
+| `DELETE /movements/{key}/draft/illustrations` | Remove all Illustrations from the draft |
 
-Generation runs in the background. A request fails if the draft it was made for is no longer open. Storage and generation are currently stubs: every stored or generated picture gets the url `atlas.storage.stub-url`.
+The generation body is `{ "stages": [ ... ] }`, 1 to 20 stages. Each stage sets exactly one of:
 
-Responses:
-- Reads by viewers (`GET /movements`, `/movements/{key}`, `/movements/{key}/revisions/{revision}`) show the Illustrations of one Avatar: `avatarId` and an ordered `illustrations[]`. The Avatar is the signed-in user's preferred Avatar, or the default Avatar for visitors and when the preferred Avatar has no Illustrations in that revision. In the list, `representativeIllustration` is the first of them.
-- Maintainer endpoints (`GET /movements/{key}/draft` and all writes) return `illustrations` grouped by Avatar id.
+- `avatar`: `avatarId`, `viewpointId`, and `instructions` and/or `referenceImageUrl`.
+- `staticImage`: `imageUrl`.
+
+Stages of both kinds may be mixed in one request. One Illustration results per stage, and a successful run replaces the draft's sequence. A request fails if the draft it was made for is no longer open. Generation runs in the background. Storage and generation are currently stubs: every stored or generated picture gets the url `atlas.storage.stub-url`.
 
 Rules:
 - A key is lowercase letters, digits and hyphens.
@@ -63,15 +65,12 @@ Rules:
 
 ## Avatars and Viewpoints
 
-`/avatars` and `/viewpoints` have the same shape. Viewpoints are Maintainer-only, including reads.
+Maintainer only, including reads. `/avatars` and `/viewpoints` have the same shape.
 
-| Method and path | Access |
-| --- | --- |
-| `GET /avatars`, `GET /avatars/{id}` | Public (specification returned to Maintainers only) |
-| `POST /avatars`, `PUT /avatars/{id}`, `DELETE /avatars/{id}` | Maintainer |
-| `PUT /avatars/{id}/default` | Maintainer |
+- `GET /avatars`, `GET /avatars/{id}`
+- `POST /avatars`, `PUT /avatars/{id}`, `DELETE /avatars/{id}`
 
-Body: `name` (unique), `specification`. Avatars also return `isDefault`. The first Avatar created is the default; `PUT /avatars/{id}/default` moves it. The default Avatar cannot be deleted, and an Avatar with Movement illustrations cannot be deleted (409).
+Body: `name` (unique), `specification`. An Avatar or Viewpoint used by a generation request cannot be deleted (409).
 
 ## Routines
 
@@ -89,4 +88,4 @@ Body: `name`, `description`, `sections[]` of `name`, `description`, `movements[]
 
 ## Not yet available
 
-Illustration generation and upload, and illustration write endpoints.
+Real picture storage and generation (both are stubs), and removing or reordering a single Illustration.

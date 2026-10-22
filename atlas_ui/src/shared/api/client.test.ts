@@ -37,4 +37,18 @@ describe('apiFetch', () => {
     stubFetch(new Response(null, { status: 204 }));
     expect(await apiFetch('/auth/logout')).toBeUndefined();
   });
+
+  it('refreshes the CSRF token and retries once after a 403 on an unsafe request', async () => {
+    vi.stubGlobal('document', { cookie: 'XSRF-TOKEN=abc' });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(null, { status: 403 }))
+      .mockResolvedValueOnce(new Response(null, { status: 401 })) // the token refresh
+      .mockResolvedValueOnce(Response.json({ ok: true }));
+    vi.stubGlobal('fetch', fetchMock);
+    expect(await apiFetch('/movements', { method: 'POST', body: {} })).toEqual({
+      ok: true,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
 });

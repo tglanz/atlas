@@ -21,9 +21,6 @@ class UserEntity {
   @Enumerated(EnumType.STRING)
   Role role;
 
-  @Column(name = "preferred_avatar_id")
-  String preferredAvatarId;
-
   @Column(name = "created_at")
   Instant createdAt;
 }

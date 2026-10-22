@@ -2,8 +2,8 @@ package com.tglanz.atlas.backend.avatar.domain;
 
 import java.util.UUID;
 
-/** A kind of figure users can choose to see. Exactly one Avatar is the default. */
-public record Avatar(UUID id, String name, String specification, boolean isDefault) {
+/** A look for generated Illustrations, described by a specification used to generate them. */
+public record Avatar(UUID id, String name, String specification) {
   public Avatar {
     if (id == null) {
       throw new IllegalArgumentException("Id is required");
@@ -17,15 +17,11 @@ public record Avatar(UUID id, String name, String specification, boolean isDefau
     name = name.strip();
   }
 
-  public static Avatar create(String name, String specification, boolean isDefault) {
-    return new Avatar(UUID.randomUUID(), name, specification, isDefault);
+  public static Avatar create(String name, String specification) {
+    return new Avatar(UUID.randomUUID(), name, specification);
   }
 
   public Avatar edit(String newName, String newSpecification) {
-    return new Avatar(id, newName, newSpecification, isDefault);
-  }
-
-  public Avatar withDefault(boolean value) {
-    return new Avatar(id, name, specification, value);
+    return new Avatar(id, newName, newSpecification);
   }
 }

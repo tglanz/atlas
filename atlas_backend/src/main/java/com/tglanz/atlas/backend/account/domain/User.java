@@ -4,13 +4,7 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-public record User(
-    UUID id,
-    String email,
-    String passwordHash,
-    Role role,
-    UUID preferredAvatarId,
-    Instant createdAt) {
+public record User(UUID id, String email, String passwordHash, Role role, Instant createdAt) {
   private static final Pattern EMAIL = Pattern.compile("[^@\\s]+@[^@\\s]+\\.[^@\\s]+");
   private static final int MAX_EMAIL_LENGTH = 255;
 
@@ -30,10 +24,6 @@ public record User(
       throw new IllegalArgumentException("A valid email address is required");
     }
     return normalized;
-  }
-
-  public User withPreferredAvatar(UUID avatarId) {
-    return new User(id, email, passwordHash, role, avatarId, createdAt);
   }
 
   public boolean isMaintainer() {

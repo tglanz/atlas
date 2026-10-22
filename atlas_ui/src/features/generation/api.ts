@@ -3,16 +3,23 @@ import { apiFetch } from '@/shared/api';
 export type Viewpoint = { id: string; name: string; specification: string };
 export type ViewpointInput = { name: string; specification: string };
 
-export type GenerationStatus = 'PENDING' | 'RUNNING' | 'SUCCEEDED' | 'FAILED';
+/** How one Illustration is produced. Exactly one of the two fields is set. */
+export type StageSpec =
+  | {
+      avatar: {
+        avatarId: string;
+        viewpointId: string;
+        instructions?: string;
+        referenceImageUrl?: string;
+      };
+    }
+  | { staticImage: { imageUrl: string } };
 
-/** A stage is described in words, by a reference picture url, or both. */
-export type Stage = { description: string; referenceUrl: string };
+export type GenerationStatus = 'PENDING' | 'RUNNING' | 'SUCCEEDED' | 'FAILED';
 
 export type GenerationRequest = {
   id: string;
-  avatarId: string;
-  viewpointId: string;
-  stages: Stage[];
+  stages: Partial<{ avatar: unknown; staticImage: unknown }>[];
   status: GenerationStatus;
   failureReason: string | null;
   results: string[];
@@ -30,18 +37,27 @@ export const updateViewpoint = (id: string, input: ViewpointInput) =>
 export const deleteViewpoint = (id: string) =>
   apiFetch<void>(`/viewpoints/${id}`, { method: 'DELETE' });
 
+/** Stores a picture and returns its url, to use as an image in a spec. */
+export async function uploadMedia(file: File): Promise<string> {
+  const body = new FormData();
+  body.append('file', file);
+  const { url } = await apiFetch<{ url: string }>('/media', {
+    method: 'POST',
+    body,
+  });
+  return url;
+}
+
 const draftPath = (movementKey: string) => `/movements/${movementKey}/draft`;
 
 export const listGenerations = (movementKey: string) =>
   apiFetch<GenerationRequest[]>(`${draftPath(movementKey)}/generations`);
 
-export const requestGeneration = (
-  movementKey: string,
-  body: { avatarId: string; viewpointId: string; stages: Stage[] },
-) =>
+/** Produces the draft's whole Illustration sequence: one picture per stage. */
+export const requestGeneration = (movementKey: string, stages: StageSpec[]) =>
   apiFetch<GenerationRequest>(`${draftPath(movementKey)}/generations`, {
     method: 'POST',
-    body,
+    body: { stages },
   });
 
 export const retryGeneration = (movementKey: string, id: string) =>
@@ -52,26 +68,7 @@ export const retryGeneration = (movementKey: string, id: string) =>
     },
   );
 
-export function uploadIllustration(
-  movementKey: string,
-  avatarId: string,
-  file: File,
-) {
-  const body = new FormData();
-  body.append('file', file);
-  return apiFetch<{ url: string }>(
-    `${draftPath(movementKey)}/avatars/${avatarId}/illustrations`,
-    {
-      method: 'POST',
-      body,
-    },
-  );
-}
-
-export const clearIllustrations = (movementKey: string, avatarId: string) =>
-  apiFetch<unknown>(
-    `${draftPath(movementKey)}/avatars/${avatarId}/illustrations`,
-    {
-      method: 'DELETE',
-    },
-  );
+export const clearIllustrations = (movementKey: string) =>
+  apiFetch<unknown>(`${draftPath(movementKey)}/illustrations`, {
+    method: 'DELETE',
+  });

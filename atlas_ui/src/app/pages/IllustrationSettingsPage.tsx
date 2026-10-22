@@ -1,4 +1,4 @@
-import { Stack, Tabs, Title } from '@mantine/core';
+import { Stack, Tabs, Text, Title } from '@mantine/core';
 import { AvatarSettings } from '@/features/avatars';
 import { ViewpointSettings } from '@/features/generation';
 
@@ -7,6 +7,10 @@ export function IllustrationSettingsPage() {
   return (
     <Stack gap="md">
       <Title order={1}>Illustration settings</Title>
+      <Text c="dimmed">
+        Avatars and viewpoints are what you choose from when generating a
+        movement&apos;s illustrations.
+      </Text>
       <Tabs defaultValue="avatars">
         <Tabs.List>
           <Tabs.Tab value="avatars">Avatars</Tabs.Tab>

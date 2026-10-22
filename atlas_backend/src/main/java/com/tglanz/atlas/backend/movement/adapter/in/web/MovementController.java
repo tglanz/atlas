@@ -6,9 +6,7 @@ import com.tglanz.atlas.backend.movement.domain.Movement;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.security.Principal;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,17 +32,13 @@ class MovementController {
 
   @GetMapping
   List<MovementSummaryResponse> search(
-      @RequestParam(required = false) String text,
-      @RequestParam(required = false) String tag,
-      Principal principal) {
-    return queries.search(text, tag, viewerId(principal)).stream()
-        .map(MovementSummaryResponse::from)
-        .toList();
+      @RequestParam(required = false) String text, @RequestParam(required = false) String tag) {
+    return queries.search(text, tag).stream().map(MovementSummaryResponse::from).toList();
   }
 
   @GetMapping("/{key}")
-  MovementResponse current(@PathVariable String key, Principal principal) {
-    return MovementResponse.from(queries.getCurrent(new MovementKey(key), viewerId(principal)));
+  MovementResponse current(@PathVariable String key) {
+    return MovementResponse.from(queries.getCurrent(new MovementKey(key)));
   }
 
   @GetMapping("/{key}/revisions")
@@ -55,50 +49,43 @@ class MovementController {
   }
 
   @GetMapping("/{key}/revisions/{revision}")
-  MovementResponse revision(
-      @PathVariable String key, @PathVariable int revision, Principal principal) {
-    return MovementResponse.from(
-        queries.getPublishedRevision(new MovementKey(key), revision, viewerId(principal)));
+  MovementResponse revision(@PathVariable String key, @PathVariable int revision) {
+    return MovementResponse.from(queries.getPublishedRevision(new MovementKey(key), revision));
   }
 
   @GetMapping("/{key}/draft")
-  MovementEditorResponse draft(@PathVariable String key) {
-    return MovementEditorResponse.from(queries.getDraft(new MovementKey(key)));
+  MovementResponse draft(@PathVariable String key) {
+    return MovementResponse.from(queries.getDraft(new MovementKey(key)));
   }
 
   @PostMapping
-  ResponseEntity<MovementEditorResponse> create(@Valid @RequestBody CreateMovementRequest request) {
+  ResponseEntity<MovementResponse> create(@Valid @RequestBody CreateMovementRequest request) {
     Movement draft =
         commands.createDraft(new MovementKey(request.key()), request.content().toContent());
     return ResponseEntity.created(URI.create("/api/movements/" + request.key() + "/draft"))
-        .body(MovementEditorResponse.from(draft));
+        .body(MovementResponse.from(draft));
   }
 
   @PutMapping("/{key}/draft")
-  MovementEditorResponse updateDraft(
+  MovementResponse updateDraft(
       @PathVariable String key, @Valid @RequestBody MovementRequest request) {
-    return MovementEditorResponse.from(
-        commands.updateDraft(new MovementKey(key), request.toContent()));
+    return MovementResponse.from(commands.updateDraft(new MovementKey(key), request.toContent()));
   }
 
   @PostMapping("/{key}/revisions")
-  ResponseEntity<MovementEditorResponse> createRevision(@PathVariable String key) {
+  ResponseEntity<MovementResponse> createRevision(@PathVariable String key) {
     Movement draft = commands.createRevision(new MovementKey(key));
     return ResponseEntity.created(URI.create("/api/movements/" + key + "/draft"))
-        .body(MovementEditorResponse.from(draft));
+        .body(MovementResponse.from(draft));
   }
 
   @PostMapping("/{key}/draft/publish")
-  MovementEditorResponse publish(@PathVariable String key) {
-    return MovementEditorResponse.from(commands.publish(new MovementKey(key)));
+  MovementResponse publish(@PathVariable String key) {
+    return MovementResponse.from(commands.publish(new MovementKey(key)));
   }
 
-  @DeleteMapping("/{key}/draft/avatars/{avatarId}/illustrations")
-  MovementEditorResponse clearIllustrations(@PathVariable String key, @PathVariable UUID avatarId) {
-    return MovementEditorResponse.from(commands.clearIllustrations(new MovementKey(key), avatarId));
-  }
-
-  private static String viewerId(Principal principal) {
-    return principal == null ? null : principal.getName();
+  @DeleteMapping("/{key}/draft/illustrations")
+  MovementResponse clearIllustrations(@PathVariable String key) {
+    return MovementResponse.from(commands.clearIllustrations(new MovementKey(key)));
   }
 }

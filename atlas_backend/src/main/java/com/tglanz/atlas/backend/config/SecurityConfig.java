@@ -29,8 +29,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * {@code password}). Logout: {@code POST /api/auth/logout}. Unsafe requests must send the {@code
  * XSRF-TOKEN} cookie value in the {@code X-XSRF-TOKEN} header.
  *
- * <p>Public: the UI's static files, reading published movements and avatars (names only),
- * registering. Authenticated: routines and the current user. Maintainer: everything else.
+ * <p>Public: the UI's static files, reading published movements, registering. Authenticated:
+ * routines and the current user. Maintainer: everything else.
  */
 @Configuration
 class SecurityConfig {
@@ -75,13 +75,17 @@ class SecurityConfig {
             auth ->
                 auth.requestMatchers(HttpMethod.POST, "/api/auth/register")
                     .permitAll()
-                    .requestMatchers("/api/auth/me/**", "/api/auth/me", "/api/routines/**")
+                    .requestMatchers("/api/auth/me", "/api/routines/**")
                     .authenticated()
                     .requestMatchers(HttpMethod.GET, "/api/movements/*/draft/**")
                     .hasRole(MAINTAINER)
-                    .requestMatchers(HttpMethod.GET, "/api/movements/**", "/api/avatars/**")
+                    .requestMatchers(HttpMethod.GET, "/api/movements/**")
                     .permitAll()
-                    .requestMatchers("/api/movements/**", "/api/avatars/**", "/api/viewpoints/**")
+                    .requestMatchers(
+                        "/api/movements/**",
+                        "/api/avatars/**",
+                        "/api/viewpoints/**",
+                        "/api/media/**")
                     .hasRole(MAINTAINER)
                     .requestMatchers("/api/**")
                     .denyAll()

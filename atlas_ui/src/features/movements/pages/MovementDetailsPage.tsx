@@ -13,7 +13,7 @@ import {
 import { Link, useNavigate, useParams } from 'react-router';
 import { useCurrentUser } from '@/features/auth';
 import { QueryBoundary } from '@/shared/ui';
-import type { MovementDetails, MovementLink } from '../api';
+import type { Movement, MovementLink } from '../api';
 import {
   useCreateRevision,
   useDraft,
@@ -41,7 +41,7 @@ function MovementView({
   movement,
   historical,
 }: {
-  movement: MovementDetails;
+  movement: Movement;
   historical: boolean;
 }) {
   const user = useCurrentUser();

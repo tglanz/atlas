@@ -23,7 +23,6 @@ URL: `/movements/:key`
 
 - Data: Current published revision's name, description, illustrations, cues, tags, and linked Movements.
 - Actions: View illustrations, open linked Movements.
-- Illustrations shown are those of the user's preferred Avatar. Visitors without a preference, and Movements with no illustrations for the preferred Avatar, show the default Avatar's illustrations.
 - Practitioner actions: Add Movement to a Routine.
 - Maintainer actions: Edit draft, create revision, view Revision History.
 
@@ -31,8 +30,9 @@ URL: `/movements/:key`
 
 URLs: `/movements/new`, `/movements/:key/edit`
 
-- Data: Movement name, description, cues, tags, links, and illustrations grouped by Avatar.
-- Actions: Add and remove tags, manage links, select Avatar and Viewpoint, generate and manage illustrations.
+- Data: Movement name, description, cues, tags, links, and the ordered illustrations.
+- Actions: Add and remove tags, manage links, set illustrations, remove all illustrations.
+- Setting illustrations offers two patterns. Generate with an Avatar: choose an Avatar and a Viewpoint, then per stage give instructions, a reference image, or both. Use my own images: give an image per stage. The result replaces the draft's illustrations; the status of generation requests is shown, and failed ones can be retried.
 - Buttons: Save Draft, Publish, Cancel.
 - Only maintainers can access this page.
 - Creating a revision from a published Movement creates a new draft with the same key and the next revision number.
@@ -63,9 +63,8 @@ Maintainer-only page with two tabs.
 
 ### Avatars
 
-- Data: Avatar names and which Avatar is the default.
-- Actions: Create, edit, delete Avatars, set the default Avatar.
-- The default Avatar cannot be deleted.
+- Data: Avatar names.
+- Actions: Create, edit, delete Avatars.
 - Create and edit open a modal containing the Avatar name and illustration-generation specification.
 
 ### Viewpoints
@@ -106,7 +105,7 @@ URLs: `/routines/new`, `/routines/:id/edit`
 ## 10. Account
 
 - Registration, sign-in and sign-out are handled by the application. The first registered user is a Maintainer; later users are Practitioners.
-- Actions: Register, Sign In, Sign Out, choose the preferred Avatar.
+- Actions: Register, Sign In, Sign Out.
 
 ## Access and Revision Rules
 

@@ -1,12 +1,14 @@
 package com.tglanz.atlas.backend.generation.adapter.in.web;
 
 import com.tglanz.atlas.backend.generation.application.port.in.GenerationUseCase;
+import com.tglanz.atlas.backend.generation.domain.AvatarImageSpec;
 import com.tglanz.atlas.backend.generation.domain.GenerationRequest;
-import com.tglanz.atlas.backend.generation.domain.Stage;
+import com.tglanz.atlas.backend.generation.domain.IllustrationsGenerationSpec;
+import com.tglanz.atlas.backend.generation.domain.StageSpec;
+import com.tglanz.atlas.backend.generation.domain.StaticImageSpec;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.net.URI;
 import java.time.Instant;
@@ -24,22 +26,49 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/movements/{key}/draft/generations")
 class GenerationController {
 
-  record StageDto(
-      @Size(max = 2000) String description,
-      @Size(max = 500) @Pattern(regexp = "|https?://.+") String referenceUrl) {}
-
-  record GenerateRequest(
+  record AvatarStage(
       @NotNull UUID avatarId,
       @NotNull UUID viewpointId,
-      @NotEmpty @Size(max = 20) List<@NotNull @Valid StageDto> stages) {}
+      @Size(max = 4000) String instructions,
+      @Size(max = 500) String referenceImageUrl) {}
+
+  record StaticStage(@NotNull @Size(max = 500) String imageUrl) {}
+
+  /** Exactly one of the two is set. */
+  record StageBody(@Valid AvatarStage avatar, @Valid StaticStage staticImage) {
+    StageSpec toSpec() {
+      if ((avatar == null) == (staticImage == null)) {
+        throw new IllegalArgumentException(
+            "A stage is either avatar-based or a static image, not both or neither");
+      }
+      return avatar != null
+          ? new AvatarImageSpec(
+              avatar.avatarId(),
+              avatar.viewpointId(),
+              avatar.instructions(),
+              avatar.referenceImageUrl())
+          : new StaticImageSpec(staticImage.imageUrl());
+    }
+
+    static StageBody from(StageSpec spec) {
+      return switch (spec) {
+        case AvatarImageSpec s ->
+            new StageBody(
+                new AvatarStage(
+                    s.avatarId(), s.viewpointId(), s.instructions(), s.referenceImageUrl()),
+                null);
+        case StaticImageSpec s -> new StageBody(null, new StaticStage(s.imageUrl()));
+      };
+    }
+  }
+
+  record GenerateRequest(@NotEmpty @Size(max = 20) List<@NotNull @Valid StageBody> stages) {}
 
   record GenerationResponse(
       UUID id,
       String movementKey,
       int draftRevision,
-      UUID avatarId,
-      UUID viewpointId,
-      List<StageDto> stages,
+      List<StageBody> stages,
       String status,
       String failureReason,
       List<String> results,
@@ -50,9 +79,7 @@ class GenerationController {
           r.id(),
           r.movementKey(),
           r.draftRevision(),
-          r.avatarId(),
-          r.viewpointId(),
-          r.stages().stream().map(s -> new StageDto(s.description(), s.referenceUrl())).toList(),
+          r.spec().stages().stream().map(StageBody::from).toList(),
           r.status().name(),
           r.failureReason(),
           r.resultUrls(),
@@ -70,9 +97,9 @@ class GenerationController {
   @PostMapping
   ResponseEntity<GenerationResponse> request(
       @PathVariable String key, @Valid @RequestBody GenerateRequest body) {
-    List<Stage> stages =
-        body.stages().stream().map(s -> new Stage(s.description(), s.referenceUrl())).toList();
-    GenerationRequest created = useCase.request(key, body.avatarId(), body.viewpointId(), stages);
+    var spec =
+        new IllustrationsGenerationSpec(body.stages().stream().map(StageBody::toSpec).toList());
+    GenerationRequest created = useCase.request(key, spec);
     return ResponseEntity.accepted()
         .location(URI.create("/api/movements/" + key + "/draft/generations/" + created.id()))
         .body(GenerationResponse.from(created));

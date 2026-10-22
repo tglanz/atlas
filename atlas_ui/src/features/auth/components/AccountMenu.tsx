@@ -34,9 +34,6 @@ export function AccountMenu() {
         </Button>
       </Menu.Target>
       <Menu.Dropdown>
-        <Menu.Item component={Link} to="/settings/profile">
-          Profile settings
-        </Menu.Item>
         {user.data.role === 'MAINTAINER' && (
           <Menu.Item component={Link} to="/settings/illustrations">
             Illustration settings

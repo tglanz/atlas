@@ -3,11 +3,7 @@ package com.tglanz.atlas.backend.movement.domain;
 import com.tglanz.atlas.backend.shared.error.ConflictException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 /** One revision of a Movement. Drafts are editable; published revisions are immutable. */
 public final class Movement {
@@ -16,7 +12,7 @@ public final class Movement {
   private RevisionStatus status;
   private Instant publishedAt;
   private MovementContent content;
-  private final Map<UUID, List<Illustration>> illustrations = new LinkedHashMap<>();
+  private List<Illustration> illustrations;
 
   private Movement(
       MovementKey key,
@@ -24,7 +20,7 @@ public final class Movement {
       RevisionStatus status,
       Instant publishedAt,
       MovementContent content,
-      Map<UUID, List<Illustration>> illustrations) {
+      List<Illustration> illustrations) {
     if (key == null || content == null) {
       throw new IllegalArgumentException("Key and content are required");
     }
@@ -39,12 +35,12 @@ public final class Movement {
     this.status = status;
     this.publishedAt = publishedAt;
     this.content = content;
-    illustrations.forEach((avatarId, list) -> this.illustrations.put(avatarId, List.copyOf(list)));
+    this.illustrations = List.copyOf(illustrations);
   }
 
   /** A new Movement starts as a draft at revision 1. */
   public static Movement newDraft(MovementKey key, MovementContent content) {
-    return new Movement(key, 1, RevisionStatus.DRAFT, null, content, Map.of());
+    return new Movement(key, 1, RevisionStatus.DRAFT, null, content, List.of());
   }
 
   /** Rebuilds a stored revision. */
@@ -54,7 +50,7 @@ public final class Movement {
       RevisionStatus status,
       Instant publishedAt,
       MovementContent content,
-      Map<UUID, List<Illustration>> illustrations) {
+      List<Illustration> illustrations) {
     return new Movement(key, revision, status, publishedAt, content, illustrations);
   }
 
@@ -77,31 +73,27 @@ public final class Movement {
     if (status != RevisionStatus.PUBLISHED) {
       throw new ConflictException("Only published revisions can be revised");
     }
-    return new Movement(key, revision + 1, RevisionStatus.DRAFT, null, content, illustrations());
+    return new Movement(key, revision + 1, RevisionStatus.DRAFT, null, content, illustrations);
   }
 
-  /** Replaces the Avatar's whole sequence; an empty list removes it. */
-  public void replaceIllustrations(UUID avatarId, List<Illustration> sequence) {
+  /** Replaces the whole sequence; an empty list removes all Illustrations. */
+  public void replaceIllustrations(List<Illustration> sequence) {
     requireDraft("Only drafts can change illustrations");
-    if (avatarId == null || sequence == null) {
-      throw new IllegalArgumentException("Avatar and illustrations are required");
+    if (sequence == null) {
+      throw new IllegalArgumentException("Illustrations are required");
     }
-    if (sequence.isEmpty()) {
-      illustrations.remove(avatarId);
-    } else {
-      illustrations.put(avatarId, List.copyOf(sequence));
-    }
+    this.illustrations = List.copyOf(sequence);
   }
 
-  /** Appends to the end of the Avatar's sequence. */
-  public void addIllustration(UUID avatarId, Illustration illustration) {
+  /** Appends to the end of the sequence. */
+  public void addIllustration(Illustration illustration) {
     requireDraft("Only drafts can change illustrations");
-    if (avatarId == null || illustration == null) {
-      throw new IllegalArgumentException("Avatar and illustration are required");
+    if (illustration == null) {
+      throw new IllegalArgumentException("Illustration is required");
     }
-    List<Illustration> sequence = new ArrayList<>(illustrations.getOrDefault(avatarId, List.of()));
+    List<Illustration> sequence = new ArrayList<>(illustrations);
     sequence.add(illustration);
-    illustrations.put(avatarId, List.copyOf(sequence));
+    this.illustrations = List.copyOf(sequence);
   }
 
   private void requireDraft(String message) {
@@ -130,7 +122,8 @@ public final class Movement {
     return content;
   }
 
-  public Map<UUID, List<Illustration>> illustrations() {
-    return Collections.unmodifiableMap(new LinkedHashMap<>(illustrations));
+  /** The ordered Illustrations of this revision. */
+  public List<Illustration> illustrations() {
+    return illustrations;
   }
 }

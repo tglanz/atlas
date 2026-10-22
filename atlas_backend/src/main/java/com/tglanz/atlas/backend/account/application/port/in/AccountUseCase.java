@@ -12,7 +12,4 @@ public interface AccountUseCase {
   Optional<User> findByEmail(String email);
 
   User get(UUID id);
-
-  /** Sets the Avatar whose illustrations the user wants to see; null clears the preference. */
-  User setPreferredAvatar(UUID userId, UUID avatarId);
 }

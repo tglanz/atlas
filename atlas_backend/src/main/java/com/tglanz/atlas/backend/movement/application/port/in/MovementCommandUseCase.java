@@ -5,7 +5,6 @@ import com.tglanz.atlas.backend.movement.domain.Movement;
 import com.tglanz.atlas.backend.movement.domain.MovementContent;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import java.util.List;
-import java.util.UUID;
 
 public interface MovementCommandUseCase {
 
@@ -18,13 +17,13 @@ public interface MovementCommandUseCase {
 
   Movement publish(MovementKey key);
 
-  /** Appends an Illustration to the Avatar's sequence on the open draft. */
-  Movement addIllustration(MovementKey key, UUID avatarId, Illustration illustration);
+  /** Appends an Illustration to the end of the open draft's sequence. */
+  Movement addIllustration(MovementKey key, Illustration illustration);
 
-  /** Replaces the Avatar's sequence on the open draft, which must be the expected revision. */
+  /** Replaces the open draft's sequence. The open draft must be the expected revision. */
   Movement replaceIllustrations(
-      MovementKey key, int expectedRevision, UUID avatarId, List<Illustration> illustrations);
+      MovementKey key, int expectedRevision, List<Illustration> illustrations);
 
-  /** Removes the Avatar's whole sequence from the open draft. */
-  Movement clearIllustrations(MovementKey key, UUID avatarId);
+  /** Removes all Illustrations from the open draft. */
+  Movement clearIllustrations(MovementKey key);
 }

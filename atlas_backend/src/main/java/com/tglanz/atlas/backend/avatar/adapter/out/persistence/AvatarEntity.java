@@ -1,6 +1,5 @@
 package com.tglanz.atlas.backend.avatar.adapter.out.persistence;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -11,7 +10,4 @@ class AvatarEntity {
   @Id String id;
   String name;
   String specification;
-
-  @Column(name = "is_default")
-  boolean isDefault;
 }

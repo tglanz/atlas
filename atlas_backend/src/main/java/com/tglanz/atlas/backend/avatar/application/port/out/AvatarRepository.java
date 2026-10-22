@@ -10,11 +10,9 @@ public interface AvatarRepository {
 
   Optional<Avatar> findById(UUID id);
 
-  Optional<Avatar> findDefault();
-
   /** Throws ConflictException when the name is taken. */
   void save(Avatar avatar);
 
-  /** Throws ConflictException when the Avatar is still referenced by illustrations. */
+  /** Throws ConflictException when the Avatar is still referenced. */
   void deleteById(UUID id);
 }

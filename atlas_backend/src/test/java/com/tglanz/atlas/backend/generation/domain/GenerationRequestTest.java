@@ -13,33 +13,27 @@ class GenerationRequestTest {
 
   private static final Instant NOW = Instant.parse("2026-01-01T00:00:00Z");
 
+  /** One generated stage and one static stage: the model allows mixing. */
   private static GenerationRequest request() {
-    return GenerationRequest.create(
-        "push-up",
-        1,
-        UUID.randomUUID(),
-        UUID.randomUUID(),
-        List.of(
-            new Stage("Chest near the floor", ""), new Stage("", "https://example.com/top.png")),
-        NOW);
+    var spec =
+        new IllustrationsGenerationSpec(
+            List.of(
+                new AvatarImageSpec(
+                    UUID.randomUUID(), UUID.randomUUID(), "Chest near the floor", ""),
+                new StaticImageSpec("https://example.com/top.png")));
+    return GenerationRequest.create("push-up", 1, spec, NOW);
   }
 
   @Test
-  void runsFromPendingToSucceededWithOneResultPerStage() {
+  void producesOnePictureForEachStage() {
     GenerationRequest r = request();
     assertThat(r.status()).isEqualTo(GenerationStatus.PENDING);
     r.start();
+    assertThatThrownBy(() -> r.succeed(List.of("a"), NOW))
+        .isInstanceOf(IllegalArgumentException.class);
     r.succeed(List.of("a", "b"), NOW);
     assertThat(r.status()).isEqualTo(GenerationStatus.SUCCEEDED);
     assertThat(r.resultUrls()).containsExactly("a", "b");
-  }
-
-  @Test
-  void resultCountMustMatchStages() {
-    GenerationRequest r = request();
-    r.start();
-    assertThatThrownBy(() -> r.succeed(List.of("a"), NOW))
-        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
@@ -55,8 +49,16 @@ class GenerationRequestTest {
   }
 
   @Test
-  void stageNeedsDescriptionOrReference() {
-    assertThatThrownBy(() -> new Stage(" ", "")).isInstanceOf(IllegalArgumentException.class);
-    assertThat(new Stage("", "https://example.com/x.png").referenceUrl()).isNotBlank();
+  void stageSpecsValidateTheirOwnFields() {
+    var avatar = UUID.randomUUID();
+    var viewpoint = UUID.randomUUID();
+    assertThatThrownBy(() -> new AvatarImageSpec(avatar, viewpoint, " ", null))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new AvatarImageSpec(null, viewpoint, "x", null))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new StaticImageSpec(" ")).isInstanceOf(IllegalArgumentException.class);
+    assertThat(new AvatarImageSpec(avatar, viewpoint, "", "https://example.com/r.png")).isNotNull();
+    assertThatThrownBy(() -> new IllustrationsGenerationSpec(List.of()))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 }

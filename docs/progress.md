@@ -6,18 +6,18 @@ Status as of 2026-10-21.
 
 - **Docs**: product, domain, flows, design spec, API, tooling and backend architecture are written.
 - **Backend `atlas_backend`**: runs end to end on SQLite (verified by a manual HTTP walkthrough). All planned backend features exist; storage and generation are stubs.
-- **Frontend `atlas_ui`**: feature-based structure with an API client, sign in and register, and pages wired to the backend: movement library, details, revision history and editor (including Illustration upload and generation), routines, Avatar and Viewpoint settings, profile figure style. Checked by build, lint and a dev-server proxy walkthrough; never loaded in a browser.
+- **Frontend `atlas_ui`**: feature-based structure with an API client, sign in and register, and pages wired to the backend: movement library, details, revision history and editor (including Illustration upload and generation), routines, and Avatar and Viewpoint settings. Checked by build, lint and a dev-server proxy walkthrough; never loaded in a browser.
 - **CI**: builds and tests both projects on push and pull request.
 - **UI hosting**: the backend serves the built UI from the same origin (one jar), so cookies and CSRF work without CORS.
 - **Dev container**: written, never built.
 
 ### Backend features
 
-- **Movement**: draft, publish and revise lifecycle; immutable published revisions; cues, tags, links; search by name and tag; revision history. Viewers get the Illustrations of one Avatar (preferred, else default).
-- **Avatar**: CRUD, one default Avatar, specification visible to Maintainers only.
-- **Generation**: Viewpoint presets, generation requests with stages (words or reference picture), background execution, retry, picture upload. Stubbed generator and storage return a placeholder URL.
+- **Movement**: draft, publish and revise lifecycle; immutable published revisions; cues, tags, links; search by name and tag; revision history. Each revision has one ordered sequence of Illustrations.
+- **Avatar and Viewpoint**: maintainer-only CRUD. They are only inputs to generation; viewers never see or choose them.
+- **Generation**: a generation request holds an ordered spec of stages, each either avatar-based (Avatar, Viewpoint, instructions and/or reference image) or a static image. One picture results per stage and replaces the draft's sequence. Runs in the background with status and retry. Picture upload for reference and static images. The generator and storage are stubs that return a placeholder URL.
 - **Routine**: private to the owner, sections, pinned published Movement revisions.
-- **Account**: registration, session login and logout, roles (Practitioner, Maintainer; the first user is a Maintainer), preferred Avatar.
+- **Account**: registration, session login and logout, roles (Practitioner, Maintainer; the first user is a Maintainer).
 - **Quality gates**: Spotless, javac lint, ArchUnit layering rules, 23 tests.
 
 ## What is missing
@@ -27,7 +27,7 @@ Status as of 2026-10-21.
 - Real S3 storage and a real illustration generator.
 - Recovery of generation requests left Running by a restart, and cleanup of old requests.
 - Account management: password reset, email verification, login throttling, change email or password.
-- Movement: discarding a draft, validating link targets, a tag listing endpoint for filters, pagination, removing or reordering a single Illustration (only the whole Avatar sequence can be cleared).
+- Movement: discarding a draft, validating link targets, a tag listing endpoint for filters, pagination, removing or reordering a single Illustration (only the whole sequence can be cleared).
 - Routine details return references only, not Movement names.
 - CORS configuration. There is none.
 - Deployment: Dockerfile, Render configuration, PostgreSQL profile verified against a real database.
@@ -54,15 +54,15 @@ Status as of 2026-10-21.
 6. **Generation scheduler is in the wrong package.** `TaskExecutorGenerationScheduler` is an outbound adapter that triggers an inbound use case. It works but misplaces a background job.
 7. **Illustration stores a URL, not a storage key.** With S3 (especially private buckets or signed URLs) a key plus a base URL is likely a better fit. Changing it later touches the schema.
 8. **SQLite runs with a single connection.** It is fine for a proof of concept and not for production load.
-9. **Adding an Avatar does not reach old Movements.** Illustrations are frozen with each revision, so existing published revisions fall back to the default Avatar until new revisions are published. This is intentional, but there is no tool to make it easy.
+9. **Illustrations are frozen with each revision.** Adding or changing a Movement's Illustrations after publishing needs a new revision. This is intentional, so Routines never change.
 10. **Some tooling gaps.** `build.gradle` has no formatter (the Eclipse-based one could not download). The dev container is untested.
-11. **Design spec lags the model.** It has no profile settings page, no Avatar choice UI, and no generation or upload UI, which now exist in the UI.
+11. **Design spec lags the model.** It does not yet describe the editor's upload and generation tools.
 
 ## Next steps
 
 1. Decide whether to keep the current architecture or move to the leaner shape.
 2. Replace the first-user rule with an explicit bootstrap, such as a Maintainer seeded from an environment variable.
-3. Update `design-spec.md` for profile settings, Avatar choice, generation and upload.
+3. Update `design-spec.md` for the editor's upload and generation tools.
 4. Use the UI in a browser against the backend and fix what is rough.
 5. Add "Add to routine" on the Movement page.
 6. Deploy the backend (one jar with the UI) and database, and run the migrations on PostgreSQL.

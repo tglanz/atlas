@@ -25,8 +25,8 @@ class ViewpointController {
   record Request(@NotBlank @Size(max = 100) String name, @NotBlank String specification) {}
 
   record Response(UUID id, String name, String specification) {
-    static Response from(Viewpoint viewpoint) {
-      return new Response(viewpoint.id(), viewpoint.name(), viewpoint.specification());
+    static Response from(Viewpoint v) {
+      return new Response(v.id(), v.name(), v.specification());
     }
   }
 

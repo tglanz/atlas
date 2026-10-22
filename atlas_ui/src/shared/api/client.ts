@@ -31,6 +31,7 @@ export async function apiFetch<T>(
   options: RequestOptions = {},
 ): Promise<T> {
   const method = (options.method ?? 'GET').toUpperCase();
+  const unsafe = !SAFE_METHODS.has(method);
   const headers = new Headers({ Accept: 'application/json' });
   let body: BodyInit | undefined;
 
@@ -43,18 +44,27 @@ export async function apiFetch<T>(
     headers.set('Content-Type', 'application/json');
     body = JSON.stringify(options.body);
   }
-  if (!SAFE_METHODS.has(method)) {
-    const token = await csrfToken();
-    if (token) headers.set('X-XSRF-TOKEN', token);
-  }
 
-  const response = await fetch(`${API_URL}/api${path}`, {
-    method,
-    headers,
-    body,
-    credentials: 'include',
-    signal: options.signal,
-  });
+  const send = async () => {
+    if (unsafe) {
+      const token = await csrfToken();
+      if (token) headers.set('X-XSRF-TOKEN', token);
+    }
+    return fetch(`${API_URL}/api${path}`, {
+      method,
+      headers,
+      body,
+      credentials: 'include',
+      signal: options.signal,
+    });
+  };
+
+  let response = await send();
+  if (response.status === 403 && unsafe) {
+    // The token rotates when the session changes (login, logout). Fetch the new one and retry once.
+    await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' });
+    response = await send();
+  }
 
   if (!response.ok) {
     throw new ApiError(response.status, await problemDetail(response));

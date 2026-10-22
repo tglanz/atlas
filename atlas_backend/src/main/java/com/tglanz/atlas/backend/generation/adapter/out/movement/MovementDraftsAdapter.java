@@ -9,7 +9,6 @@ import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.shared.error.NotFoundException;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 /** Reads and updates Movement drafts through the movement module's public use cases. */
@@ -36,17 +35,8 @@ class MovementDraftsAdapter implements MovementDrafts {
   }
 
   @Override
-  public void replaceIllustrations(
-      String movementKey, int revision, UUID avatarId, List<String> urls) {
+  public void replaceIllustrations(String movementKey, int revision, List<String> urls) {
     commands.replaceIllustrations(
-        new MovementKey(movementKey),
-        revision,
-        avatarId,
-        urls.stream().map(Illustration::new).toList());
-  }
-
-  @Override
-  public void addIllustration(String movementKey, UUID avatarId, String url) {
-    commands.addIllustration(new MovementKey(movementKey), avatarId, new Illustration(url));
+        new MovementKey(movementKey), revision, urls.stream().map(Illustration::new).toList());
   }
 }

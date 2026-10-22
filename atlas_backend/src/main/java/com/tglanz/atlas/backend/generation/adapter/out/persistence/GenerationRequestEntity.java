@@ -28,12 +28,6 @@ class GenerationRequestEntity {
   @Column(name = "draft_revision")
   int draftRevision;
 
-  @Column(name = "avatar_id")
-  String avatarId;
-
-  @Column(name = "viewpoint_id")
-  String viewpointId;
-
   @Enumerated(EnumType.STRING)
   GenerationStatus status;
 
@@ -57,11 +51,23 @@ class GenerationRequestEntity {
   @Column(name = "url")
   List<String> results = new ArrayList<>();
 
+  /** One row per stage; the columns used depend on the kind (AVATAR or STATIC). */
   @Embeddable
   static class StageRow {
-    String description;
+    String kind;
 
-    @Column(name = "reference_url")
-    String referenceUrl;
+    @Column(name = "avatar_id")
+    String avatarId;
+
+    @Column(name = "viewpoint_id")
+    String viewpointId;
+
+    String instructions;
+
+    @Column(name = "reference_image_url")
+    String referenceImageUrl;
+
+    @Column(name = "image_url")
+    String imageUrl;
   }
 }

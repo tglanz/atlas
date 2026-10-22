@@ -2,6 +2,7 @@ package com.tglanz.atlas.backend.generation.domain;
 
 import java.util.UUID;
 
+/** A predefined way to specify the viewing angle of a generated Illustration. */
 public record Viewpoint(UUID id, String name, String specification) {
   public Viewpoint {
     if (id == null) {

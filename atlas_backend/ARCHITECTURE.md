@@ -32,28 +32,26 @@ These rules are enforced by ArchUnit tests in `ArchitectureTest`.
 
 ## Features and dependencies
 
-- `movement`: Movements, revisions, publishing, and the Illustrations held by each revision.
-- `avatar`: Avatars, including the default Avatar.
-- `generation`: Viewpoints, generation requests, and picture uploads.
+- `movement`: Movements, revisions, publishing, and the ordered Illustrations held by each revision.
+- `avatar`: Avatars, the looks used to generate Illustrations.
+- `generation`: Viewpoints, generation requests (a spec of stages, each avatar-based or a static image), and picture uploads.
 - `routine`: Routines that pin published Movement revisions.
-- `account`: users, roles, and the preferred Avatar.
+- `account`: users and roles.
 
 ```
 generation -> movement, avatar
-movement   -> avatar, account   (to choose which Avatar's Illustrations a viewer sees)
 routine    -> movement
-account    -> avatar
 ```
 
-Each arrow is an outbound adapter in the dependent feature, such as `generation.adapter.out.movement`. `ArchitectureTest` rejects any other dependency between features.
+`movement`, `avatar` and `account` depend on no other feature. Each arrow is an outbound adapter in the dependent feature, such as `generation.adapter.out.movement`. `ArchitectureTest` rejects any other dependency between features.
 
 ## Generation
 
 A generation request runs in the background on the application task executor. The run is split into short transactions around the slow generator call, so no database transaction stays open while waiting on the third party:
 
-1. `GenerationLifecycle.begin` marks the request running and builds the generator input.
-2. The generator and picture storage are called outside any transaction.
-3. `GenerationLifecycle.complete` attaches the Illustrations to the draft, or `fail` records the reason.
+1. `GenerationLifecycle.begin` marks the request running and resolves each stage into a step: use a static image as is, or generate a picture.
+2. The generator and picture storage are called outside any transaction, once per generated stage.
+3. `GenerationLifecycle.complete` replaces the draft's Illustrations with one per stage, or `fail` records the reason.
 
 `IllustrationGenerator` and `PictureStorage` are ports. Their current adapters are stubs; the storage target is S3.
 

@@ -3,10 +3,8 @@ package com.tglanz.atlas.backend.avatar.application.service;
 import com.tglanz.atlas.backend.avatar.application.port.in.AvatarUseCase;
 import com.tglanz.atlas.backend.avatar.application.port.out.AvatarRepository;
 import com.tglanz.atlas.backend.avatar.domain.Avatar;
-import com.tglanz.atlas.backend.shared.error.ConflictException;
 import com.tglanz.atlas.backend.shared.error.NotFoundException;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,15 +32,8 @@ public class AvatarService implements AvatarUseCase {
   }
 
   @Override
-  @Transactional(readOnly = true)
-  public Optional<Avatar> findDefault() {
-    return repository.findDefault();
-  }
-
-  @Override
   public Avatar create(String name, String specification) {
-    boolean first = repository.findDefault().isEmpty();
-    Avatar created = Avatar.create(name, specification, first);
+    Avatar created = Avatar.create(name, specification);
     repository.save(created);
     return created;
   }
@@ -55,23 +46,8 @@ public class AvatarService implements AvatarUseCase {
   }
 
   @Override
-  public Avatar makeDefault(UUID id) {
-    Avatar target = get(id);
-    if (target.isDefault()) {
-      return target;
-    }
-    // Clear the old default first: at most one Avatar may be the default at any time.
-    repository.findDefault().ifPresent(current -> repository.save(current.withDefault(false)));
-    Avatar updated = target.withDefault(true);
-    repository.save(updated);
-    return updated;
-  }
-
-  @Override
   public void delete(UUID id) {
-    if (get(id).isDefault()) {
-      throw new ConflictException("The default avatar cannot be deleted");
-    }
+    get(id);
     repository.deleteById(id);
   }
 }

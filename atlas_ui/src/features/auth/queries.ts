@@ -1,11 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  fetchCurrentUser,
-  login,
-  logout,
-  register,
-  setPreferredAvatar,
-} from './api';
+import { fetchCurrentUser, login, logout, register } from './api';
 
 export const currentUserKey = ['auth', 'me'] as const;
 
@@ -42,14 +36,5 @@ export function useLogout() {
     mutationFn: logout,
     // Everything cached may depend on who is signed in.
     onSuccess: () => queryClient.clear(),
-  });
-}
-
-export function useSetPreferredAvatar() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: setPreferredAvatar,
-    // The server picks the Illustrations to show, so cached Movements are stale too.
-    onSuccess: () => queryClient.invalidateQueries(),
   });
 }

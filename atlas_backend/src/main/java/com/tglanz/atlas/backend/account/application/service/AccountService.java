@@ -1,7 +1,6 @@
 package com.tglanz.atlas.backend.account.application.service;
 
 import com.tglanz.atlas.backend.account.application.port.in.AccountUseCase;
-import com.tglanz.atlas.backend.account.application.port.out.AvatarCatalog;
 import com.tglanz.atlas.backend.account.application.port.out.PasswordHasher;
 import com.tglanz.atlas.backend.account.application.port.out.UserRepository;
 import com.tglanz.atlas.backend.account.domain.Role;
@@ -24,14 +23,11 @@ public class AccountService implements AccountUseCase {
 
   private final UserRepository users;
   private final PasswordHasher hasher;
-  private final AvatarCatalog avatars;
   private final Clock clock;
 
-  public AccountService(
-      UserRepository users, PasswordHasher hasher, AvatarCatalog avatars, Clock clock) {
+  public AccountService(UserRepository users, PasswordHasher hasher, Clock clock) {
     this.users = users;
     this.hasher = hasher;
-    this.avatars = avatars;
     this.clock = clock;
   }
 
@@ -50,8 +46,7 @@ public class AccountService implements AccountUseCase {
     }
     Role role = users.count() == 0 ? Role.MAINTAINER : Role.PRACTITIONER;
     User user =
-        new User(
-            UUID.randomUUID(), normalized, hasher.hash(rawPassword), role, null, clock.instant());
+        new User(UUID.randomUUID(), normalized, hasher.hash(rawPassword), role, clock.instant());
     users.save(user);
     return user;
   }
@@ -70,15 +65,5 @@ public class AccountService implements AccountUseCase {
   @Transactional(readOnly = true)
   public User get(UUID id) {
     return users.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
-  }
-
-  @Override
-  public User setPreferredAvatar(UUID userId, UUID avatarId) {
-    if (avatarId != null && !avatars.exists(avatarId)) {
-      throw new IllegalArgumentException("Unknown avatar");
-    }
-    User updated = get(userId).withPreferredAvatar(avatarId);
-    users.save(updated);
-    return updated;
   }
 }

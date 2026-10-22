@@ -1,12 +1,6 @@
 import { apiFetch } from '@/shared/api';
 
-/** The specification is only returned to maintainers. */
-export type Avatar = {
-  id: string;
-  name: string;
-  specification?: string;
-  isDefault: boolean;
-};
+export type Avatar = { id: string; name: string; specification: string };
 
 export type AvatarInput = { name: string; specification: string };
 
@@ -20,6 +14,3 @@ export const updateAvatar = (id: string, input: AvatarInput) =>
 
 export const deleteAvatar = (id: string) =>
   apiFetch<void>(`/avatars/${id}`, { method: 'DELETE' });
-
-export const makeDefaultAvatar = (id: string) =>
-  apiFetch<Avatar>(`/avatars/${id}/default`, { method: 'PUT' });

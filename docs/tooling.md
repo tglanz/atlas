@@ -30,6 +30,7 @@ Commands, from `atlas_backend/`:
 | Run a single test class | `./gradlew test --tests 'com.tglanz.atlas.backend.SomeTest'` |
 | Compile only | `./gradlew compileJava compileTestJava` |
 | Run the application | `./gradlew bootRun` |
+| Reset the local database | delete `atlas.db` (see the backend README) |
 | Format | `./gradlew spotlessApply` |
 | Check formatting | `./gradlew spotlessCheck` |
 | Build executable jar | `./gradlew bootJar` |

@@ -1,5 +1,4 @@
 import { createBrowserRouter } from 'react-router';
-import { ProfileSettingsPage } from '@/features/avatars';
 import { LoginPage, RegisterPage, RequireAuth } from '@/features/auth';
 import {
   MovementDetailsPage,
@@ -55,7 +54,6 @@ export const router = createBrowserRouter([
           { path: 'routines/new', element: <RoutineEditorPage /> },
           { path: 'routines/:id', element: <RoutineDetailsPage /> },
           { path: 'routines/:id/edit', element: <RoutineEditorPage /> },
-          { path: 'settings/profile', element: <ProfileSettingsPage /> },
         ],
       },
 

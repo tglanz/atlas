@@ -2,9 +2,9 @@ package com.tglanz.atlas.backend.generation.application.service;
 
 import com.tglanz.atlas.backend.generation.application.port.in.RunGenerationUseCase;
 import com.tglanz.atlas.backend.generation.application.port.out.GeneratedPicture;
-import com.tglanz.atlas.backend.generation.application.port.out.GenerationInput;
 import com.tglanz.atlas.backend.generation.application.port.out.IllustrationGenerator;
 import com.tglanz.atlas.backend.generation.application.port.out.PictureStorage;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -25,14 +25,21 @@ public class GenerationRunner implements RunGenerationUseCase {
 
   @Override
   public void run(UUID requestId) {
-    GenerationInput input = lifecycle.begin(requestId).orElse(null);
-    if (input == null) {
+    GenerationPlan plan = lifecycle.begin(requestId).orElse(null);
+    if (plan == null) {
       return;
     }
     try {
-      List<GeneratedPicture> pictures = generator.generate(input);
-      List<String> urls =
-          pictures.stream().map(p -> storage.store(p.contentType(), p.content())).toList();
+      List<String> urls = new ArrayList<>();
+      for (GenerationPlan.Step step : plan.steps()) {
+        switch (step) {
+          case GenerationPlan.Existing existing -> urls.add(existing.url());
+          case GenerationPlan.Generate generate -> {
+            GeneratedPicture picture = generator.generate(generate.request());
+            urls.add(storage.store(picture.contentType(), picture.content()));
+          }
+        }
+      }
       lifecycle.complete(requestId, urls);
     } catch (RuntimeException e) {
       lifecycle.fail(requestId, describe(e));

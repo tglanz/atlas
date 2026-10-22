@@ -17,8 +17,8 @@ src/
   features/
     auth/             sign in, register, current user, route guard, account menu
     movements/        library, details, revision history, editor
-    avatars/          Avatar settings, profile choice of figure style
-    generation/       Viewpoint settings, Illustration generation and upload
+    avatars/          Avatar settings
+    generation/       Viewpoint settings, setting a draft's Illustrations (generate or static images)
     routines/         routine library, details, editor
 ```
 
@@ -37,7 +37,7 @@ Inside a feature:
 3. Filters and search live in the URL as search params.
 4. `shared` imports nothing from `features` or `app`.
 5. A feature imports other features only through their `index.ts`, never their internals, and never imports from `app`.
-6. Dependencies between features point one way: `movements` uses `generation`, which uses `avatars`; `routines` uses `movements`; `avatars` uses `auth`. Features that need to combine two features that don't depend on each other are composed in `app/pages`.
+6. Dependencies between features point one way: `movements` uses `generation`, which uses `avatars`; `routines` uses `movements`. Features that need to combine two features that don't depend on each other are composed in `app/pages`.
 7. Only `shared/api` calls `fetch`.
 8. Route guards only shape the UI. The backend enforces access.
 
@@ -48,7 +48,6 @@ The import rules are checked by `oxlint` (see `.oxlintrc.json`).
 - Pages call query hooks. `QueryBoundary` shows the loading and error states.
 - Mutations call the backend and then invalidate the related queries.
 - Who is signed in is a query on `/api/auth/me`. The session cookie is the source of truth.
-- Which Illustrations a Movement shows is decided by the server from the user's preferred Avatar, so changing the preferred Avatar invalidates all queries.
 
 ## API client
 

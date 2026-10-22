@@ -6,8 +6,10 @@ import com.tglanz.atlas.backend.generation.application.port.out.GenerationReposi
 import com.tglanz.atlas.backend.generation.application.port.out.GenerationScheduler;
 import com.tglanz.atlas.backend.generation.application.port.out.MovementDrafts;
 import com.tglanz.atlas.backend.generation.application.port.out.ViewpointRepository;
+import com.tglanz.atlas.backend.generation.domain.AvatarImageSpec;
 import com.tglanz.atlas.backend.generation.domain.GenerationRequest;
-import com.tglanz.atlas.backend.generation.domain.Stage;
+import com.tglanz.atlas.backend.generation.domain.IllustrationsGenerationSpec;
+import com.tglanz.atlas.backend.generation.domain.StageSpec;
 import com.tglanz.atlas.backend.shared.error.NotFoundException;
 import java.time.Clock;
 import java.util.List;
@@ -42,21 +44,23 @@ public class GenerationService implements GenerationUseCase {
   }
 
   @Override
-  public GenerationRequest request(
-      String movementKey, UUID avatarId, UUID viewpointId, List<Stage> stages) {
+  public GenerationRequest request(String movementKey, IllustrationsGenerationSpec spec) {
     var draft =
         drafts
             .findDraft(movementKey)
             .orElseThrow(() -> new NotFoundException("No draft for movement " + movementKey));
-    if (avatars.find(avatarId).isEmpty()) {
-      throw new IllegalArgumentException("Unknown avatar");
-    }
-    if (viewpoints.findById(viewpointId).isEmpty()) {
-      throw new IllegalArgumentException("Unknown viewpoint");
+    for (StageSpec stage : spec.stages()) {
+      if (stage instanceof AvatarImageSpec avatarStage) {
+        if (avatars.find(avatarStage.avatarId()).isEmpty()) {
+          throw new IllegalArgumentException("Unknown avatar");
+        }
+        if (viewpoints.findById(avatarStage.viewpointId()).isEmpty()) {
+          throw new IllegalArgumentException("Unknown viewpoint");
+        }
+      }
     }
     GenerationRequest request =
-        GenerationRequest.create(
-            movementKey, draft.revision(), avatarId, viewpointId, stages, clock.instant());
+        GenerationRequest.create(movementKey, draft.revision(), spec, clock.instant());
     requests.save(request);
     scheduler.schedule(request.id());
     return request;

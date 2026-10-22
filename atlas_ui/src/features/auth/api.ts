@@ -6,7 +6,6 @@ export type CurrentUser = {
   id: string;
   email: string;
   role: Role;
-  preferredAvatarId: string | null;
 };
 
 /** The signed-in user, or null for a visitor. */
@@ -39,13 +38,4 @@ export function login(email: string, password: string): Promise<void> {
 
 export function logout(): Promise<void> {
   return apiFetch<void>('/auth/logout', { method: 'POST' });
-}
-
-export function setPreferredAvatar(
-  avatarId: string | null,
-): Promise<CurrentUser> {
-  return apiFetch<CurrentUser>('/auth/me/avatar', {
-    method: 'PUT',
-    body: { avatarId },
-  });
 }

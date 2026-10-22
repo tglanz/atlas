@@ -1,11 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  createAvatar,
-  deleteAvatar,
-  listAvatars,
-  makeDefaultAvatar,
-  updateAvatar,
-} from './api';
+import { createAvatar, deleteAvatar, listAvatars, updateAvatar } from './api';
 import type { AvatarInput } from './api';
 
 const avatarsKey = ['avatars'] as const;
@@ -17,8 +11,7 @@ function useAvatarMutation<V>(fn: (v: V) => Promise<unknown>) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: fn,
-    // Which Avatar is default decides what Movements show, so refresh everything.
-    onSuccess: () => queryClient.invalidateQueries(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: avatarsKey }),
   });
 }
 
@@ -32,6 +25,3 @@ export const useUpdateAvatar = () =>
 
 export const useDeleteAvatar = () =>
   useAvatarMutation((id: string) => deleteAvatar(id));
-
-export const useMakeDefaultAvatar = () =>
-  useAvatarMutation((id: string) => makeDefaultAvatar(id));

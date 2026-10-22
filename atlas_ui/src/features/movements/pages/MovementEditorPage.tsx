@@ -16,7 +16,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router';
 import { IllustrationPanel } from '@/features/generation';
 import { QueryBoundary } from '@/shared/ui';
-import type { MovementContent, MovementDraft } from '../api';
+import type { MovementContent, Movement } from '../api';
 import {
   movementKeys,
   useCreateMovement,
@@ -100,7 +100,7 @@ function toContent(values: FormValues): MovementContent {
   };
 }
 
-function MovementForm({ draft }: { draft?: MovementDraft }) {
+function MovementForm({ draft }: { draft?: Movement }) {
   const navigate = useNavigate();
   const create = useCreateMovement();
   const update = useUpdateDraft();

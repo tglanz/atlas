@@ -30,17 +30,11 @@ class AvatarPersistenceAdapter implements AvatarRepository {
   }
 
   @Override
-  public Optional<Avatar> findDefault() {
-    return jpa.findFirstByIsDefaultTrue().map(this::toDomain);
-  }
-
-  @Override
   public void save(Avatar avatar) {
     var entity = new AvatarEntity();
     entity.id = avatar.id().toString();
     entity.name = avatar.name();
     entity.specification = avatar.specification();
-    entity.isDefault = avatar.isDefault();
     try {
       jpa.saveAndFlush(entity);
     } catch (DataAccessException e) {
@@ -65,6 +59,6 @@ class AvatarPersistenceAdapter implements AvatarRepository {
   }
 
   private Avatar toDomain(AvatarEntity e) {
-    return new Avatar(UUID.fromString(e.id), e.name, e.specification, e.isDefault);
+    return new Avatar(UUID.fromString(e.id), e.name, e.specification);
   }
 }

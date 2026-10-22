@@ -13,5 +13,6 @@ public interface ViewpointRepository {
   /** Throws ConflictException when the name is taken. */
   void save(Viewpoint viewpoint);
 
+  /** Throws ConflictException when the Viewpoint is still referenced. */
   void deleteById(UUID id);
 }

@@ -70,9 +70,6 @@ class MovementRevisionEntity {
 
   @Embeddable
   static class IllustrationRow {
-    @Column(name = "avatar_id")
-    String avatarId;
-
     @Column(name = "url")
     String url;
   }

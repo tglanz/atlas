@@ -6,18 +6,14 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * A request to generate the Illustration sequence of one Avatar for an open Movement draft. One
- * Illustration is produced per stage, in stage order.
+ * A request to produce the Illustration sequence of an open Movement draft from a spec. A
+ * successful request replaces the draft's sequence: one Illustration per stage, in order.
  */
 public final class GenerationRequest {
-  private static final int MAX_STAGES = 20;
-
   private final UUID id;
   private final String movementKey;
   private final int draftRevision;
-  private final UUID avatarId;
-  private final UUID viewpointId;
-  private final List<Stage> stages;
+  private final IllustrationsGenerationSpec spec;
   private final Instant createdAt;
   private GenerationStatus status;
   private String failureReason;
@@ -28,27 +24,19 @@ public final class GenerationRequest {
       UUID id,
       String movementKey,
       int draftRevision,
-      UUID avatarId,
-      UUID viewpointId,
-      List<Stage> stages,
+      IllustrationsGenerationSpec spec,
       GenerationStatus status,
       String failureReason,
       List<String> resultUrls,
       Instant createdAt,
       Instant completedAt) {
-    if (id == null || movementKey == null || avatarId == null || viewpointId == null) {
-      throw new IllegalArgumentException("Movement, avatar and viewpoint are required");
-    }
-    if (stages == null || stages.isEmpty() || stages.size() > MAX_STAGES) {
-      throw new IllegalArgumentException(
-          "Between 1 and %d stages are required".formatted(MAX_STAGES));
+    if (id == null || movementKey == null || spec == null) {
+      throw new IllegalArgumentException("Movement and spec are required");
     }
     this.id = id;
     this.movementKey = movementKey;
     this.draftRevision = draftRevision;
-    this.avatarId = avatarId;
-    this.viewpointId = viewpointId;
-    this.stages = List.copyOf(stages);
+    this.spec = spec;
     this.status = status;
     this.failureReason = failureReason;
     this.resultUrls = List.copyOf(resultUrls);
@@ -57,19 +45,12 @@ public final class GenerationRequest {
   }
 
   public static GenerationRequest create(
-      String movementKey,
-      int draftRevision,
-      UUID avatarId,
-      UUID viewpointId,
-      List<Stage> stages,
-      Instant now) {
+      String movementKey, int draftRevision, IllustrationsGenerationSpec spec, Instant now) {
     return new GenerationRequest(
         UUID.randomUUID(),
         movementKey,
         draftRevision,
-        avatarId,
-        viewpointId,
-        stages,
+        spec,
         GenerationStatus.PENDING,
         null,
         List.of(),
@@ -81,9 +62,7 @@ public final class GenerationRequest {
       UUID id,
       String movementKey,
       int draftRevision,
-      UUID avatarId,
-      UUID viewpointId,
-      List<Stage> stages,
+      IllustrationsGenerationSpec spec,
       GenerationStatus status,
       String failureReason,
       List<String> resultUrls,
@@ -93,9 +72,7 @@ public final class GenerationRequest {
         id,
         movementKey,
         draftRevision,
-        avatarId,
-        viewpointId,
-        stages,
+        spec,
         status,
         failureReason,
         resultUrls,
@@ -110,7 +87,7 @@ public final class GenerationRequest {
 
   public void succeed(List<String> urls, Instant now) {
     require(GenerationStatus.RUNNING, "Only running requests can succeed");
-    if (urls.size() != stages.size()) {
+    if (urls.size() != spec.stages().size()) {
       throw new IllegalArgumentException("Expected one illustration per stage");
     }
     resultUrls = List.copyOf(urls);
@@ -153,16 +130,8 @@ public final class GenerationRequest {
     return draftRevision;
   }
 
-  public UUID avatarId() {
-    return avatarId;
-  }
-
-  public UUID viewpointId() {
-    return viewpointId;
-  }
-
-  public List<Stage> stages() {
-    return stages;
+  public IllustrationsGenerationSpec spec() {
+    return spec;
   }
 
   public GenerationStatus status() {
