@@ -1,10 +1,13 @@
 package com.tglanz.atlas.backend.movement.adapter.out.persistence;
 
+import com.tglanz.atlas.backend.movement.domain.ItemType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OrderColumn;
@@ -26,10 +29,9 @@ class MovementEntity {
   String description;
 
   @ElementCollection
-  @CollectionTable(name = "movement_cue", joinColumns = @JoinColumn(name = "movement_key"))
+  @CollectionTable(name = "movement_item", joinColumns = @JoinColumn(name = "movement_key"))
   @OrderColumn(name = "position")
-  @Column(name = "cue")
-  List<String> cues = new ArrayList<>();
+  List<ItemRow> items = new ArrayList<>();
 
   @ElementCollection
   @CollectionTable(name = "movement_tag", joinColumns = @JoinColumn(name = "movement_key"))
@@ -45,6 +47,14 @@ class MovementEntity {
   @CollectionTable(name = "movement_illustration", joinColumns = @JoinColumn(name = "movement_key"))
   @OrderColumn(name = "position")
   List<IllustrationRow> illustrations = new ArrayList<>();
+
+  @Embeddable
+  static class ItemRow {
+    @Enumerated(EnumType.STRING)
+    ItemType type;
+
+    String content;
+  }
 
   @Embeddable
   static class LinkRow {

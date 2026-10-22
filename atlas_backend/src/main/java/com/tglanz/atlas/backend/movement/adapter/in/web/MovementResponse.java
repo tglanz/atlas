@@ -9,10 +9,12 @@ record MovementResponse(
     String key,
     String name,
     String description,
-    List<String> cues,
+    List<ItemResponse> items,
     List<String> tags,
     List<LinkResponse> links,
     List<String> illustrations) {
+
+  record ItemResponse(String type, String content) {}
 
   record LinkResponse(String target, String relationType) {}
 
@@ -22,7 +24,7 @@ record MovementResponse(
         m.key().value(),
         c.name(),
         c.description(),
-        c.cues(),
+        c.items().stream().map(i -> new ItemResponse(i.type().name(), i.content())).toList(),
         c.tags().stream().sorted().toList(),
         c.links().stream()
             .map(l -> new LinkResponse(l.target().value(), l.relationType()))

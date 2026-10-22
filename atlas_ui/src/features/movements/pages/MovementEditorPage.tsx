@@ -11,13 +11,14 @@ import {
   Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconTrash } from '@tabler/icons-react';
+import { IconArrowDown, IconArrowUp, IconTrash } from '@tabler/icons-react';
+import type { UseFormReturnType } from '@mantine/form';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { IllustrationPanel } from '@/features/generation';
 import { QueryBoundary } from '@/shared/ui';
-import type { Movement, MovementContent } from '../api';
+import type { Movement, MovementContent, MovementItem } from '../api';
 import {
   movementKeys,
   useCreateMovement,
@@ -57,7 +58,10 @@ type FormValues = {
   key: string;
   name: string;
   description: string;
-  cues: string;
+  // One list per item type the editor offers; other types are carried through untouched.
+  cues: string[];
+  comments: string[];
+  otherItems: MovementItem[];
   tags: string[];
   links: { target: string; relationType: string }[];
 };
@@ -72,16 +76,28 @@ function withPendingTag(tags: string[], pending: string): string[] {
 }
 
 function toContent(values: FormValues, pendingTag: string): MovementContent {
+  const texts = (type: string, list: string[]): MovementItem[] =>
+    list
+      .map((content) => content.trim())
+      .filter(Boolean)
+      .map((content) => ({ type, content }));
   return {
     name: values.name,
     description: values.description,
-    cues: values.cues
-      .split('\n')
-      .map((cue) => cue.trim())
-      .filter(Boolean),
+    items: [
+      ...texts('CUE', values.cues),
+      ...texts('COMMENT', values.comments),
+      ...values.otherItems,
+    ],
     tags: withPendingTag(values.tags, pendingTag),
     links: values.links.filter((link) => link.target && link.relationType),
   };
+}
+
+function contentsOf(movement: Movement | undefined, type: string): string[] {
+  return (
+    movement?.items.filter((i) => i.type === type).map((i) => i.content) ?? []
+  );
 }
 
 function MovementForm({ movement }: { movement?: Movement }) {
@@ -96,7 +112,12 @@ function MovementForm({ movement }: { movement?: Movement }) {
       key: movement?.key ?? '',
       name: movement?.name ?? '',
       description: movement?.description ?? '',
-      cues: movement?.cues.join('\n') ?? '',
+      cues: contentsOf(movement, 'CUE'),
+      comments: contentsOf(movement, 'COMMENT'),
+      otherItems:
+        movement?.items.filter(
+          (i) => i.type !== 'CUE' && i.type !== 'COMMENT',
+        ) ?? [],
       tags: movement?.tags ?? [],
       links: movement?.links ?? [],
     },
@@ -144,12 +165,12 @@ function MovementForm({ movement }: { movement?: Movement }) {
           minRows={3}
           {...form.getInputProps('description')}
         />
-        <Textarea
-          label="Cues"
-          description="One per line, in order"
-          autosize
-          minRows={3}
-          {...form.getInputProps('cues')}
+        <ItemList form={form} field="cues" title="Cues" singular="cue" />
+        <ItemList
+          form={form}
+          field="comments"
+          title="Comments"
+          singular="comment"
         />
         <TagsInput
           label="Tags"
@@ -213,5 +234,77 @@ function MovementForm({ movement }: { movement?: Movement }) {
         </Group>
       </Stack>
     </form>
+  );
+}
+
+/** An ordered list of texts of one item type, with add, remove and reorder. */
+function ItemList({
+  form,
+  field,
+  title,
+  singular,
+}: {
+  form: UseFormReturnType<FormValues>;
+  field: 'cues' | 'comments';
+  title: string;
+  singular: string;
+}) {
+  const values = form.values[field];
+  return (
+    <Stack gap="xs">
+      <Text fw={500} size="sm">
+        {title}
+      </Text>
+      {values.map((_, index) => (
+        <Group key={index} align="flex-start" wrap="nowrap">
+          <Text size="sm" pt={6} w={20}>
+            {index + 1}.
+          </Text>
+          <Textarea
+            aria-label={`${title}, item ${index + 1}`}
+            autosize
+            minRows={1}
+            style={{ flex: 1 }}
+            {...form.getInputProps(`${field}.${index}`)}
+          />
+          <ActionIcon
+            variant="default"
+            aria-label={`Move ${singular} up`}
+            disabled={index === 0}
+            onClick={() =>
+              form.reorderListItem(field, { from: index, to: index - 1 })
+            }
+          >
+            <IconArrowUp size={16} />
+          </ActionIcon>
+          <ActionIcon
+            variant="default"
+            aria-label={`Move ${singular} down`}
+            disabled={index === values.length - 1}
+            onClick={() =>
+              form.reorderListItem(field, { from: index, to: index + 1 })
+            }
+          >
+            <IconArrowDown size={16} />
+          </ActionIcon>
+          <ActionIcon
+            variant="subtle"
+            color="red"
+            aria-label={`Remove ${singular}`}
+            onClick={() => form.removeListItem(field, index)}
+          >
+            <IconTrash size={16} />
+          </ActionIcon>
+        </Group>
+      ))}
+      <Button
+        variant="default"
+        size="xs"
+        w="fit-content"
+        onClick={() => form.insertListItem(field, '')}
+      >
+        Add {singular}
+      </Button>
+    </Stack>
   );
 }

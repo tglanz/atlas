@@ -31,6 +31,12 @@ Docs record what stays true as the code changes. The code, migrations, and confi
 - When a change would make a doc stale, remove the volatile detail instead of updating it.
 - When in doubt, leave it out.
 
+## Issues
+
+- `./docs/issues` holds open issues, one file each.
+- When there is a natural moment, suggest taking an issue and fixing it. Do not start one without the user's agreement.
+- When an issue is fixed, remove its file, or update it if only part is done.
+
 ## UI and UX
 
 - Prioritize clarity, consistency, accessibility, and usability.

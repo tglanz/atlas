@@ -8,12 +8,19 @@
 - **Key**: Stable identifier.
 - **Name**: String.
 - **Description**: Text.
-- **Cues**: Ordered collection of performance instructions.
+- **Items**: Ordered collection of typed pieces of text, such as cues and comments.
 - **Tags**: Set of keywords.
 - **Links**: Collection of directed links, each containing a target Movement Key and a relationship type.
 - **Illustrations**: Ordered collection of Illustrations.
 
 Movements are edited in place; see `technicalities.md`.
+
+# Movement Item
+
+- **Type**: The kind of item, such as Cue or Comment. New types can be added without changing the model.
+- **Content**: Text.
+
+The model does not restrict how items are used. The user interface groups items by type for display, and offers only the types it supports when editing.
 
 # Illustration
 

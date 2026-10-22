@@ -4,6 +4,7 @@ import com.tglanz.atlas.backend.movement.application.port.out.MovementRepository
 import com.tglanz.atlas.backend.movement.domain.Illustration;
 import com.tglanz.atlas.backend.movement.domain.Movement;
 import com.tglanz.atlas.backend.movement.domain.MovementContent;
+import com.tglanz.atlas.backend.movement.domain.MovementItem;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.movement.domain.MovementLink;
 import java.util.ArrayList;
@@ -49,8 +50,13 @@ class MovementPersistenceAdapter implements MovementRepository {
     MovementContent content = movement.content();
     entity.name = content.name();
     entity.description = content.description();
-    entity.cues.clear();
-    entity.cues.addAll(content.cues());
+    entity.items.clear();
+    for (MovementItem item : content.items()) {
+      var row = new MovementEntity.ItemRow();
+      row.type = item.type();
+      row.content = item.content();
+      entity.items.add(row);
+    }
     entity.tags.clear();
     entity.tags.addAll(content.tags());
     entity.links.clear();
@@ -74,8 +80,10 @@ class MovementPersistenceAdapter implements MovementRepository {
     for (var row : e.links) {
       links.add(new MovementLink(new MovementKey(row.targetKey), row.relationType));
     }
+    List<MovementItem> items =
+        e.items.stream().map(row -> new MovementItem(row.type, row.content)).toList();
     MovementContent content =
-        new MovementContent(e.name, e.description, List.copyOf(e.cues), Set.copyOf(e.tags), links);
+        new MovementContent(e.name, e.description, items, Set.copyOf(e.tags), links);
     List<Illustration> illustrations =
         e.illustrations.stream().map(row -> new Illustration(row.url)).toList();
     return Movement.restore(new MovementKey(e.movementKey), content, illustrations);

@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test;
 class MovementTest {
 
   private static MovementContent content(String name) {
-    return new MovementContent(name, "desc", List.of("cue"), Set.of("Core"), List.of());
+    return new MovementContent(
+        name, "desc", List.of(new MovementItem(ItemType.CUE, "Brace")), Set.of("Core"), List.of());
   }
 
   private static Movement movement() {
@@ -45,5 +46,15 @@ class MovementTest {
   void contentRequiresNameAndNormalizesTags() {
     assertThatThrownBy(() -> content(" ")).isInstanceOf(IllegalArgumentException.class);
     assertThat(content("Plank").tags()).containsExactly("core");
+  }
+
+  @Test
+  void itemsHaveATypeAndContent() {
+    assertThatThrownBy(() -> new MovementItem(ItemType.COMMENT, " "))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new MovementItem(null, "x"))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThat(new MovementItem(ItemType.COMMENT, " Mind the wrist ").content())
+        .isEqualTo("Mind the wrist");
   }
 }

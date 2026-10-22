@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 public record MovementContent(
     String name,
     String description,
-    List<String> cues,
+    List<MovementItem> items,
     Set<String> tags,
     List<MovementLink> links) {
 
@@ -18,10 +18,7 @@ public record MovementContent(
     }
     name = name.strip();
     description = description == null ? "" : description;
-    cues = cues == null ? List.of() : List.copyOf(cues);
-    if (cues.stream().anyMatch(c -> c == null || c.isBlank())) {
-      throw new IllegalArgumentException("Cues must not be blank");
-    }
+    items = items == null ? List.of() : List.copyOf(items);
     tags =
         tags == null
             ? Set.of()

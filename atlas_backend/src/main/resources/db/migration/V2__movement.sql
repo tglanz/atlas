@@ -4,10 +4,11 @@ CREATE TABLE movement (
     description TEXT NOT NULL
 );
 
-CREATE TABLE movement_cue (
+CREATE TABLE movement_item (
     movement_key VARCHAR(100) NOT NULL REFERENCES movement (movement_key) ON DELETE CASCADE,
     position INTEGER NOT NULL,
-    cue TEXT NOT NULL,
+    type VARCHAR(32) NOT NULL,
+    content TEXT NOT NULL,
     PRIMARY KEY (movement_key, position)
 );
 

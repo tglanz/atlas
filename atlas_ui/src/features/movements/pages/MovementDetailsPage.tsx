@@ -13,6 +13,7 @@ import { Link, useParams } from 'react-router';
 import { useCurrentUser } from '@/features/auth';
 import { QueryBoundary } from '@/shared/ui';
 import type { Movement, MovementLink } from '../api';
+import { groupItems } from '../itemTypes';
 import { useMovement } from '../queries';
 
 export function MovementDetailsPage() {
@@ -76,18 +77,18 @@ function MovementView({ movement }: { movement: Movement }) {
         <Text style={{ whiteSpace: 'pre-wrap' }}>{movement.description}</Text>
       )}
 
-      {movement.cues.length > 0 && (
-        <section>
+      {groupItems(movement.items).map((group) => (
+        <section key={group.type}>
           <Title order={2} size="h3" mb="xs">
-            Cues
+            {group.title}
           </Title>
-          <List type="ordered">
-            {movement.cues.map((cue, index) => (
-              <List.Item key={index}>{cue}</List.Item>
+          <List type={group.ordered ? 'ordered' : 'unordered'}>
+            {group.items.map((item, index) => (
+              <List.Item key={index}>{item.content}</List.Item>
             ))}
           </List>
         </section>
-      )}
+      ))}
 
       {movement.tags.length > 0 && (
         <Group gap="xs">

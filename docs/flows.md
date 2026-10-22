@@ -6,7 +6,7 @@ Browse and search the Movement library by name and tags.
 
 ## View a Movement
 
-View its description, cues, illustrations, tags, and links to related Movements. Each relationship type appears in its own subsection, such as Progressions, with previews of candidate Movements.
+View its description, items grouped by type (such as cues and comments), illustrations, tags, and links to related Movements. Each relationship type appears in its own subsection, such as Progressions, with previews of candidate Movements.
 
 ## Create a Routine
 
@@ -24,7 +24,7 @@ View the Routine and its ordered Sections and Movements.
 
 ## Create a Movement
 
-Create a Movement with its name, description, cues, tags, and links to other Movements. Illustrations are optional during creation.
+Create a Movement with its name, description, items, tags, and links to other Movements. Illustrations are optional during creation.
 
 ## Edit a Movement
 

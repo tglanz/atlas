@@ -2,10 +2,13 @@ import { apiFetch } from '@/shared/api';
 
 export type MovementLink = { target: string; relationType: string };
 
+/** A piece of text about a movement. New types can be added without changing the model. */
+export type MovementItem = { type: string; content: string };
+
 export type MovementContent = {
   name: string;
   description: string;
-  cues: string[];
+  items: MovementItem[];
   tags: string[];
   links: MovementLink[];
 };
