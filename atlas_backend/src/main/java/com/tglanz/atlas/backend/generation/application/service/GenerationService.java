@@ -47,21 +47,28 @@ public class GenerationService implements GenerationUseCase {
   }
 
   @Override
-  public GenerationMovementIllustrations request(String movementKey, List<StageDefinition> stages) {
-    if (movements.find(movementKey).isEmpty()) {
-      throw new NotFoundException("No movement " + movementKey);
+  public GenerationMovementIllustrations request(
+      String movementKey, UUID avatarId, UUID viewpointId) {
+    Movements.Info movement =
+        movements
+            .find(movementKey)
+            .orElseThrow(() -> new NotFoundException("No movement " + movementKey));
+    if (movement.stages().isEmpty()) {
+      throw new IllegalArgumentException("The movement has no stages to generate");
     }
-    for (StageDefinition stage : stages) {
-      if (avatars.find(stage.avatarId()).isEmpty()) {
-        throw new IllegalArgumentException("Unknown avatar");
-      }
-      if (viewpoints.findById(stage.viewpointId()).isEmpty()) {
-        throw new IllegalArgumentException("Unknown viewpoint");
-      }
+    if (avatars.find(avatarId).isEmpty()) {
+      throw new IllegalArgumentException("Unknown avatar");
+    }
+    if (viewpoints.findById(viewpointId).isEmpty()) {
+      throw new IllegalArgumentException("Unknown viewpoint");
     }
     if (generations.existsInProgress(movementKey)) {
       throw new ConflictException("This movement already has a generation in progress");
     }
+    List<StageDefinition> stages =
+        movement.stages().stream()
+            .map(s -> new StageDefinition(avatarId, viewpointId, s.name(), s.description()))
+            .toList();
     var generation = GenerationMovementIllustrations.create(movementKey, stages, clock.instant());
     generations.save(generation);
     scheduler.schedule(generation.id());

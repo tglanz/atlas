@@ -9,9 +9,9 @@ The templates are Mustache files in `atlas_backend/src/main/resources/generation
 - `movement.name`, `movement.description`, `movement.cues` (the Movement's cues, in order)
 - `avatar.specification`
 - `viewpoint.specification`
-- `stage.instructions`
+- `stage.name`, `stage.description` (the Movement stage this image shows)
 
-Both templates get the same model. A text that is empty or blank counts as absent, so a Mustache section on it (`{{#stage.instructions}}...{{/stage.instructions}}`) renders only when there is something to show. Nothing is HTML-escaped. Leading and trailing whitespace of each rendered text is stripped.
+Both templates get the same model. A text that is empty or blank counts as absent, so a Mustache section on it (`{{#movement.description}}...{{/movement.description}}`) renders only when there is something to show. Nothing is HTML-escaped. Leading and trailing whitespace of each rendered text is stripped.
 
 Adding something to the model, such as a Movement's cues, means extending what the worker gives the renderer.
 

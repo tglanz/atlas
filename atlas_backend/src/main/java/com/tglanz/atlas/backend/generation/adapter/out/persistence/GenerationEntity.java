@@ -53,7 +53,9 @@ class GenerationEntity {
     @Column(name = "viewpoint_id")
     String viewpointId;
 
-    String instructions;
+    String name;
+
+    String description;
 
     @Column(name = "candidate_state")
     @Enumerated(EnumType.STRING)

@@ -15,7 +15,7 @@ public final class GenerationMovementIllustrations {
   private static final int MAX_STAGES = 20;
 
   /** What a maintainer asks for in one stage. */
-  public record StageDefinition(UUID avatarId, UUID viewpointId, String instructions) {}
+  public record StageDefinition(UUID avatarId, UUID viewpointId, String name, String description) {}
 
   private final UUID id;
   private final String movementKey;
@@ -59,7 +59,12 @@ public final class GenerationMovementIllustrations {
       StageDefinition d = definitions.get(i);
       stages.add(
           new IllustrationStage(
-              i, d.avatarId(), d.viewpointId(), d.instructions(), IllustrationCandidate.pending()));
+              i,
+              d.avatarId(),
+              d.viewpointId(),
+              d.name(),
+              d.description(),
+              IllustrationCandidate.pending()));
     }
     return new GenerationMovementIllustrations(
         UUID.randomUUID(), movementKey, GenerationStatus.PENDING, null, now, null, stages);

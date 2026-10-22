@@ -11,7 +11,7 @@ import {
   requestGeneration,
   updateViewpoint,
 } from './api';
-import type { IllustrationStageInput, ViewpointInput } from './api';
+import type { ViewpointInput } from './api';
 
 const viewpointsKey = ['viewpoints'] as const;
 const generationsKey = (movementKey: string) =>
@@ -68,8 +68,10 @@ function useGenerationMutation<V>(
 }
 
 export const useRequestGeneration = (movementKey: string) =>
-  useGenerationMutation(movementKey, (stages: IllustrationStageInput[]) =>
-    requestGeneration(movementKey, stages),
+  useGenerationMutation(
+    movementKey,
+    (input: { avatarId: string; viewpointId: string }) =>
+      requestGeneration(movementKey, input),
   );
 
 export const useApplyGeneration = (movementKey: string) =>

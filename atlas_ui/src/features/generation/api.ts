@@ -16,12 +16,6 @@ export type GenerationStatus =
   | 'DISCARDED'
   | 'FAILED';
 
-export type IllustrationStageInput = {
-  avatarId: string;
-  viewpointId: string;
-  instructions: string;
-};
-
 export type IllustrationCandidate = {
   state: 'PENDING' | 'DONE' | 'FAILED';
   imageUrl: string | null;
@@ -36,10 +30,14 @@ export type GenerationMovementIllustrations = {
   failureReason: string | null;
   createdAt: string;
   finishedAt: string | null;
-  stages: (IllustrationStageInput & {
+  stages: {
     position: number;
+    avatarId: string;
+    viewpointId: string;
+    name: string;
+    description: string;
     candidate: IllustrationCandidate;
-  })[];
+  }[];
 };
 
 export const listViewpoints = () => apiFetch<Viewpoint[]>('/viewpoints');
@@ -63,13 +61,14 @@ export const listGenerations = (movementKey: string) =>
     `${movementPath(movementKey)}/generations`,
   );
 
+/** Generates an image for each stage of the movement, with this avatar and viewpoint. */
 export const requestGeneration = (
   movementKey: string,
-  stages: IllustrationStageInput[],
+  input: { avatarId: string; viewpointId: string },
 ) =>
   apiFetch<GenerationMovementIllustrations>(
     `${movementPath(movementKey)}/generations`,
-    { method: 'POST', body: { stages } },
+    { method: 'POST', body: input },
   );
 
 export const applyGeneration = (movementKey: string, id: string) =>

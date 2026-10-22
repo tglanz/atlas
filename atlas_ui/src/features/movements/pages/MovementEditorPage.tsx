@@ -24,8 +24,10 @@ import type {
   Movement,
   MovementContent,
   MovementItem,
+  MovementStage,
 } from '@/shared/movements';
 import { LinkRows } from '../components/LinkRows';
+import { StageRows } from '../components/StageRows';
 import { KEY_FORMAT, keyFromName } from '../movementKey';
 import {
   movementKeys,
@@ -65,6 +67,7 @@ type FormValues = {
   cues: string[];
   comments: string[];
   otherItems: MovementItem[];
+  stages: MovementStage[];
   tags: string[];
   // Edges leaving this movement. They are stored in the graph, not in the movement.
   links: { target: string; type: string }[];
@@ -91,6 +94,10 @@ function toContent(values: FormValues, pendingTag: string): MovementContent {
       ...texts('COMMENT', values.comments),
       ...values.otherItems,
     ],
+    stages: values.stages.map((s) => ({
+      name: s.name.trim(),
+      description: s.description.trim(),
+    })),
     tags: withPendingTag(values.tags, pendingTag),
   };
 }
@@ -132,6 +139,7 @@ function MovementForm({
         movement?.items.filter(
           (i) => i.type !== 'CUE' && i.type !== 'COMMENT',
         ) ?? [],
+      stages: movement?.stages ?? [],
       tags: movement?.tags ?? [],
       links: outgoing?.map((e) => ({ target: e.target, type: e.type })) ?? [],
     },
@@ -141,6 +149,10 @@ function MovementForm({
           ? null
           : 'Use lowercase letters, digits, hyphens and underscores',
       name: (v) => (v.trim() ? null : 'Enter a name'),
+      stages: (rows) =>
+        rows.every((row) => row.name.trim() && row.description.trim())
+          ? null
+          : 'Give every stage a name and a description',
       links: (rows) =>
         rows.every((row) => row.target && row.type)
           ? null
@@ -211,6 +223,15 @@ function MovementForm({
           title="Comments"
           singular="comment"
         />
+        <StageRows
+          value={form.values.stages}
+          onChange={(rows) => form.setFieldValue('stages', rows)}
+          error={
+            typeof form.errors.stages === 'string'
+              ? form.errors.stages
+              : undefined
+          }
+        />
         <TagsInput
           label="Tags"
           description="Press Enter to add a tag"
@@ -240,6 +261,7 @@ function MovementForm({
             <IllustrationGeneration
               movementKey={movement.key}
               illustrations={movement.illustrations}
+              stages={movement.stages}
               onChanged={() =>
                 queryClient.invalidateQueries({ queryKey: movementKeys.all })
               }

@@ -9,6 +9,7 @@
 - **Name**: String.
 - **Description**: Text saying what the movement is generally for. How it relates to other movements belongs in the Movement Graph, not here.
 - **Items**: Ordered collection of typed pieces of text, such as cues and comments.
+- **Stages**: Ordered collection of Movement Stages.
 - **Tags**: Set of keywords.
 - **Illustrations**: Ordered collection of Illustrations.
 
@@ -20,6 +21,13 @@ Movements are edited in place; see `technicalities.md`.
 - **Content**: Text.
 
 The model does not restrict how items are used. The user interface groups items by type for display, and offers only the types it supports when editing.
+
+# Movement Stage
+
+- **Name**: String.
+- **Description**: Text saying what the movement looks like at this stage, as a position of the body. Generation uses it to draw the stage, so it describes what can be seen.
+
+A Movement Stage is a position or phase worth showing. One Illustration is produced for each stage.
 
 # Movement Graph
 

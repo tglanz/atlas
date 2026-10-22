@@ -16,7 +16,7 @@ Generate the Illustrations of a Movement with an external provider. Generated im
 - **GenerationMovementIllustrations**: the generation state for a Movement's Illustrations. A record in our database that stands for a maintainer's order to generate one image per IllustrationStage for a Movement. It holds the IllustrationStages and tracks progress, so the UI can poll it while a worker generates in the background.
 - **GenerationMovementIllustrationsRequest**: the body the UI sends to the API to start a generation. It is the API request, not the record.
 - **GenerationMovementIllustrationsResponse**: what the API returns for a GenerationMovementIllustrations.
-- **IllustrationStage**: one image to generate, defined by an Avatar, a Viewpoint, and free-text instructions. It belongs to one GenerationMovementIllustrations and has a position in it.
+- **IllustrationStage**: one image to generate, defined by an Avatar, a Viewpoint, and a Movement stage's name and description. It belongs to one GenerationMovementIllustrations and has a position in it.
 - **IllustrationCandidate**: the image generated for an IllustrationStage, with its state and provider details. It is not on the Movement until approved.
 - **Provider**: the external service that generates images, such as fal.ai.
 - **Provider request**: one call to the provider, identified by the provider's request id. An IllustrationStage makes one.
@@ -34,7 +34,7 @@ Out of scope: images a maintainer provides themselves (they are not generation),
 
 ### P0: the first implementation
 
-- Generate one image per IllustrationStage. Its system prompt is its own Avatar's and Viewpoint's specifications, and its image prompt is the Movement's name and description plus the IllustrationStage's instructions.
+- Generate one image per IllustrationStage. Its system prompt is its own Avatar's and Viewpoint's specifications, and its image prompt is the Movement's name and description plus the stage's name and description.
 - Generation only runs from an explicit Generate action by a maintainer.
 - A Movement has at most one generation in progress. Generate is disabled in the UI while a record of the Movement is `PENDING` or `RUNNING`, and the backend rejects it.
 - It runs in the background, one IllustrationStage at a time. A GenerationMovementIllustrations has a status that the UI can poll.
@@ -104,7 +104,8 @@ New or changed, in the relational database. Existing tables that do not change a
   - `position`: integer, part of the primary key
   - `avatar_id`: uuid, references `avatar`
   - `viewpoint_id`: uuid, references `viewpoint`
-  - `instructions`: text
+  - `name`: text
+  - `description`: text
   - `candidate_state`: text, one of `PENDING`, `DONE`, `FAILED`
   - `candidate_image_url`: text, null until `DONE`
   - `candidate_failure_reason`: text, null unless `FAILED`
@@ -120,7 +121,7 @@ New or changed, in the relational database. Existing tables that do not change a
 ### Domain objects
 
 - **GenerationMovementIllustrations**: `id`, `movementKey`, `status`, `failureReason`, `createdAt`, `finishedAt`, `stages` (a list of IllustrationStage ordered by position).
-- **IllustrationStage**: `position`, `avatarId`, `viewpointId`, `instructions`, `candidate` (an IllustrationCandidate).
+- **IllustrationStage**: `position`, `avatarId`, `viewpointId`, `name`, `description`, `candidate` (an IllustrationCandidate).
 - **IllustrationCandidate**: `state`, `imageUrl`, `failureReason`, `provider`, `model`, `providerRequestId`, `providerStatusUrl`, `providerResultUrl`, `obtainedAt`.
 - **Illustration** (existing): `imageUrl`, in the Movement's ordered list.
 - **Avatar** and **Viewpoint** (existing): `id`, `name`, `specification`.
@@ -146,11 +147,9 @@ All endpoints are maintainer-only. `{key}` is the Movement's key and `{id}` the 
 ### Objects
 
 - **GenerationMovementIllustrationsRequest**
-  - `stages`: a list of IllustrationStageInput, at least one
-- **IllustrationStageInput**
   - `avatarId`: uuid
   - `viewpointId`: uuid
-  - `instructions`: string, may be empty
+  - The stages are not in the body. The Movement's own stages are used, one IllustrationStage for each.
 - **GenerationMovementIllustrationsResponse**
   - `id`: uuid
   - `movementKey`: string
@@ -163,7 +162,8 @@ All endpoints are maintainer-only. `{key}` is the Movement's key and `{id}` the 
   - `position`: integer
   - `avatarId`: uuid
   - `viewpointId`: uuid
-  - `instructions`: string
+  - `name`: string
+  - `description`: string
   - `candidate`: IllustrationCandidateResponse
 - **IllustrationCandidateResponse**
   - `state`: `PENDING`, `DONE` or `FAILED`
@@ -177,7 +177,7 @@ All endpoints are maintainer-only. `{key}` is the Movement's key and `{id}` the 
 - `POST /api/movements/{key}/generations`
   - Body: GenerationMovementIllustrationsRequest
   - Returns 202 with a GenerationMovementIllustrationsResponse, status `PENDING`
-  - 400 if there are no stages or an Avatar or Viewpoint does not exist. 404 if the Movement does not exist.
+  - 400 if the Movement has no stages or the Avatar or Viewpoint does not exist. 404 if the Movement does not exist.
   - 409 if the Movement already has a record whose status is `PENDING` or `RUNNING`. The check in the code gives a clear message, and the unique index catches two simultaneous calls.
   - Changed: the body no longer allows static images.
 - `GET /api/movements/{key}/generations`
@@ -200,12 +200,12 @@ Saving a Movement never changes its Illustrations. Only apply does.
 
 ### Generate and approve
 
-1. In the Movement editor the maintainer enters IllustrationStages, each with an Avatar, a Viewpoint and instructions, and presses Generate.
+1. In the Movement editor the maintainer chooses an Avatar and a Viewpoint, and presses Generate. There is one IllustrationStage for each stage of the Movement, taken from the Movement when the generation is created.
 2. The UI calls the create endpoint. The backend checks that the Movement, Avatars and Viewpoints exist, that there is at least one IllustrationStage, and that no other record of the Movement is `PENDING` or `RUNNING`. It stores a GenerationMovementIllustrations as `PENDING`, with every IllustrationCandidate `PENDING`, and returns it.
 3. The UI polls the read endpoint while the status is `PENDING` or `RUNNING`. Generate stays disabled for that Movement meanwhile. Each IllustrationStage whose candidate is `PENDING` shows a spinner. When a poll returns a candidate as `DONE`, its spinner is replaced by the image, loaded from its `candidate_image_url`, before the other IllustrationStages have finished.
 4. A background worker takes the GenerationMovementIllustrations and sets it `RUNNING`.
 5. For each IllustrationStage, in position order:
-   1. Compose the system prompt from its Avatar's and Viewpoint's specifications, and the image prompt from the Movement's name and description and its instructions.
+   1. Compose the system prompt from its Avatar's and Viewpoint's specifications, and the image prompt from the Movement's name and description and the stage's name and description.
    2. The connector submits one provider request to fal.ai's queue, asking for one image with the lifetime header set to no expiry. It stores `provider`, `model`, `provider_request_id` and the returned status and result URLs on the row at once.
    3. It polls the status URL until the provider request completes, within a time limit.
    4. It fetches the result right away and reads the image URL of the first image.
@@ -228,7 +228,7 @@ Saving a Movement never changes its Illustrations. Only apply does.
 
 1. A GenerationMovementIllustrations is `READY_FOR_REVIEW` and the maintainer does not want the result.
 2. The UI calls the discard endpoint. The status becomes `DISCARDED` and the Movement is unchanged.
-3. The maintainer can create a new GenerationMovementIllustrations, with changed instructions for example.
+3. The maintainer can create a new GenerationMovementIllustrations, with another Avatar for example.
 
 ## Changes to current state
 

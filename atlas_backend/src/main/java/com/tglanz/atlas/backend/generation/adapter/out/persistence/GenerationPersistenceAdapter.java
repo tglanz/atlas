@@ -79,7 +79,8 @@ class GenerationPersistenceAdapter implements GenerationRepository {
     var row = new GenerationEntity.StageRow();
     row.avatarId = stage.avatarId().toString();
     row.viewpointId = stage.viewpointId().toString();
-    row.instructions = stage.instructions();
+    row.name = stage.name();
+    row.description = stage.description();
     IllustrationCandidate c = stage.candidate();
     row.candidateState = c.state();
     row.candidateImageUrl = c.imageUrl();
@@ -116,7 +117,8 @@ class GenerationPersistenceAdapter implements GenerationRepository {
                       i,
                       UUID.fromString(r.avatarId),
                       UUID.fromString(r.viewpointId),
-                      r.instructions,
+                      r.name,
+                      r.description,
                       candidate);
                 })
             .toList();

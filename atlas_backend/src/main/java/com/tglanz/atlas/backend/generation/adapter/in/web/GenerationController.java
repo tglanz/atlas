@@ -2,14 +2,10 @@ package com.tglanz.atlas.backend.generation.adapter.in.web;
 
 import com.tglanz.atlas.backend.generation.application.port.in.GenerationUseCase;
 import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations;
-import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations.StageDefinition;
 import com.tglanz.atlas.backend.generation.domain.IllustrationCandidate;
 import com.tglanz.atlas.backend.generation.domain.IllustrationStage;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
@@ -26,13 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/movements/{key}/generations")
 class GenerationController {
 
-  record IllustrationStageInput(
-      @NotNull UUID avatarId,
-      @NotNull UUID viewpointId,
-      @NotBlank @Size(max = 4000) String instructions) {}
-
+  /** Generates an image for each stage of the Movement, all with this Avatar and Viewpoint. */
   record GenerationMovementIllustrationsRequest(
-      @NotEmpty @Size(max = 20) List<@NotNull @Valid IllustrationStageInput> stages) {}
+      @NotNull UUID avatarId, @NotNull UUID viewpointId) {}
 
   record IllustrationCandidateResponse(
       String state, String imageUrl, String failureReason, String progress) {
@@ -46,14 +38,16 @@ class GenerationController {
       int position,
       UUID avatarId,
       UUID viewpointId,
-      String instructions,
+      String name,
+      String description,
       IllustrationCandidateResponse candidate) {
     static IllustrationStageResponse from(IllustrationStage s) {
       return new IllustrationStageResponse(
           s.position(),
           s.avatarId(),
           s.viewpointId(),
-          s.instructions(),
+          s.name(),
+          s.description(),
           IllustrationCandidateResponse.from(s.candidate()));
     }
   }
@@ -87,11 +81,8 @@ class GenerationController {
   @PostMapping
   ResponseEntity<GenerationMovementIllustrationsResponse> request(
       @PathVariable String key, @Valid @RequestBody GenerationMovementIllustrationsRequest body) {
-    List<StageDefinition> stages =
-        body.stages().stream()
-            .map(s -> new StageDefinition(s.avatarId(), s.viewpointId(), s.instructions()))
-            .toList();
-    GenerationMovementIllustrations created = useCase.request(key, stages);
+    GenerationMovementIllustrations created =
+        useCase.request(key, body.avatarId(), body.viewpointId());
     return ResponseEntity.accepted()
         .location(URI.create("/api/movements/" + key + "/generations/" + created.id()))
         .body(GenerationMovementIllustrationsResponse.from(created));

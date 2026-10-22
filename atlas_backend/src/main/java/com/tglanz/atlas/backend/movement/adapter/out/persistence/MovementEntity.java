@@ -34,6 +34,11 @@ class MovementEntity {
   List<ItemRow> items = new ArrayList<>();
 
   @ElementCollection
+  @CollectionTable(name = "movement_stage", joinColumns = @JoinColumn(name = "movement_key"))
+  @OrderColumn(name = "position")
+  List<StageRow> stages = new ArrayList<>();
+
+  @ElementCollection
   @CollectionTable(name = "movement_tag", joinColumns = @JoinColumn(name = "movement_key"))
   @Column(name = "tag")
   Set<String> tags = new HashSet<>();
@@ -49,6 +54,12 @@ class MovementEntity {
     ItemType type;
 
     String content;
+  }
+
+  @Embeddable
+  static class StageRow {
+    String name;
+    String description;
   }
 
   @Embeddable

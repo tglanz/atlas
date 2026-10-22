@@ -3,10 +3,14 @@ import { apiFetch } from '@/shared/api';
 /** A piece of text about a movement. New types can be added without changing the model. */
 export type MovementItem = { type: string; content: string };
 
+/** A position of a movement worth showing, such as the bottom of a push-up. */
+export type MovementStage = { name: string; description: string };
+
 export type MovementContent = {
   name: string;
   description: string;
   items: MovementItem[];
+  stages: MovementStage[];
   tags: string[];
 };
 

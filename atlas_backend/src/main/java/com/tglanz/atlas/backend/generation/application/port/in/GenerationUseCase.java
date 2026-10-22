@@ -1,14 +1,13 @@
 package com.tglanz.atlas.backend.generation.application.port.in;
 
 import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations;
-import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations.StageDefinition;
 import java.util.List;
 import java.util.UUID;
 
 public interface GenerationUseCase {
 
-  /** Queues the generation of one image per stage for the Movement. */
-  GenerationMovementIllustrations request(String movementKey, List<StageDefinition> stages);
+  /** Queues the generation of one image for each stage of the Movement. */
+  GenerationMovementIllustrations request(String movementKey, UUID avatarId, UUID viewpointId);
 
   GenerationMovementIllustrations get(String movementKey, UUID id);
 

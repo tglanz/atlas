@@ -7,6 +7,7 @@ import com.tglanz.atlas.backend.movement.domain.MovementContent;
 import com.tglanz.atlas.backend.movement.domain.MovementItem;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.movement.domain.MovementName;
+import com.tglanz.atlas.backend.movement.domain.MovementStage;
 import com.tglanz.atlas.backend.movement.domain.TagCount;
 import java.util.Collection;
 import java.util.List;
@@ -74,6 +75,13 @@ class MovementPersistenceAdapter implements MovementRepository {
       row.content = item.content();
       entity.items.add(row);
     }
+    entity.stages.clear();
+    for (MovementStage stage : content.stages()) {
+      var row = new MovementEntity.StageRow();
+      row.name = stage.name();
+      row.description = stage.description();
+      entity.stages.add(row);
+    }
     entity.tags.clear();
     entity.tags.addAll(content.tags());
     entity.illustrations.clear();
@@ -88,7 +96,10 @@ class MovementPersistenceAdapter implements MovementRepository {
   private Movement toDomain(MovementEntity e) {
     List<MovementItem> items =
         e.items.stream().map(row -> new MovementItem(row.type, row.content)).toList();
-    MovementContent content = new MovementContent(e.name, e.description, items, Set.copyOf(e.tags));
+    List<MovementStage> stages =
+        e.stages.stream().map(row -> new MovementStage(row.name, row.description)).toList();
+    MovementContent content =
+        new MovementContent(e.name, e.description, items, stages, Set.copyOf(e.tags));
     List<Illustration> illustrations =
         e.illustrations.stream().map(row -> new Illustration(row.imageUrl)).toList();
     return Movement.restore(new MovementKey(e.movementKey), content, illustrations);

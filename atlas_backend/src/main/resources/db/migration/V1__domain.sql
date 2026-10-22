@@ -35,6 +35,14 @@ CREATE TABLE movement_item (
     PRIMARY KEY (movement_key, position)
 );
 
+CREATE TABLE movement_stage (
+    movement_key VARCHAR(100) NOT NULL REFERENCES movement (movement_key) ON DELETE CASCADE,
+    position INTEGER NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    description TEXT NOT NULL,
+    PRIMARY KEY (movement_key, position)
+);
+
 CREATE TABLE movement_tag (
     movement_key VARCHAR(100) NOT NULL REFERENCES movement (movement_key) ON DELETE CASCADE,
     tag VARCHAR(100) NOT NULL,
@@ -82,7 +90,8 @@ CREATE TABLE generation_illustration_stage (
     position INTEGER NOT NULL,
     avatar_id VARCHAR(36) NOT NULL REFERENCES avatar (id),
     viewpoint_id VARCHAR(36) NOT NULL REFERENCES viewpoint (id),
-    instructions TEXT NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    description TEXT NOT NULL,
     candidate_state VARCHAR(16) NOT NULL,
     candidate_image_url TEXT,
     candidate_failure_reason TEXT,

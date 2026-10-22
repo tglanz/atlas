@@ -8,7 +8,7 @@ The design is in `docs/rfcs/image-generation.md`, and how fal.ai behaves is in `
 ## Context
 
 - Generation sits behind a port and is currently a stub that returns a placeholder. Image storage is also a stub (S3 is the plan).
-- A stage to generate has the Avatar's specification, the Viewpoint's specification, and optionally instructions and a reference image. One image is produced per stage.
+- A stage to generate has the Avatar's specification, the Viewpoint's specification, and a stage name and description (optionally with a reference image). One image is produced per stage.
 - Volume is small: a few images per movement, generated once and stored. The cost that matters is the number of attempts needed and keeping the figure consistent across the stages of one movement, more than the price of a single picture.
 
 ## Direction

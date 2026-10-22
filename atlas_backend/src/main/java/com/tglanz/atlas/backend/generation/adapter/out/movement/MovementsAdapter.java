@@ -35,7 +35,9 @@ class MovementsAdapter implements Movements {
               .filter(item -> item.type() == ItemType.CUE)
               .map(MovementItem::content)
               .toList();
-      return Optional.of(new Info(content.name(), content.description(), cues));
+      List<Stage> stages =
+          content.stages().stream().map(s -> new Stage(s.name(), s.description())).toList();
+      return Optional.of(new Info(content.name(), content.description(), cues, stages));
     } catch (NotFoundException | IllegalArgumentException e) {
       return Optional.empty();
     }

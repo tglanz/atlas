@@ -15,7 +15,7 @@ class GenerationMovementIllustrationsTest {
   private static final Instant NOW = Instant.parse("2026-01-01T00:00:00Z");
 
   private static GenerationMovementIllustrations running() {
-    var stage = new StageDefinition(UUID.randomUUID(), UUID.randomUUID(), "start");
+    var stage = new StageDefinition(UUID.randomUUID(), UUID.randomUUID(), "Bottom", "start");
     var g = GenerationMovementIllustrations.create("push-up", List.of(stage, stage), NOW);
     g.start();
     return g;

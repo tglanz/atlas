@@ -125,7 +125,8 @@ public class ImageGenerationWorker implements RunGenerationUseCase {
             movement.cues(),
             avatar,
             viewpoint.specification(),
-            stage.instructions()));
+            stage.name(),
+            stage.description()));
   }
 
   private static String describe(RuntimeException e) {

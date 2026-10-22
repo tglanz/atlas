@@ -1,20 +1,19 @@
 import {
-  ActionIcon,
   Alert,
   Button,
   Card,
   Group,
   Image,
+  List,
   Loader,
   Select,
   Stack,
   Text,
-  Textarea,
 } from '@mantine/core';
-import { IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useAvatars } from '@/features/avatars';
 import { QueryBoundary } from '@/shared/ui';
+import type { MovementStage } from '@/shared/movements';
 import type { GenerationMovementIllustrations } from '../api';
 import {
   useApplyGeneration,
@@ -25,17 +24,18 @@ import {
   useViewpoints,
 } from '../queries';
 
-const MAX_STAGES = 20;
-
 /** An existing movement's illustrations, and generating new ones for review. */
 export function IllustrationGeneration({
   movementKey,
   illustrations,
+  stages,
   onChanged,
 }: {
   movementKey: string;
   /** Image urls of the movement's Illustrations, in order. */
   illustrations: string[];
+  /** The movement's stages: one image is generated for each. */
+  stages: MovementStage[];
   /** Called after the Illustrations changed, so the movement can be reloaded. */
   onChanged: () => void;
 }) {
@@ -87,18 +87,22 @@ export function IllustrationGeneration({
           onApplied={onChanged}
         />
       )}
-      <GenerateForm movementKey={movementKey} disabled={inProgress} />
+      <GenerateForm
+        movementKey={movementKey}
+        stages={stages}
+        disabled={inProgress}
+      />
     </Stack>
   );
 }
 
-type StageForm = { instructions: string };
-
 function GenerateForm({
   movementKey,
+  stages,
   disabled,
 }: {
   movementKey: string;
+  stages: MovementStage[];
   disabled: boolean;
 }) {
   const avatars = useAvatars();
@@ -106,7 +110,14 @@ function GenerateForm({
   const request = useRequestGeneration(movementKey);
   const [avatarId, setAvatarId] = useState<string | null>(null);
   const [viewpointId, setViewpointId] = useState<string | null>(null);
-  const [stages, setStages] = useState<StageForm[]>([{ instructions: '' }]);
+
+  if (stages.length === 0) {
+    return (
+      <Alert color="blue">
+        Add stages to this movement and save it to generate its illustrations.
+      </Alert>
+    );
+  }
 
   return (
     <QueryBoundary query={avatars}>
@@ -128,11 +139,7 @@ function GenerateForm({
               viewpointId ??
               viewpointItems.find((v) => v.isDefault)?.id ??
               (viewpointItems.length === 1 ? viewpointItems[0].id : null);
-            const ready = Boolean(
-              chosenAvatar &&
-              chosenViewpoint &&
-              stages.every((s) => s.instructions.trim()),
-            );
+            const ready = Boolean(chosenAvatar && chosenViewpoint);
 
             return (
               <Stack gap="sm">
@@ -156,65 +163,30 @@ function GenerateForm({
                     onChange={setViewpointId}
                   />
                 </Group>
-                {stages.map((stage, index) => (
-                  <Card key={index} withBorder padding="sm">
-                    <Group align="flex-start" wrap="nowrap">
-                      <Text fw={600} w={60}>
-                        Stage {index + 1}
+                <Text size="sm" c="dimmed">
+                  One image is generated for each stage of the movement. Edit
+                  the stages above and save to change them.
+                </Text>
+                <List type="ordered" size="sm">
+                  {stages.map((stage, index) => (
+                    <List.Item key={index}>
+                      <Text span fw={600} size="sm">
+                        {stage.name}
                       </Text>
-                      <Textarea
-                        style={{ flex: 1 }}
-                        aria-label={`Stage ${index + 1} instructions`}
-                        placeholder="Describe this stage, e.g. chest an inch above the floor"
-                        autosize
-                        minRows={2}
-                        value={stage.instructions}
-                        onChange={(e) => {
-                          const instructions = e.currentTarget.value;
-                          setStages((all) =>
-                            all.map((s, i) =>
-                              i === index ? { instructions } : s,
-                            ),
-                          );
-                        }}
-                      />
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        aria-label={`Remove stage ${index + 1}`}
-                        disabled={stages.length === 1}
-                        onClick={() =>
-                          setStages((all) => all.filter((_, i) => i !== index))
-                        }
-                      >
-                        <IconTrash size={16} />
-                      </ActionIcon>
-                    </Group>
-                  </Card>
-                ))}
+                      : {stage.description}
+                    </List.Item>
+                  ))}
+                </List>
                 <Group>
-                  <Button
-                    variant="default"
-                    size="xs"
-                    disabled={stages.length >= MAX_STAGES}
-                    onClick={() =>
-                      setStages((all) => [...all, { instructions: '' }])
-                    }
-                  >
-                    Add stage
-                  </Button>
                   <Button
                     size="xs"
                     loading={request.isPending}
                     disabled={disabled || !ready}
                     onClick={() =>
-                      request.mutate(
-                        stages.map((s) => ({
-                          avatarId: chosenAvatar as string,
-                          viewpointId: chosenViewpoint as string,
-                          instructions: s.instructions.trim(),
-                        })),
-                      )
+                      request.mutate({
+                        avatarId: chosenAvatar as string,
+                        viewpointId: chosenViewpoint as string,
+                      })
                     }
                   >
                     Generate
@@ -261,7 +233,7 @@ function Review({
               {stage.candidate.state === 'DONE' && stage.candidate.imageUrl ? (
                 <Image
                   src={stage.candidate.imageUrl}
-                  alt={`New step ${stage.position + 1}`}
+                  alt={`New ${stage.name}`}
                   h={120}
                   w="auto"
                   fit="contain"
@@ -275,10 +247,7 @@ function Review({
                   Not generated
                 </Text>
               ) : (
-                <Loader
-                  size="sm"
-                  aria-label={`Generating step ${stage.position + 1}`}
-                />
+                <Loader size="sm" aria-label={`Generating ${stage.name}`} />
               )}
               {stage.candidate.state === 'PENDING' &&
                 stage.candidate.progress && (
@@ -287,7 +256,7 @@ function Review({
                   </Text>
                 )}
               <Text size="xs" c="dimmed">
-                Step {stage.position + 1}
+                {stage.name}
               </Text>
             </Stack>
           ))}

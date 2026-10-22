@@ -11,7 +11,11 @@ class MovementTest {
 
   private static MovementContent content(String name) {
     return new MovementContent(
-        name, "desc", List.of(new MovementItem(ItemType.CUE, "Brace")), Set.of("Core"));
+        name,
+        "desc",
+        List.of(new MovementItem(ItemType.CUE, "Brace")),
+        List.of(new MovementStage("Hold", "Body straight")),
+        Set.of("Core"));
   }
 
   private static Movement movement() {
@@ -48,6 +52,15 @@ class MovementTest {
   void contentRequiresNameAndNormalizesTags() {
     assertThatThrownBy(() -> content(" ")).isInstanceOf(IllegalArgumentException.class);
     assertThat(content("Plank").tags()).containsExactly("core");
+  }
+
+  @Test
+  void stagesHaveANameAndDescription() {
+    assertThatThrownBy(() -> new MovementStage(" ", "x"))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new MovementStage("Bottom", " "))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThat(new MovementStage(" Bottom ", " Chest to floor ").name()).isEqualTo("Bottom");
   }
 
   @Test

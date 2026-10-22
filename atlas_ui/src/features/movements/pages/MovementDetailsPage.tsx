@@ -68,6 +68,24 @@ function MovementView({ movement }: { movement: Movement }) {
         </section>
       ))}
 
+      {movement.stages.length > 0 && (
+        <section>
+          <Title order={2} size="h3" mb="xs">
+            Stages
+          </Title>
+          <List type="ordered">
+            {movement.stages.map((stage, index) => (
+              <List.Item key={index}>
+                <Text span fw={600}>
+                  {stage.name}
+                </Text>
+                : {stage.description}
+              </List.Item>
+            ))}
+          </List>
+        </section>
+      )}
+
       {movement.tags.length > 0 && (
         <Group gap="xs">
           {movement.tags.map((tag) => (
