@@ -34,20 +34,20 @@ class FalImageConnector implements ImageConnector {
   private final JsonMapper json = JsonMapper.builder().build();
   private final String apiKey;
   private final String model;
-  private final String aspectRatio;
-  private final String resolution;
+  private final String imageSize;
+  private final String quality;
   private final Duration timeout;
 
   FalImageConnector(
       @Value("${atlas.generation.fal.api-key:}") String apiKey,
       @Value("${atlas.generation.fal.model}") String model,
-      @Value("${atlas.generation.fal.aspect-ratio}") String aspectRatio,
-      @Value("${atlas.generation.fal.resolution}") String resolution,
+      @Value("${atlas.generation.fal.image-size}") String imageSize,
+      @Value("${atlas.generation.fal.quality}") String quality,
       @Value("${atlas.generation.fal.timeout}") Duration timeout) {
     this.apiKey = apiKey;
     this.model = model;
-    this.aspectRatio = aspectRatio;
-    this.resolution = resolution;
+    this.imageSize = imageSize;
+    this.quality = quality;
     this.timeout = timeout;
   }
 
@@ -56,24 +56,19 @@ class FalImageConnector implements ImageConnector {
     if (apiKey.isBlank()) {
       throw new ImageGenerationException("The fal.ai API key is not configured");
     }
+    // This model has no system prompt field, so the system prompt leads the image prompt.
     Map<String, Object> body =
         Map.of(
-            "system_prompt",
-            request.systemPrompt(),
             "prompt",
-            request.imagePrompt(),
+            request.systemPrompt() + "\n\n" + request.imagePrompt(),
             "num_images",
             1,
-            "aspect_ratio",
-            aspectRatio,
-            "resolution",
-            resolution,
+            "image_size",
+            imageSize,
+            "quality",
+            quality,
             "output_format",
-            "png",
-            "limit_generations",
-            true,
-            "enable_web_search",
-            false);
+            "png");
     String payload = json.writeValueAsString(body);
     HttpRequest.Builder builder =
         base(QUEUE + model)
