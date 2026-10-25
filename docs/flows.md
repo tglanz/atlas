@@ -36,7 +36,11 @@ In the Movement editor, define the Movement's relationships to other existing Mo
 
 ## Set Movement Illustrations
 
-One Illustration is produced for each stage, and approving the result replaces the Movement's sequence. The stages are the Movement's own and are edited with it.
+One Illustration is produced for each stage of the Movement. The stages are the Movement's own and are edited with it.
 
-- Generate with an Avatar: choose an Avatar and a Viewpoint (the default Viewpoint is preselected), then press Generate.
-- Use my own images: give each stage an image, which is used as is.
+1. In the Movement editor, choose an Avatar and a Viewpoint (the default Viewpoint is preselected) and press Generate. The Movement must be saved first, and only one generation can run for it at a time.
+2. Each stage shows its progress, and its image as soon as it is ready.
+3. When every image is ready, they are shown for review. Approving replaces the Movement's Illustrations; discarding leaves them unchanged.
+4. If a stage fails, the generation stops and shows why. The maintainer can start a new one.
+
+Saving a Movement never changes its Illustrations.

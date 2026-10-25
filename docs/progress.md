@@ -1,16 +1,16 @@
 # Progress
 
-Last reviewed 2026-10-22.
+Last reviewed 2026-10-25.
 
 ## Where we are
 
-A proof of concept. Movements, illustrations (uploaded or generated), routines, and accounts work end to end in the backend and are wired into the web app. Image storage and illustration generation are stubs. The web app has been built and checked against the API but not used in a browser.
+A proof of concept. Movements, their stages, illustration generation with review, routines, and accounts work end to end in the backend and are wired into the web app. Generation runs against a stub or fal.ai; the fal.ai connector has had little real use. The web app has been built and checked against the API but not used in a browser.
 
 ## Missing
 
-- Real image storage and a real illustration generator.
+- Our own image storage, retry of failed generations, and reference images for generation.
+- Setting a Movement's Illustrations from the maintainer's own images.
 - Account management: password reset, email verification, login throttling.
-- Recovery and cleanup of generation requests interrupted by a restart.
 - Movement: deleting a Movement, pagination, removing a single Illustration.
 - Using the graph: traversal exists in the API but nothing in the UI uses it yet, such as a progression ladder or paths between movements.
 - Change history for Movements, and a way to keep a Movement hidden while it is being built. Both were deferred on purpose; see `technicalities.md`.
@@ -30,9 +30,9 @@ A proof of concept. Movements, illustrations (uploaded or generated), routines, 
 ## Next steps
 
 1. Decide whether to keep the current structure or simplify it.
-2. Replace the first-user rule with an explicit bootstrap, such as a Maintainer configured from the environment.
+2. Remove the first-user rule now that a Maintainer can be configured from the environment.
 3. Use the web app in a browser and fix what is rough.
 4. Deploy the backend and database.
-5. Implement real storage and generation behind the existing ports.
+5. Validate generation against the real provider, then add our own image storage.
 6. Harden accounts.
 7. Add a small set of API tests for authorization and movement editing.

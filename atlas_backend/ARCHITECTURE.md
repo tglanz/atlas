@@ -34,7 +34,7 @@ These rules are enforced by ArchUnit tests in `ArchitectureTest`.
 
 - `movement`: Movements and their ordered Illustrations.
 - `avatar`: Avatars, the looks used to generate Illustrations.
-- `generation`: Viewpoints, generation requests (a spec of stages, each avatar-based or a static image), and picture uploads.
+- `generation`: Viewpoints, and the generation of a Movement's Illustrations for review.
 - `graph`: the relationships between Movements, and traversing them.
 - `routine`: Routines, which list Movements by key.
 - `account`: users and roles.
@@ -49,13 +49,14 @@ routine    -> movement
 
 ## Generation
 
-A generation request runs in the background on the application task executor. The run is split into short transactions around the slow generator call, so no database transaction stays open while waiting on the third party:
+A generation runs in the background on the application task executor. It makes one image for each of the Movement's stages, one at a time, and stops at the first failure. The run is split into short transactions around the slow provider calls, so no database transaction stays open while waiting on the provider.
 
-1. `GenerationLifecycle.begin` marks the request running and resolves each stage into a step: use a static image as is, or generate a picture.
-2. The generator and picture storage are called outside any transaction, once per generated stage.
-3. `GenerationLifecycle.complete` replaces the Movement's Illustrations with one per stage, or `fail` records the reason.
+- `ImageConnector` is the port to an image provider. Its adapters, a real provider and a stub that emulates one, are selected by configuration.
+- The texts sent to the provider are rendered from Mustache templates in the resources, from a model built in code.
+- The images are candidates until a maintainer approves them, which replaces the Movement's Illustrations through the movement feature's use case.
+- Generations left in progress by a restart are failed at startup, since nothing runs them anymore.
 
-`IllustrationGenerator` and `PictureStorage` are ports. Their current adapters are stubs; the storage target is S3.
+The design is in `docs/rfcs/image-generation.md`.
 
 ## Errors
 

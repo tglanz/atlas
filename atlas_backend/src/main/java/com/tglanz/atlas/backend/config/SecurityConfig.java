@@ -91,6 +91,9 @@ class SecurityConfig {
                         "/api/avatars/**",
                         "/api/viewpoints/**")
                     .hasRole(MAINTAINER)
+                    // The API reference lists every endpoint, so only maintainers see it.
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                    .hasRole(MAINTAINER)
                     .requestMatchers("/api/**")
                     .denyAll()
                     .requestMatchers(HttpMethod.GET, "/**")

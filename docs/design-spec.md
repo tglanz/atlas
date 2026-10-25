@@ -34,13 +34,13 @@ URL: `/movements/:key`
 
 URLs: `/movements/new`, `/movements/:key/edit`
 
-- Data: Movement name, description, items, tags, outgoing relationships, and the illustrations.
-- Actions: Add, remove, and reorder items of the supported types; add and remove tags; manage outgoing relationships; set illustrations; remove all illustrations.
+- Data: Movement name, description, items, stages, tags, outgoing relationships, and the illustrations.
+- Actions: Add, remove, and reorder items of the supported types and stages; add and remove tags; manage outgoing relationships; generate illustrations; remove all illustrations.
 - A relationship's target is chosen with a movement search and its type from the offered types. Targets must be existing Movements.
 - When creating a Movement, the key is suggested from the name and can be changed.
 - Items are added per type, not as free text with a chosen type. Only the supported types are offered.
-- Setting illustrations follows the flow "Set Movement Illustrations". Generation progress is shown, and failed generations can be retried.
-- Everything is available when creating a new Movement as well as when editing one, and a single Save applies it all. A new Movement is created first, then its relationships and illustrations.
+- Generating illustrations follows the flow "Set Movement Illustrations". Progress is shown for each stage, and the result is reviewed before it replaces the illustrations.
+- Details, stages, tags and relationships are available when creating a new Movement as well as when editing one, and a single Save applies them all. Generating illustrations needs a saved Movement, so a new Movement shows a hint instead.
 - Buttons: Save, Cancel.
 - Only maintainers can access this page.
 
