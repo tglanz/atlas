@@ -1,0 +1,51 @@
+{
+  "key": "wide_arm_pullup",
+  "name": "Wide arm pullup",
+  "description": "A wide arm pullup is a pullup with the hands wider than the shoulders. Hang from the bar, pull up until the chin is over the bar, then lower back down.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Grip wider than shoulder width"
+    },
+    {
+      "type": "CUE",
+      "content": "Scapulae depressed and retracted"
+    },
+    {
+      "type": "CUE",
+      "content": "Core braced, glutes squeezed, legs together"
+    },
+    {
+      "type": "CUE",
+      "content": "Body straight, no swinging"
+    },
+    {
+      "type": "CUE",
+      "content": "Elbows driven down and out"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Eccentric",
+      "description": "Dead hang from the bar with a wide grip, arms straight, body straight."
+    },
+    {
+      "name": "Concentric",
+      "description": "Chin over the bar with a wide grip, elbows out to the sides, body straight."
+    }
+  ],
+  "tags": [
+    "arms",
+    "back",
+    "calisthenics",
+    "pull"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "wide_arm_pullup",
+      "target": "pullup",
+      "type": "regression"
+    }
+  ]
+}

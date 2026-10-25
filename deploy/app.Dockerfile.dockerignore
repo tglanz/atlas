@@ -5,3 +5,4 @@
 **/.gradle
 **/*.db
 docs
+atlas_utils

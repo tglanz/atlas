@@ -1,0 +1,61 @@
+{
+  "key": "pseudo_planche_pushup",
+  "name": "Pseudo planche pushup",
+  "description": "A pseudo planche pushup is a pushup with the hands by the waist and the shoulders forward over the hands. Lower the chest to the floor, then press back up.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Hands by the waist, fingers pointing back or out"
+    },
+    {
+      "type": "CUE",
+      "content": "Shoulders forward over the hands"
+    },
+    {
+      "type": "CUE",
+      "content": "Scapulae protracted, pushing the floor away"
+    },
+    {
+      "type": "CUE",
+      "content": "Core braced, glutes squeezed"
+    },
+    {
+      "type": "CUE",
+      "content": "Elbows close to the body"
+    },
+    {
+      "type": "CUE",
+      "content": "Body in one straight line"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Eccentric",
+      "description": "Chest to floor, hands by the waist, shoulders forward over the hands, elbows tucked, body straight."
+    },
+    {
+      "name": "Concentric",
+      "description": "Elbows locked, hands by the waist, shoulders forward over the hands, body straight."
+    }
+  ],
+  "tags": [
+    "arms",
+    "calisthenics",
+    "chest",
+    "push",
+    "shoulders"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "pseudo_planche_pushup",
+      "target": "handstand_pushup",
+      "type": "progression"
+    },
+    {
+      "source": "pseudo_planche_pushup",
+      "target": "push_up",
+      "type": "regression"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "key": "barbell_squat",
+  "name": "Barbell squat",
+  "description": "A barbell squat is a squat with a barbell on the upper back. Lower until the thighs are below parallel, then stand back up.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Barbell on the upper back, held with both hands"
+    },
+    {
+      "type": "CUE",
+      "content": "Feet about shoulder width apart"
+    },
+    {
+      "type": "CUE",
+      "content": "Whole foot on the floor"
+    },
+    {
+      "type": "CUE",
+      "content": "Chest up, back neutral"
+    },
+    {
+      "type": "CUE",
+      "content": "Core braced, glutes engaged"
+    },
+    {
+      "type": "CUE",
+      "content": "Knees track over the toes"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Eccentric",
+      "description": "Deepest squat with the barbell on the upper back, thighs below parallel, chest up, back flat."
+    },
+    {
+      "name": "Concentric",
+      "description": "Standing tall with the barbell on the upper back, hips and knees locked."
+    }
+  ],
+  "tags": [
+    "barbell",
+    "legs"
+  ],
+  "illustrations": [
+    "https://v3b.fal.media/files/b/0aafcc86/uoSEWbYJNrw2vNXnJAgsw_td3rwL9r.png",
+    "https://v3b.fal.media/files/b/0aafcc8e/LuYPTN3Qy_H14k8SMpKKe_q52PsdRk.png"
+  ],
+  "edges": [
+    {
+      "source": "barbell_squat",
+      "target": "squats",
+      "type": "variant"
+    }
+  ]
+}

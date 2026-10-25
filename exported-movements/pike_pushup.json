@@ -1,0 +1,60 @@
+{
+  "key": "pike_pushup",
+  "name": "Pike pushup",
+  "description": "A pike pushup is a pushup with the hips high and the body in an inverted V. Lower the head toward the floor between the hands, then press back up.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Hips high, body in an inverted V"
+    },
+    {
+      "type": "CUE",
+      "content": "Hands about shoulder width apart, fingers spread"
+    },
+    {
+      "type": "CUE",
+      "content": "Legs straight, back flat"
+    },
+    {
+      "type": "CUE",
+      "content": "Core braced, glutes squeezed"
+    },
+    {
+      "type": "CUE",
+      "content": "Elbows tucked, not flaring"
+    },
+    {
+      "type": "CUE",
+      "content": "Neck neutral"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Eccentric",
+      "description": "Head near the floor between the hands, elbows bent, hips high in an inverted V, legs straight."
+    },
+    {
+      "name": "Concentric",
+      "description": "Elbows locked, hips high in an inverted V, legs straight."
+    }
+  ],
+  "tags": [
+    "arms",
+    "calisthenics",
+    "push",
+    "shoulders"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "pike_pushup",
+      "target": "handstand_pushup",
+      "type": "progression"
+    },
+    {
+      "source": "pike_pushup",
+      "target": "push_up",
+      "type": "regression"
+    }
+  ]
+}

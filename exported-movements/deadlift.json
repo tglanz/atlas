@@ -1,0 +1,41 @@
+{
+  "key": "deadlift",
+  "name": "Deadlift",
+  "description": "A deadlift is lifting a barbell from the floor to standing. Bend at the hips and knees to grip the bar, then stand up with the bar.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Barbell close to the body, over the middle of the feet"
+    },
+    {
+      "type": "CUE",
+      "content": "Back neutral, chest up"
+    },
+    {
+      "type": "CUE",
+      "content": "Core braced, glutes engaged"
+    },
+    {
+      "type": "CUE",
+      "content": "Arms straight, shoulders pulled down (lats engaged)"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Eccentric",
+      "description": "Barbell on the floor, hips low, back flat, arms straight, hands outside the knees."
+    },
+    {
+      "name": "Concentric",
+      "description": "Standing tall, hips and knees locked, barbell held at the thighs, shoulders back."
+    }
+  ],
+  "tags": [
+    "back",
+    "barbell",
+    "legs",
+    "pull"
+  ],
+  "illustrations": [],
+  "edges": []
+}

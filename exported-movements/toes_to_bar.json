@@ -1,0 +1,43 @@
+{
+  "key": "toes_to_bar",
+  "name": "Toes to bar",
+  "description": "Toes to bar is raising the legs while hanging from a bar. Hang from the bar, raise the legs until the toes touch the bar, then lower back down.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Hands on the bar, scapulae depressed"
+    },
+    {
+      "type": "CUE",
+      "content": "Arms straight"
+    },
+    {
+      "type": "CUE",
+      "content": "Legs straight and together"
+    },
+    {
+      "type": "CUE",
+      "content": "Hollow body, core braced"
+    },
+    {
+      "type": "CUE",
+      "content": "No swinging"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Eccentric",
+      "description": "Dead hang from the bar, arms straight, legs straight and together."
+    },
+    {
+      "name": "Concentric",
+      "description": "Toes touching the bar, legs straight and together, arms straight."
+    }
+  ],
+  "tags": [
+    "calisthenics",
+    "core"
+  ],
+  "illustrations": [],
+  "edges": []
+}

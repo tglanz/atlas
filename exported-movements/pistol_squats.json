@@ -1,0 +1,52 @@
+{
+  "key": "pistol_squats",
+  "name": "Pistol squats",
+  "description": "A pistol squat is a squat on one leg, with the other leg held straight in front. Lower as deep as possible, then stand back up.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "One leg straight out in front"
+    },
+    {
+      "type": "CUE",
+      "content": "Standing foot flat, knee tracking over the toes"
+    },
+    {
+      "type": "CUE",
+      "content": "Chest up, back neutral"
+    },
+    {
+      "type": "CUE",
+      "content": "Core braced, standing glute engaged"
+    },
+    {
+      "type": "CUE",
+      "content": "Arms forward for balance"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Eccentric",
+      "description": "Deepest single-leg squat, the other leg straight out in front, chest up, arms forward."
+    },
+    {
+      "name": "Concentric",
+      "description": "Standing tall on one leg, the other leg straight out in front, arms forward."
+    }
+  ],
+  "tags": [
+    "calisthenics",
+    "legs"
+  ],
+  "illustrations": [
+    "https://v3b.fal.media/files/b/0aafccd0/Qcv2rDaNLdPgm2OF0k-0e_9Iryc3Sh.png",
+    "https://v3b.fal.media/files/b/0aafccd9/tr9hs2JPu3J8ytwrK5iRE_I34BWT9R.png"
+  ],
+  "edges": [
+    {
+      "source": "pistol_squats",
+      "target": "squats",
+      "type": "regression"
+    }
+  ]
+}

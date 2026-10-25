@@ -1,0 +1,56 @@
+{
+  "key": "chicken_pushup",
+  "name": "Chicken pushup",
+  "description": "A chicken pushup is a pushup with the knees on the floor. Lower the chest to the floor, then press back up.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Knees on the floor, hands under the shoulders"
+    },
+    {
+      "type": "CUE",
+      "content": "Body in one straight line from head to knees"
+    },
+    {
+      "type": "CUE",
+      "content": "Core braced, glutes squeezed"
+    },
+    {
+      "type": "CUE",
+      "content": "Elbows tucked at about 45 degrees"
+    },
+    {
+      "type": "CUE",
+      "content": "Shoulder blades move freely, no winging"
+    },
+    {
+      "type": "CUE",
+      "content": "Neck neutral, gaze slightly ahead of the hands"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Eccentric",
+      "description": "Knees on the floor, chest to floor, elbows tucked, body straight from head to knees."
+    },
+    {
+      "name": "Concentric",
+      "description": "Knees on the floor, elbows locked, body straight from head to knees."
+    }
+  ],
+  "tags": [
+    "arms",
+    "calisthenics",
+    "chest",
+    "push",
+    "shoulders"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "chicken_pushup",
+      "target": "push_up",
+      "type": "progression"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "key": "handstand_pushup",
+  "name": "Handstand pushup",
+  "description": "A handstand pushup is a pushup while doing a handstand. Hold a handstand, lower the head toward the floor between the hands, then press back up.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Body inverted and in one straight line"
+    },
+    {
+      "type": "CUE",
+      "content": "Hands about shoulder width apart, fingers spread"
+    },
+    {
+      "type": "CUE",
+      "content": "Core braced, glutes squeezed, ribs in"
+    },
+    {
+      "type": "CUE",
+      "content": "Shoulders active, pushing tall through the hands"
+    },
+    {
+      "type": "CUE",
+      "content": "Elbows tucked, not flaring"
+    },
+    {
+      "type": "CUE",
+      "content": "Neck neutral, gaze between the hands"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Eccentric",
+      "description": "Head to the floor between the hands, elbows bent, body inverted and straight."
+    },
+    {
+      "name": "Concentric",
+      "description": "Elbows locked in a handstand, body inverted and straight."
+    }
+  ],
+  "tags": [
+    "arms",
+    "calisthenics",
+    "handstand",
+    "push",
+    "shoulders"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "handstand_pushup",
+      "target": "pike_pushup",
+      "type": "regression"
+    },
+    {
+      "source": "handstand_pushup",
+      "target": "pseudo_planche_pushup",
+      "type": "regression"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "key": "pullup",
+  "name": "Pullup",
+  "description": "A pullup is pulling the body up on a bar with the arms. Hang from the bar, pull up until the chin is over the bar, then lower back down.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Hands on the bar, about shoulder width apart"
+    },
+    {
+      "type": "CUE",
+      "content": "Scapulae depressed and retracted"
+    },
+    {
+      "type": "CUE",
+      "content": "Core braced, glutes squeezed, legs together"
+    },
+    {
+      "type": "CUE",
+      "content": "Body straight, no swinging"
+    },
+    {
+      "type": "CUE",
+      "content": "Elbows driven down toward the ribs"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Eccentric",
+      "description": "Dead hang from the bar, arms straight, body straight."
+    },
+    {
+      "name": "Concentric",
+      "description": "Chin over the bar, elbows bent, body straight."
+    }
+  ],
+  "tags": [
+    "arms",
+    "back",
+    "calisthenics",
+    "pull"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "pullup",
+      "target": "wide_arm_pullup",
+      "type": "progression"
+    }
+  ]
+}

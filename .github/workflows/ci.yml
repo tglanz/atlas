@@ -29,6 +29,21 @@ jobs:
       # Also builds the UI and packages it into the jar.
       - run: ./gradlew build
 
+  utils:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: atlas_utils
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: '0.13.5'
+      - run: uv sync --locked
+      - run: uv run ruff format --check .
+      - run: uv run ruff check .
+      - run: uv run pytest
+
   frontend:
     runs-on: ubuntu-latest
     defaults:

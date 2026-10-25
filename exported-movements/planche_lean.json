@@ -1,0 +1,49 @@
+{
+  "key": "planche_lean",
+  "name": "Planche lean",
+  "description": "A planche lean is holding a straight-arm plank with the shoulders leaning forward past the hands.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Scapulae protracted, pushing the floor away"
+    },
+    {
+      "type": "CUE",
+      "content": "Core braced, pelvis tucked"
+    },
+    {
+      "type": "CUE",
+      "content": "Glutes squeezed"
+    },
+    {
+      "type": "CUE",
+      "content": "Arms straight, elbows locked"
+    },
+    {
+      "type": "CUE",
+      "content": "Shoulders forward past the hands"
+    },
+    {
+      "type": "CUE",
+      "content": "Body in one straight line"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Start",
+      "description": "Straight-arm plank, shoulders over the hands, body straight."
+    },
+    {
+      "name": "Lean",
+      "description": "Shoulders forward past the hands, arms straight, body straight."
+    }
+  ],
+  "tags": [
+    "calisthenics",
+    "core",
+    "push",
+    "shoulders"
+  ],
+  "illustrations": [],
+  "edges": []
+}

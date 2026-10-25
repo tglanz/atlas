@@ -1,0 +1,66 @@
+{
+  "key": "push_up",
+  "name": "Push up",
+  "description": "A pushup is pressing the body away from the floor with the hands, while the body stays straight. Lower the chest to the floor, then press back up.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Hands under the shoulders"
+    },
+    {
+      "type": "CUE",
+      "content": "Body in one straight line from head to heels"
+    },
+    {
+      "type": "CUE",
+      "content": "Core braced, glutes squeezed"
+    },
+    {
+      "type": "CUE",
+      "content": "Elbows tucked at about 45 degrees"
+    },
+    {
+      "type": "CUE",
+      "content": "Shoulder blades move freely, no winging"
+    },
+    {
+      "type": "CUE",
+      "content": "Neck neutral, gaze slightly ahead of the hands"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Eccentric",
+      "description": "Chest to floor, elbows tucked, body straight."
+    },
+    {
+      "name": "Concentric",
+      "description": "Elbows locked, body straight."
+    }
+  ],
+  "tags": [
+    "arms",
+    "calisthenics",
+    "chest",
+    "push",
+    "shoulders"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "push_up",
+      "target": "pike_pushup",
+      "type": "progression"
+    },
+    {
+      "source": "push_up",
+      "target": "pseudo_planche_pushup",
+      "type": "progression"
+    },
+    {
+      "source": "push_up",
+      "target": "chicken_pushup",
+      "type": "regression"
+    }
+  ]
+}

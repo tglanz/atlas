@@ -1,4 +1,4 @@
-import { SimpleGrid, Title } from '@mantine/core';
+import { Alert, Loader, SimpleGrid, Title } from '@mantine/core';
 import { MovementCardByKey } from '@/shared/ui';
 import type { Edge } from '../api';
 import { useEdgeTypes, useEdges } from '../queries';
@@ -13,8 +13,19 @@ const capitalize = (text: string) =>
 export function RelatedMovements({ movementKey }: { movementKey: string }) {
   const edges = useEdges(movementKey);
   const types = useEdgeTypes();
-  if (!edges.data) return null;
+  // Wait for both, so the sections appear once, with their final headings and order.
+  if (edges.isPending || types.isPending) {
+    return <Loader size="sm" aria-label="Loading related movements" />;
+  }
+  if (edges.isError) {
+    return (
+      <Alert color="red" title="Related movements could not be loaded">
+        {edges.error.message}
+      </Alert>
+    );
+  }
 
+  // The types only improve the headings and order, so without them the sections still show.
   const known = types.data ?? [];
   const groups = [
     ...edges.data.outgoing

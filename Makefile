@@ -15,10 +15,12 @@ run: build ## Build and run the app: one process, the backend serving the UI
 build: ## Build the single runnable jar, with the UI inside
 	cd atlas_backend && ./gradlew bootJar
 
-test: ## Run the backend and UI tests
+test: ## Run the backend, UI and utilities tests
 	cd atlas_backend && ./gradlew test
 	cd atlas_ui && pnpm install --frozen-lockfile && pnpm test
+	cd atlas_utils && uv run pytest
 
-format: ## Format the backend and UI code
+format: ## Format the backend, UI and utilities code
 	cd atlas_backend && ./gradlew spotlessApply
 	cd atlas_ui && pnpm install --frozen-lockfile && pnpm format
+	cd atlas_utils && uv run ruff format .

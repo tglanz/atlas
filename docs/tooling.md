@@ -5,8 +5,9 @@
 - Java 25 (LTS)
 - Node.js 24
 - pnpm 12
+- Python 3.14, with uv 0.13 managing it and the project's packages
 
-Gradle comes from the wrapper. Library and plugin versions are defined in `atlas_backend/build.gradle` and `atlas_ui/package.json`, which are the source of truth.
+Gradle comes from the wrapper. Library and plugin versions are defined in `atlas_backend/build.gradle`, `atlas_ui/package.json` and `atlas_utils/pyproject.toml`, which are the source of truth.
 
 ## Backend
 
@@ -18,6 +19,12 @@ Gradle comes from the wrapper. Library and plugin versions are defined in `atlas
 
 - Vite builds and serves the app. Vitest runs tests.
 - Prettier formats the code. oxlint lints it, including the import rules in `atlas_ui/ARCHITECTURE.md`.
+
+## Utilities
+
+- `atlas_utils` is a uv project with a Click command line for working with a deployment, such as exporting its data and building seed migrations. The command line only calls the scenarios package.
+- pytest runs the tests. Ruff formats and lints the code.
+- It is not part of the deployed app.
 
 ## How the pieces fit
 

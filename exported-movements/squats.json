@@ -1,0 +1,57 @@
+{
+  "key": "squats",
+  "name": "Squats",
+  "description": "A squat is lowering the body by bending the knees and hips. Lower until the thighs are below parallel, then stand back up.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Feet about shoulder width apart, toes slightly out"
+    },
+    {
+      "type": "CUE",
+      "content": "Whole foot on the floor"
+    },
+    {
+      "type": "CUE",
+      "content": "Chest up, back neutral"
+    },
+    {
+      "type": "CUE",
+      "content": "Core braced, glutes engaged"
+    },
+    {
+      "type": "CUE",
+      "content": "Knees track over the toes"
+    }
+  ],
+  "stages": [
+    {
+      "name": "Eccentric",
+      "description": "Deepest squat, thighs below parallel, knees over the toes, chest up, arms forward."
+    },
+    {
+      "name": "Concentric",
+      "description": "Standing tall, hips and knees locked, arms forward."
+    }
+  ],
+  "tags": [
+    "calisthenics",
+    "legs"
+  ],
+  "illustrations": [
+    "https://v3b.fal.media/files/b/0aafcccd/tV0r2rG_Q6miXbT5nZC-G_mH9tk2lu.png",
+    "https://v3b.fal.media/files/b/0aafccd6/0Pl_H_7b55YQmzT_ezSHQ_IgKYwPHV.png"
+  ],
+  "edges": [
+    {
+      "source": "squats",
+      "target": "pistol_squats",
+      "type": "progression"
+    },
+    {
+      "source": "squats",
+      "target": "barbell_squat",
+      "type": "variant"
+    }
+  ]
+}
