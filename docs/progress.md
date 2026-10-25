@@ -15,7 +15,7 @@ A proof of concept. Movements, their stages, illustration generation with review
 - Using the graph: traversal exists in the API but nothing in the UI uses it yet, such as a progression ladder or paths between movements.
 - Change history for Movements, and a way to keep a Movement hidden while it is being built. Both were deferred on purpose; see `technicalities.md`.
 - "Add to routine" from a Movement page.
-- Deployment: container image, hosting, a verified PostgreSQL setup.
+- Deployment: hosting. The container image and the PostgreSQL setup are in `deploy/`.
 
 ## Known problems
 
