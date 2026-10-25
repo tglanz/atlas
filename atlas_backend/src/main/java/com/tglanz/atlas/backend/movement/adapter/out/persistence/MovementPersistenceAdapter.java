@@ -8,9 +8,13 @@ import com.tglanz.atlas.backend.movement.domain.MovementItem;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.movement.domain.MovementName;
 import com.tglanz.atlas.backend.movement.domain.MovementStage;
+import com.tglanz.atlas.backend.movement.domain.MovementSummary;
 import com.tglanz.atlas.backend.movement.domain.TagCount;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.stereotype.Component;
@@ -35,10 +39,33 @@ class MovementPersistenceAdapter implements MovementRepository {
   }
 
   @Override
-  public List<Movement> search(String text, Set<String> tags) {
+  public List<MovementSummary> search(String text, Set<String> tags) {
     // An empty list cannot be bound in a query, so a placeholder stands in when no tags are given.
     Collection<String> bound = tags.isEmpty() ? List.of("") : tags;
-    return jpa.search(text, bound, tags.size()).stream().map(this::toDomain).toList();
+    return toSummaries(jpa.searchSummaryRows(text, bound, tags.size()));
+  }
+
+  @Override
+  public List<MovementSummary> findSummaries(Collection<MovementKey> keys) {
+    return toSummaries(jpa.summaryRowsByKeys(keys.stream().map(MovementKey::value).toList()));
+  }
+
+  /** The rows are ordered, one for each tag of a Movement, so a Movement's rows are together. */
+  private static List<MovementSummary> toSummaries(List<Object[]> rows) {
+    Map<String, MovementSummary> summaries = new LinkedHashMap<>();
+    for (Object[] row : rows) {
+      String key = (String) row[0];
+      MovementSummary previous = summaries.get(key);
+      List<String> movementTags = new ArrayList<>(previous == null ? List.of() : previous.tags());
+      if (row[2] != null) {
+        movementTags.add((String) row[2]);
+      }
+      summaries.put(
+          key,
+          new MovementSummary(
+              new MovementKey(key), (String) row[1], movementTags, (String) row[3]));
+    }
+    return List.copyOf(summaries.values());
   }
 
   @Override

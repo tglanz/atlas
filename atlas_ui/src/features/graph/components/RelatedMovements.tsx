@@ -1,6 +1,6 @@
 import { Alert, Loader, SimpleGrid, Title } from '@mantine/core';
-import { MovementCardByKey } from '@/shared/ui';
-import type { Edge } from '../api';
+import { MovementCard, MovementCardByKey } from '@/shared/ui';
+import type { OutgoingRelatedEdge } from '../api';
 import { useEdgeTypes, useEdges } from '../queries';
 
 const capitalize = (text: string) =>
@@ -32,7 +32,7 @@ export function RelatedMovements({ movementKey }: { movementKey: string }) {
       .reduce((map, edge) => {
         map.set(edge.type, [...(map.get(edge.type) ?? []), edge]);
         return map;
-      }, new Map<string, Edge[]>())
+      }, new Map<string, OutgoingRelatedEdge[]>())
       .entries(),
   ]
     // Known types first, in their usual order; other types after, in the order found.
@@ -53,9 +53,16 @@ export function RelatedMovements({ movementKey }: { movementKey: string }) {
             {known.find((t) => t.name === type)?.plural ?? capitalize(type)}
           </Title>
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
-            {group.map((edge) => (
-              <MovementCardByKey key={edge.target} movementKey={edge.target} />
-            ))}
+            {group.map((edge) =>
+              edge.movement ? (
+                <MovementCard key={edge.target} movement={edge.movement} />
+              ) : (
+                <MovementCardByKey
+                  key={edge.target}
+                  movementKey={edge.target}
+                />
+              ),
+            )}
           </SimpleGrid>
         </section>
       ))}

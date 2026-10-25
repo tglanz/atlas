@@ -4,8 +4,8 @@
 
 - Main navigation: Movements, Routines.
 - Movements is a section. Every Movement-related page lives under it, with the Movement Index as its landing page, so a future page such as a graph view belongs in the Movements section.
-- Maintainer navigation: Illustration Settings.
-- Account menu: Sign In, Sign Out, Account Management.
+- Maintainer navigation: Illustrations, shown only to maintainers.
+- Signed-in users have Sign Out in the main navigation. Visitors have Sign In and Register buttons.
 - Public pages are accessible without authentication.
 - Practitioner and maintainer actions require authentication.
 - Backend authorization enforces all access restrictions.
@@ -44,7 +44,7 @@ URLs: `/movements/new`, `/movements/:key/edit`
 - Buttons: Save, Cancel.
 - Only maintainers can access this page.
 
-## 4. Illustration Settings
+## 4. Illustrations
 
 URL: `/settings/illustrations`
 

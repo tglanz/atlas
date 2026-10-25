@@ -1,14 +1,13 @@
 package com.tglanz.atlas.backend.movement.adapter.in.web;
 
-import com.tglanz.atlas.backend.movement.domain.Movement;
+import com.tglanz.atlas.backend.movement.domain.MovementSummary;
 import java.util.List;
 
 record MovementSummaryResponse(
     String key, String name, List<String> tags, String representativeIllustration) {
 
-  static MovementSummaryResponse from(Movement m) {
-    String first = m.illustrations().isEmpty() ? null : m.illustrations().get(0).imageUrl();
+  static MovementSummaryResponse from(MovementSummary s) {
     return new MovementSummaryResponse(
-        m.key().value(), m.content().name(), m.content().tags().stream().sorted().toList(), first);
+        s.key().value(), s.name(), s.tags(), s.representativeIllustration());
   }
 }

@@ -42,6 +42,9 @@ export const useMakeDefaultViewpoint = () =>
 export const useDeleteViewpoint = () =>
   useViewpointMutation((id: string) => deleteViewpoint(id));
 
+/** A generation takes a minute or more, so there is no need to ask often. */
+const GENERATION_POLL_MS = 10_000;
+
 /** Polls while a generation is in progress, so each image shows as soon as it is done. */
 export const useGenerations = (movementKey: string) =>
   useQuery({
@@ -51,7 +54,7 @@ export const useGenerations = (movementKey: string) =>
       query.state.data?.some(
         (r) => r.status === 'PENDING' || r.status === 'RUNNING',
       )
-        ? 2000
+        ? GENERATION_POLL_MS
         : false,
   });
 

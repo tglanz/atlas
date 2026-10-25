@@ -27,7 +27,6 @@ class FalImageConnector implements ImageConnector {
   private static final Logger log = LoggerFactory.getLogger(FalImageConnector.class);
 
   private static final String QUEUE = "https://queue.fal.run/";
-  private static final Duration POLL_INTERVAL = Duration.ofSeconds(2);
   private static final Duration HTTP_TIMEOUT = Duration.ofSeconds(30);
 
   private final HttpClient http = HttpClient.newHttpClient();
@@ -37,18 +36,21 @@ class FalImageConnector implements ImageConnector {
   private final String imageSize;
   private final String quality;
   private final Duration timeout;
+  private final Duration pollInterval;
 
   FalImageConnector(
       @Value("${atlas.generation.fal.api-key:}") String apiKey,
       @Value("${atlas.generation.fal.model}") String model,
       @Value("${atlas.generation.fal.image-size}") String imageSize,
       @Value("${atlas.generation.fal.quality}") String quality,
-      @Value("${atlas.generation.fal.timeout}") Duration timeout) {
+      @Value("${atlas.generation.fal.timeout}") Duration timeout,
+      @Value("${atlas.generation.fal.poll-interval}") Duration pollInterval) {
     this.apiKey = apiKey;
     this.model = model;
     this.imageSize = imageSize;
     this.quality = quality;
     this.timeout = timeout;
+    this.pollInterval = pollInterval;
   }
 
   @Override
@@ -107,7 +109,7 @@ class FalImageConnector implements ImageConnector {
         cancel(submission);
         throw new ImageGenerationException("The provider did not finish in time");
       }
-      sleep();
+      sleep(pollInterval);
     }
     JsonNode result = send(base(submission.resultUrl()).GET().build(), null);
     JsonNode url = result.path("images").path(0).path("url");
@@ -181,9 +183,9 @@ class FalImageConnector implements ImageConnector {
     return body.length() > 300 ? body.substring(0, 300) : body;
   }
 
-  private static void sleep() {
+  private static void sleep(Duration pollInterval) {
     try {
-      Thread.sleep(POLL_INTERVAL);
+      Thread.sleep(pollInterval);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new ImageGenerationException("Interrupted while waiting for the provider", e);

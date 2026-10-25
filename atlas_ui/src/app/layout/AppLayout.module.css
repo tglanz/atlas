@@ -18,6 +18,14 @@
   color: var(--mantine-color-text);
 }
 
+.action {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
 .link:hover {
   background-color: var(--mantine-color-default-hover);
 }

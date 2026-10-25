@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.tglanz.atlas.backend.graph.application.port.out.EdgeRepository;
+import com.tglanz.atlas.backend.graph.application.port.out.MovementCatalog;
 import com.tglanz.atlas.backend.graph.application.service.GraphService;
 import com.tglanz.atlas.backend.graph.domain.Edge;
+import com.tglanz.atlas.backend.graph.domain.RelatedMovement;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -41,7 +43,31 @@ class GraphServiceTest {
 
   private final FakeEdges edges = new FakeEdges();
   private final Set<String> existing = Set.of("push-up", "pseudo-planche", "pull-up", "supinated");
-  private final GraphService graph = new GraphService(edges, existing::contains);
+  private final MovementCatalog catalog =
+      new MovementCatalog() {
+        public boolean exists(String movement) {
+          return existing.contains(movement);
+        }
+
+        public List<RelatedMovement> find(Collection<String> movements) {
+          return movements.stream()
+              .filter(existing::contains)
+              .map(key -> new RelatedMovement(key, key, List.of(), null))
+              .toList();
+        }
+      };
+  private final GraphService graph = new GraphService(edges, catalog);
+
+  @Test
+  void edgesComeWithWhatIsShownOfTheirTargets() {
+    graph.setOutgoing("push-up", List.of(new Edge("push-up", "pseudo-planche", "progression")));
+
+    var view = graph.edgesWithMovements("push-up");
+
+    assertThat(view.edges().outgoing()).hasSize(1);
+    assertThat(view.targets()).extracting(RelatedMovement::key).containsExactly("pseudo-planche");
+    assertThat(graph.edgesWithMovements("pull-up").targets()).isEmpty();
+  }
 
   @Test
   void aProgressionAlsoAddsTheRegressionTheOtherWay() {

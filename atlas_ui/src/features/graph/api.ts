@@ -1,9 +1,16 @@
 import { apiFetch } from '@/shared/api';
+import type { MovementSummary } from '@/shared/movements';
 
 /** A directed, typed relationship between two movements. */
 export type Edge = { source: string; target: string; type: string };
 
-export type MovementEdges = { outgoing: Edge[]; incoming: Edge[] };
+/** An edge leaving a movement, with what is shown of the movement it leads to. */
+export type OutgoingRelatedEdge = Edge & { movement: MovementSummary | null };
+
+export type MovementEdges = {
+  outgoing: OutgoingRelatedEdge[];
+  incoming: Edge[];
+};
 
 export type OutgoingEdge = { target: string; type: string };
 

@@ -3,14 +3,17 @@ package com.tglanz.atlas.backend.graph.adapter.in.web;
 import com.tglanz.atlas.backend.graph.application.port.in.GraphUseCase;
 import com.tglanz.atlas.backend.graph.domain.Direction;
 import com.tglanz.atlas.backend.graph.domain.Edge;
-import com.tglanz.atlas.backend.graph.domain.MovementEdges;
+import com.tglanz.atlas.backend.graph.domain.EdgesWithMovements;
 import com.tglanz.atlas.backend.graph.domain.Reach;
+import com.tglanz.atlas.backend.graph.domain.RelatedMovement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
@@ -38,11 +41,30 @@ class GraphController {
     }
   }
 
-  record EdgesResponse(List<EdgeResponse> outgoing, List<EdgeResponse> incoming) {
-    static EdgesResponse from(MovementEdges edges) {
+  record RelatedMovementResponse(
+      String key, String name, List<String> tags, String representativeIllustration) {
+    static RelatedMovementResponse from(RelatedMovement m) {
+      return new RelatedMovementResponse(
+          m.key(), m.name(), m.tags(), m.representativeIllustration());
+    }
+  }
+
+  /** An edge leaving the Movement, with what is shown of the Movement it leads to. */
+  record OutgoingEdgeResponse(
+      String source, String target, String type, RelatedMovementResponse movement) {}
+
+  record EdgesResponse(List<OutgoingEdgeResponse> outgoing, List<EdgeResponse> incoming) {
+    static EdgesResponse from(EdgesWithMovements view) {
+      Map<String, RelatedMovementResponse> byKey = new HashMap<>();
+      view.targets().forEach(m -> byKey.put(m.key(), RelatedMovementResponse.from(m)));
       return new EdgesResponse(
-          edges.outgoing().stream().map(EdgeResponse::from).toList(),
-          edges.incoming().stream().map(EdgeResponse::from).toList());
+          view.edges().outgoing().stream()
+              .map(
+                  e ->
+                      new OutgoingEdgeResponse(
+                          e.source(), e.target(), e.type(), byKey.get(e.target())))
+              .toList(),
+          view.edges().incoming().stream().map(EdgeResponse::from).toList());
     }
   }
 
@@ -60,7 +82,7 @@ class GraphController {
 
   @GetMapping("/edges")
   EdgesResponse edges(@PathVariable String movement) {
-    return EdgesResponse.from(useCase.edgesOf(movement));
+    return EdgesResponse.from(useCase.edgesWithMovements(movement));
   }
 
   @PutMapping("/outgoing")

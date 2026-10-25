@@ -3,6 +3,7 @@ package com.tglanz.atlas.backend.graph.application.port.in;
 import com.tglanz.atlas.backend.graph.domain.Direction;
 import com.tglanz.atlas.backend.graph.domain.Edge;
 import com.tglanz.atlas.backend.graph.domain.EdgeType;
+import com.tglanz.atlas.backend.graph.domain.EdgesWithMovements;
 import com.tglanz.atlas.backend.graph.domain.MovementEdges;
 import com.tglanz.atlas.backend.graph.domain.Reach;
 import java.util.List;
@@ -12,6 +13,9 @@ public interface GraphUseCase {
 
   /** The edges leaving and entering a Movement. */
   MovementEdges edgesOf(String movement);
+
+  /** The edges of a Movement, and what is shown of each Movement its outgoing edges lead to. */
+  EdgesWithMovements edgesWithMovements(String movement);
 
   /** The relationship types the user interface offers. */
   List<EdgeType> edgeTypes();

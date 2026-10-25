@@ -6,7 +6,7 @@ import { ViewpointSettings } from '@/features/generation';
 export function IllustrationSettingsPage() {
   return (
     <Stack gap="md">
-      <Title order={1}>Illustration settings</Title>
+      <Title order={1}>Illustrations</Title>
       <Text c="dimmed">
         Avatars and viewpoints are what you choose from when generating a
         movement&apos;s illustrations.

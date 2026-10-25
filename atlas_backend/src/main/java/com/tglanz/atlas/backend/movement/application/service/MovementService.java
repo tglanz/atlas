@@ -8,9 +8,11 @@ import com.tglanz.atlas.backend.movement.domain.Movement;
 import com.tglanz.atlas.backend.movement.domain.MovementContent;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.movement.domain.MovementName;
+import com.tglanz.atlas.backend.movement.domain.MovementSummary;
 import com.tglanz.atlas.backend.movement.domain.TagCount;
 import com.tglanz.atlas.backend.shared.error.ConflictException;
 import com.tglanz.atlas.backend.shared.error.NotFoundException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,7 +31,7 @@ public class MovementService implements MovementQueryUseCase, MovementCommandUse
 
   @Override
   @Transactional(readOnly = true)
-  public List<Movement> search(String text, Set<String> tags) {
+  public List<MovementSummary> search(String text, Set<String> tags) {
     Set<String> wanted =
         tags == null
             ? Set.of()
@@ -38,6 +40,12 @@ public class MovementService implements MovementQueryUseCase, MovementCommandUse
                 .filter(t -> !t.isEmpty())
                 .collect(Collectors.toSet());
     return repository.search(blankToEmpty(text), wanted);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<MovementSummary> summaries(Collection<MovementKey> keys) {
+    return keys.isEmpty() ? List.of() : repository.findSummaries(keys);
   }
 
   @Override

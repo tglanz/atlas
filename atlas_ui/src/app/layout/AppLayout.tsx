@@ -8,12 +8,23 @@ import {
   Menu,
   Text,
 } from '@mantine/core';
-import { Link, NavLink, Outlet } from 'react-router';
-import { AccountMenu } from '@/features/auth';
-import { navLinks } from './navLinks';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router';
+import { AuthButtons, useCurrentUser, useLogout } from '@/features/auth';
+import { maintainerLinks, navLinks } from './navLinks';
 import classes from './AppLayout.module.css';
 
 export function AppLayout() {
+  const user = useCurrentUser();
+  const logout = useLogout();
+  const navigate = useNavigate();
+  const links = [
+    ...navLinks,
+    ...(user.data?.role === 'MAINTAINER' ? maintainerLinks : []),
+  ];
+  const signedIn = Boolean(user.data);
+  const signOut = () =>
+    logout.mutate(undefined, { onSuccess: () => navigate('/') });
+
   return (
     <AppShell header={{ height: 60 }} padding="md">
       <a href="#main" className={classes.skip}>
@@ -29,11 +40,14 @@ export function AppLayout() {
                   <Burger hiddenFrom="sm" size="sm" aria-label="Navigation" />
                 </Menu.Target>
                 <Menu.Dropdown>
-                  {navLinks.map((link) => (
+                  {links.map((link) => (
                     <Menu.Item key={link.to} component={NavLink} to={link.to}>
                       {link.label}
                     </Menu.Item>
                   ))}
+                  {signedIn && (
+                    <Menu.Item onClick={signOut}>Sign out</Menu.Item>
+                  )}
                 </Menu.Dropdown>
               </Menu>
               <Anchor
@@ -54,16 +68,27 @@ export function AppLayout() {
                 component="ul"
                 className={classes.list}
               >
-                {navLinks.map((link) => (
+                {links.map((link) => (
                   <li key={link.to}>
                     <NavLink to={link.to} className={classes.link}>
                       {link.label}
                     </NavLink>
                   </li>
                 ))}
+                {signedIn && (
+                  <li>
+                    <button
+                      type="button"
+                      className={`${classes.link} ${classes.action}`}
+                      onClick={signOut}
+                    >
+                      Sign out
+                    </button>
+                  </li>
+                )}
               </Group>
             </Box>
-            <AccountMenu />
+            <AuthButtons />
           </Group>
         </Container>
       </AppShell.Header>

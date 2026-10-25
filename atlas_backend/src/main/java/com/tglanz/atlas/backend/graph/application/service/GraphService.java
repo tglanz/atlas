@@ -7,6 +7,7 @@ import com.tglanz.atlas.backend.graph.domain.Direction;
 import com.tglanz.atlas.backend.graph.domain.Edge;
 import com.tglanz.atlas.backend.graph.domain.EdgeType;
 import com.tglanz.atlas.backend.graph.domain.EdgeTypes;
+import com.tglanz.atlas.backend.graph.domain.EdgesWithMovements;
 import com.tglanz.atlas.backend.graph.domain.MovementEdges;
 import com.tglanz.atlas.backend.graph.domain.MovementGraph;
 import com.tglanz.atlas.backend.graph.domain.Reach;
@@ -14,6 +15,7 @@ import com.tglanz.atlas.backend.shared.error.NotFoundException;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,16 @@ public class GraphService implements GraphUseCase {
   public MovementEdges edgesOf(String movement) {
     requireExists(movement);
     return new MovementEdges(edges.findFrom(movement), edges.findTo(movement));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public EdgesWithMovements edgesWithMovements(String movement) {
+    MovementEdges movementEdges = edgesOf(movement);
+    Set<String> targets =
+        movementEdges.outgoing().stream().map(Edge::target).collect(Collectors.toSet());
+    return new EdgesWithMovements(
+        movementEdges, targets.isEmpty() ? List.of() : movements.find(targets));
   }
 
   @Override
