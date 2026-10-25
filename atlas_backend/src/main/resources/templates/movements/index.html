@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
+<body>
+<main class="stack">
+  <div class="cluster between">
+    <h1>Movement index</h1>
+    <a th:if="${maintainer}" class="button" th:href="@{/movements/new}">New movement</a>
+  </div>
+  <form method="get" th:action="@{/movements}" class="stack" data-movement-search>
+    <div class="cluster search-controls">
+      <label class="field grow">Search by name
+        <input type="search" name="text" th:value="${text}" list="movement-names" autocomplete="off" placeholder="Search movements">
+      </label>
+      <button class="button" type="submit">Search</button>
+    </div>
+    <datalist id="movement-names"><option th:each="name : ${movementNames}" th:value="${name.name}"></option></datalist>
+    <fieldset class="card stack">
+      <legend>Tags</legend>
+      <div class="cluster tag-filters">
+        <label class="tag-choice" th:each="tag : ${allTags}">
+          <input type="checkbox" name="tags" th:value="${tag.tag}" th:checked="${selectedTags.contains(tag.tag)}">
+          <span th:text="|${#strings.replace(tag.tag, '_', ' ')} (${tag.count})|">Tag</span>
+        </label>
+        <label class="tag-choice" th:each="tag : ${selectedTags}" th:if="${!knownTags.contains(tag)}">
+          <input type="checkbox" name="tags" th:value="${tag}" checked><span th:text="${tag}">Tag</span>
+        </label>
+      </div>
+      <p class="muted">Movements must have all of the selected tags.</p>
+    </fieldset>
+  </form>
+  <p class="error" role="alert" data-search-error hidden>Search could not be updated. Use the Search button to try again.</p>
+  <section id="movement-results" class="stack" th:fragment="results" aria-live="polite" aria-label="Movement results">
+    <a th:href="@{/movements}" th:if="${!text.isEmpty() || !selectedTags.isEmpty()}">Clear filters</a>
+    <p class="muted" th:text="${movements.isEmpty() ? 'No movements found.' : movements.size() + (movements.size() == 1 ? ' movement' : ' movements')}">Movements</p>
+    <div class="grid movement-grid" th:if="${!movements.isEmpty()}">
+      <th:block th:each="movement : ${movements}"><article th:replace="~{movements/cards :: card(${movement})}"></article></th:block>
+    </div>
+  </section>
+</main>
+</body>
+</html>

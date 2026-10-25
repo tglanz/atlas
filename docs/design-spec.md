@@ -54,13 +54,13 @@ Maintainer-only page with two tabs.
 
 - Data: Avatar names.
 - Actions: Create, edit, delete Avatars.
-- Create and edit open a modal containing the Avatar name and illustration-generation specification.
+- Create and edit stay beside the list, preserving context while the maintainer changes generation settings.
 
 ### Viewpoints
 
 - Data: Viewpoint names and viewing-angle specifications.
 - Actions: Create, edit, delete Viewpoints, and choose the default Viewpoint.
-- Create and edit open a modal containing the Viewpoint name and specification.
+- Create and edit stay beside the list, preserving context while the maintainer changes generation settings.
 
 ## 5. Routine Library
 

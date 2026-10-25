@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
+<body>
+<main class="stack">
+  <header class="cluster">
+    <div>
+      <h1>Routines</h1>
+      <p class="muted">Organize movements into a practice of your own.</p>
+    </div>
+    <a class="button" th:href="@{/routines/new}">New routine</a>
+  </header>
+  <section class="card stack" th:if="${routines.isEmpty()}">
+    <h2>Your next practice starts here</h2>
+    <p class="muted">You have no routines yet. Create a routine and add movements in the order you want to practice them.</p>
+    <a class="button secondary" th:href="@{/routines/new}">Create your first routine</a>
+  </section>
+  <div class="stack" th:unless="${routines.isEmpty()}">
+    <article class="card cluster" th:each="routine : ${routines}">
+      <div class="stack">
+        <h2><a th:href="@{/routines/{id}(id=${routine.id})}" th:text="${routine.name}">Routine</a></h2>
+        <p class="muted prose" th:if="${!routine.description.isEmpty()}" th:text="${routine.description}">Description</p>
+      </div>
+      <form method="post" th:action="@{/routines/{id}/delete(id=${routine.id})}" data-confirm="Delete this routine? This cannot be undone.">
+        <button class="secondary danger" type="submit" th:aria-label="|Delete ${routine.name}|">Delete</button>
+      </form>
+    </article>
+  </div>
+</main>
+</body>
+</html>

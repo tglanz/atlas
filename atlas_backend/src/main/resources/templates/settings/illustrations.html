@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
+<body>
+<main class="stack">
+  <h1>Illustrations</h1>
+  <nav class="cluster" aria-label="Illustration settings">
+    <a class="button secondary" th:href="@{/settings/illustrations(tab='avatars')}" th:attr="aria-current=${settingsTab == 'avatars' ? 'page' : null}">Avatars</a>
+    <a class="button secondary" th:href="@{/settings/illustrations(tab='viewpoints')}" th:attr="aria-current=${settingsTab == 'viewpoints' ? 'page' : null}">Viewpoints</a>
+  </nav>
+  <p class="alert" role="status" th:if="${notice}" th:text="${notice}"></p>
+  <p class="alert error" role="alert" th:if="${settingsError}" th:text="${settingsError}"></p>
+
+  <section class="stack" th:if="${settingsTab == 'avatars'}" aria-labelledby="avatars-title">
+    <h2 id="avatars-title">Avatars</h2>
+    <p class="muted">Define the appearance used to generate movement illustrations.</p>
+    <details class="card" th:attr="open=${failedSpecification != null and failedSpecification.target() == 'new' ? 'open' : null}">
+      <summary>Add avatar</summary>
+      <form class="stack" th:action="@{/settings/illustrations/avatars}" method="post">
+        <label class="field" for="new-avatar-name">Name
+          <input id="new-avatar-name" name="name" required maxlength="100" th:value="${failedSpecification != null and failedSpecification.target() == 'new' ? failedSpecification.name() : ''}">
+        </label>
+        <label class="field" for="new-avatar-specification">Illustration specification
+          <textarea id="new-avatar-specification" name="specification" rows="5" required th:text="${failedSpecification != null and failedSpecification.target() == 'new' ? failedSpecification.specification() : ''}"></textarea>
+        </label>
+        <div class="cluster"><button class="button" type="submit">Create avatar</button></div>
+      </form>
+    </details>
+    <p class="muted" th:if="${avatars.isEmpty()}">No avatars yet.</p>
+    <article class="card stack" th:each="avatar : ${avatars}" th:with="failed=${failedSpecification != null and failedSpecification.target() == avatar.id().toString()}">
+      <h3 th:text="${avatar.name()}"></h3>
+      <details th:attr="open=${failed ? 'open' : null}">
+        <summary>Edit avatar</summary>
+        <form class="stack" th:action="@{/settings/illustrations/avatars/{id}(id=${avatar.id()})}" method="post">
+          <label class="field" th:for="${'avatar-name-' + avatar.id()}">Name
+            <input th:id="${'avatar-name-' + avatar.id()}" name="name" required maxlength="100" th:value="${failed ? failedSpecification.name() : avatar.name()}">
+          </label>
+          <label class="field" th:for="${'avatar-specification-' + avatar.id()}">Illustration specification
+            <textarea th:id="${'avatar-specification-' + avatar.id()}" name="specification" rows="5" required th:text="${failed ? failedSpecification.specification() : avatar.specification()}"></textarea>
+          </label>
+          <div class="cluster"><button class="button" type="submit">Save avatar</button></div>
+        </form>
+      </details>
+      <details>
+        <summary>Delete avatar</summary>
+        <form class="stack" th:action="@{/settings/illustrations/avatars/{id}/delete(id=${avatar.id()})}" method="post">
+          <p th:text="${'Delete ' + avatar.name() + '? This cannot be undone.'}"></p>
+          <div class="cluster"><button class="button danger" type="submit">Confirm delete</button></div>
+        </form>
+      </details>
+    </article>
+  </section>
+
+  <section class="stack" th:if="${settingsTab == 'viewpoints'}" aria-labelledby="viewpoints-title">
+    <h2 id="viewpoints-title">Viewpoints</h2>
+    <p class="muted">Define the viewing angle for generated illustrations. The default is selected automatically.</p>
+    <details class="card" th:attr="open=${failedSpecification != null and failedSpecification.target() == 'new' ? 'open' : null}">
+      <summary>Add viewpoint</summary>
+      <form class="stack" th:action="@{/settings/illustrations/viewpoints}" method="post">
+        <label class="field" for="new-viewpoint-name">Name
+          <input id="new-viewpoint-name" name="name" required maxlength="100" th:value="${failedSpecification != null and failedSpecification.target() == 'new' ? failedSpecification.name() : ''}">
+        </label>
+        <label class="field" for="new-viewpoint-specification">Viewing-angle specification
+          <textarea id="new-viewpoint-specification" name="specification" rows="5" required th:text="${failedSpecification != null and failedSpecification.target() == 'new' ? failedSpecification.specification() : ''}"></textarea>
+        </label>
+        <div class="cluster"><button class="button" type="submit">Create viewpoint</button></div>
+      </form>
+    </details>
+    <p class="muted" th:if="${viewpoints.isEmpty()}">No viewpoints yet.</p>
+    <article class="card stack" th:each="viewpoint : ${viewpoints}" th:with="failed=${failedSpecification != null and failedSpecification.target() == viewpoint.id().toString()}">
+      <div class="cluster">
+        <h3 th:text="${viewpoint.name()}"></h3>
+        <span class="badge" th:if="${viewpoint.isDefault()}">Default</span>
+      </div>
+      <form th:if="${!viewpoint.isDefault()}" th:action="@{/settings/illustrations/viewpoints/{id}/default(id=${viewpoint.id()})}" method="post">
+        <button class="button secondary" type="submit">Make default</button>
+      </form>
+      <details th:attr="open=${failed ? 'open' : null}">
+        <summary>Edit viewpoint</summary>
+        <form class="stack" th:action="@{/settings/illustrations/viewpoints/{id}(id=${viewpoint.id()})}" method="post">
+          <label class="field" th:for="${'viewpoint-name-' + viewpoint.id()}">Name
+            <input th:id="${'viewpoint-name-' + viewpoint.id()}" name="name" required maxlength="100" th:value="${failed ? failedSpecification.name() : viewpoint.name()}">
+          </label>
+          <label class="field" th:for="${'viewpoint-specification-' + viewpoint.id()}">Viewing-angle specification
+            <textarea th:id="${'viewpoint-specification-' + viewpoint.id()}" name="specification" rows="5" required th:text="${failed ? failedSpecification.specification() : viewpoint.specification()}"></textarea>
+          </label>
+          <div class="cluster"><button class="button" type="submit">Save viewpoint</button></div>
+        </form>
+      </details>
+      <details>
+        <summary>Delete viewpoint</summary>
+        <form class="stack" th:action="@{/settings/illustrations/viewpoints/{id}/delete(id=${viewpoint.id()})}" method="post">
+          <p th:text="${'Delete ' + viewpoint.name() + '? This cannot be undone.'}"></p>
+          <div class="cluster"><button class="button danger" type="submit">Confirm delete</button></div>
+        </form>
+      </details>
+    </article>
+  </section>
+</main>
+</body>
+</html>

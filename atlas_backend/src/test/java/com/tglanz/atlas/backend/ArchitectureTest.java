@@ -86,7 +86,8 @@ class ArchitectureTest {
                   "are features",
                   slice ->
                       !slice.getDescription().contains("shared")
-                          && !slice.getDescription().contains("config")))
+                          && !slice.getDescription().contains("config")
+                          && !slice.getDescription().contains("web")))
           .should()
           .notDependOnEachOther()
           .ignoreDependency(
@@ -97,4 +98,21 @@ class ArchitectureTest {
               com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage(
                   "..adapter.out.avatar.."),
               DescribedPredicate.alwaysTrue());
+
+  /**
+   * Page composition may combine use-case ports, but never persistence or implementation classes.
+   */
+  @ArchTest
+  static final ArchRule pagesUseApplicationPorts =
+      noClasses()
+          .that()
+          .resideInAPackage("..backend.web..")
+          .should()
+          .dependOnClassesThat()
+          .resideInAnyPackage(
+              "..adapter..",
+              "..application.service..",
+              "..application.port.out..",
+              "jakarta.persistence..",
+              "org.springframework.data..");
 }

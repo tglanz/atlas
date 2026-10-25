@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}"><body>
+<main class="stack narrow">
+  <h1>Create an account</h1>
+  <p class="muted">Build routines from the movement library.</p>
+  <form class="stack card" th:action="@{/register}" method="post">
+    <p class="alert error" role="alert" th:if="${error != null}" th:text="${error}"></p>
+    <label class="field">Email<input type="email" name="email" th:value="${email}" autocomplete="username" required></label>
+    <label class="field">Password<input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
+    <label class="field">Confirm password<input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required></label>
+    <button type="submit">Register</button>
+  </form>
+  <p>Already registered? <a th:href="@{/login}">Sign in</a>.</p>
+</main></body></html>

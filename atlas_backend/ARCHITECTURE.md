@@ -1,77 +1,29 @@
 # Architecture
 
-The backend follows hexagonal architecture, organized by feature. Each feature (`movement`, `graph`, `avatar`, `generation`, `routine`, `account`) contains the same layers.
+The application separates domain rules, use cases and transport or persistence adapters. Dependency checks keep those boundaries enforceable as rendering and storage change.
 
-```
-com.tglanz.atlas.backend
-  <feature>/
-    domain/               Entities, value objects, invariants. Plain Java.
-    application/
-      port/in/            Use-case interfaces called by inbound adapters.
-      port/out/           Interfaces the application needs from the outside.
-      service/            Use-case implementations. Transaction boundary.
-    adapter/
-      in/web/             REST controllers, request and response DTOs.
-      out/persistence/    JPA entities, Spring Data repositories, port implementations.
-  shared/                 Cross-feature kernel: error types, persistence helpers.
-  config/                 Security, clock, HTTP error mapping.
-```
+## Domain and use cases
 
-## Rules
+Domain code is framework independent. It owns validity rules and state transitions, while application services orchestrate operations through ports. Persistence representations stay behind outbound adapters so storage choices do not become domain requirements.
 
-1. Dependencies point inward: adapters depend on the application layer, the application layer on the domain, the domain on nothing but the standard library and `shared`.
-2. Domain classes enforce domain invariants (input validity, state transitions). Services orchestrate and do not hold rules.
-3. Ports are owned by the application layer. Adapters implement outbound ports and call inbound ports.
-4. JPA entities exist only in `adapter/out/persistence` and are mapped to domain objects. The domain has no framework annotations.
-5. Transactions are declared on application services.
-6. Inbound adapters never use outbound adapters.
-7. Features do not depend on each other except through ports. `routine` reads Movement data only through `movement.application.port.in`, inside `routine.adapter.out.movement`. `movement` does not depend on `routine`.
-8. Authorization is enforced by the backend: path rules in `config.SecurityConfig`, ownership checks in application services. Use cases receive only a user id; authentication details stay in `config` and `account.adapter`.
+Features communicate through application ports and explicit outbound adapters. A feature must not read another feature's persistence or call its implementation services. Movement knowledge remains independent from routines; routine references resolve through the movement feature's public use cases.
 
-These rules are enforced by ArchUnit tests in `ArchitectureTest`.
+## HTML and API transports
 
-## Features and dependencies
+The web composition layer builds page models from public use cases across features. It may compose domain results, but it must not access persistence adapters or move product rules into controllers or templates. This allows pages to combine movement, graph and generation information without introducing dependencies between those features.
 
-- `movement`: Movements and their ordered Illustrations.
-- `avatar`: Avatars, the looks used to generate Illustrations.
-- `generation`: Viewpoints, and the generation of a Movement's Illustrations for review.
-- `graph`: the relationships between Movements, and traversing them.
-- `routine`: Routines, which list Movements by key.
-- `account`: users and roles.
+HTML forms and JSON requests have separate binding and response concerns while reusing the same domain behavior. HTML renders validation errors with the submitted draft; API errors use problem details. Missing resources and authorization failures retain meaningful HTTP responses rather than appearing as successful content pages.
 
-```
-generation -> movement, avatar
-graph      -> movement
-routine    -> movement
-```
+A Save that changes movement content and relationships must commit both together. Cross-feature page orchestration therefore has a transactional service boundary, and the controller redisplays a failure only after that transaction has rolled back. Illustration generation and approval remain separate from the editor draft so they cannot silently publish unsaved changes.
 
-`movement`, `avatar` and `account` depend on no other feature. Each arrow is an outbound adapter in the dependent feature, such as `generation.adapter.out.movement`. `ArchitectureTest` rejects any other dependency between features.
+## Authorization and rendering
 
-## Generation
+Spring Security enforces route access, and application services enforce ownership. Authentication details stay at the transport boundary; use cases receive the user identity needed for the operation.
 
-A generation runs in the background on the application task executor. It makes one image for each of the Movement's stages, one at a time, and stops at the first failure. The run is split into short transactions around the slow provider calls, so no database transaction stays open while waiting on the provider.
+Thymeleaf escapes authored text by default. Metadata uses a trusted public origin, and structured data must remain safe inside its HTML script element. Page composition must preserve the confidentiality of private responses and session-dependent content when setting caching behavior.
 
-- `ImageConnector` is the port to an image provider. Its adapters, a real provider and a stub that emulates one, are selected by configuration.
-- The texts sent to the provider are rendered from Mustache templates in the resources, from a model built in code.
-- The images are candidates until a maintainer approves them, which replaces the Movement's Illustrations through the movement feature's use case.
-- Generations left in progress by a restart are failed at startup, since nothing runs them anymore.
+## Background work
 
-The design is in `docs/rfcs/image-generation.md`.
+Slow image-provider calls run outside database transactions. Short transactions record progress and apply reviewed results, avoiding locks while waiting on an external service. A restarted process cannot resume work that existed only in memory, so interrupted runs must be resolved deliberately.
 
-## Errors
-
-- `NotFoundException`: 404
-- `ConflictException`: 409 (invalid state transition, duplicate, still referenced)
-- `IllegalArgumentException` and request validation failures: 400
-
-Errors are returned as RFC 9457 problem details.
-
-## Persistence
-
-- SQLite by default; PostgreSQL through the `postgres` profile.
-- Flyway migrations are plain, portable SQL.
-- Identifiers are stored as `VARCHAR(36)`; timestamps as `TIMESTAMP`.
-
-## Stack
-
-See `../docs/stack.md` for the technology choices and `../docs/tooling.md` for versions and commands.
+See the [generation decision](../docs/rfcs/image-generation.md), [rendering decisions](../docs/stack.md), and [tooling](../docs/tooling.md). The architecture tests are the executable source of truth for dependency rules.

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
+<body>
+<main class="stack">
+  <header>
+    <h1 th:text="${routineId == null ? 'New routine' : 'Edit routine'}">New routine</h1>
+    <p class="muted">Group movements into sections and arrange them in the order you want to practice.</p>
+  </header>
+  <form method="post" class="stack" data-routine-editor th:object="${routineForm}" th:action="${routineId == null ? '/routines/new' : '/routines/' + routineId + '/edit'}">
+    <div class="alert error" role="alert" tabindex="-1" th:if="${#fields.hasAnyErrors()}">
+      <p><strong>Check the routine before saving.</strong></p>
+      <ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}">Validation error</li></ul>
+    </div>
+    <div class="card stack">
+      <div class="field">
+        <label for="routine-name">Name</label>
+        <input id="routine-name" th:field="*{name}" required maxlength="200" autocomplete="off" th:aria-invalid="${#fields.hasErrors('name')}">
+      </div>
+      <div class="field">
+        <label for="routine-description">Description <span class="muted">(optional)</span></label>
+        <textarea id="routine-description" th:field="*{description}" rows="3" maxlength="20000" th:aria-invalid="${#fields.hasErrors('description')}"></textarea>
+      </div>
+    </div>
+    <section class="stack" aria-labelledby="routine-sections-title">
+      <h2 id="routine-sections-title">Sections</h2>
+      <p class="muted" data-no-sections th:hidden="${!routineForm.sections.isEmpty()}">No sections yet. Add one to start building your routine.</p>
+      <div class="stack" data-routine-sections>
+        <fieldset class="card stack" data-routine-section th:each="section, sectionStatus : *{sections}">
+          <legend data-section-number th:text="|Section ${sectionStatus.count}|">Section</legend>
+          <div class="cluster" aria-label="Section actions">
+            <button class="secondary icon-button" type="button" data-routine-action="section-up" th:disabled="${sectionStatus.first}" aria-label="Move section up" title="Move section up"><svg th:replace="~{fragments/icons :: arrowUp}"></svg></button>
+            <button class="secondary icon-button" type="button" data-routine-action="section-down" th:disabled="${sectionStatus.last}" aria-label="Move section down" title="Move section down"><svg th:replace="~{fragments/icons :: arrowDown}"></svg></button>
+            <button class="secondary danger icon-button" type="button" data-routine-action="section-remove" aria-label="Remove section" title="Remove section"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
+          </div>
+          <div class="field">
+            <label data-section-label="name" th:for="|section-${sectionStatus.index}-name|">Section name</label>
+            <input data-section-field="name" th:id="|section-${sectionStatus.index}-name|" th:name="|sections[${sectionStatus.index}].name|" th:value="${section.name}" required maxlength="200" autocomplete="off">
+          </div>
+          <div class="field">
+            <label data-section-label="description" th:for="|section-${sectionStatus.index}-description|">Section description <span class="muted">(optional)</span></label>
+            <textarea data-section-field="description" th:id="|section-${sectionStatus.index}-description|" th:name="|sections[${sectionStatus.index}].description|" th:text="${section.description}" maxlength="20000" rows="2"></textarea>
+          </div>
+          <h3>Movements</h3>
+          <p class="muted" data-no-movements th:hidden="${!section.movements.isEmpty()}">No movements in this section.</p>
+          <ol class="stack" data-routine-movements>
+            <li data-routine-movement th:each="key, movementStatus : ${section.movements}">
+              <div class="cluster">
+                <span data-movement-name th:text="${movementNames.containsKey(key) ? movementNames.get(key) : key}">Movement</span>
+                <input type="hidden" data-movement-key th:name="|sections[${sectionStatus.index}].movements[${movementStatus.index}]|" th:value="${key}">
+                <div class="cluster" aria-label="Movement actions">
+                  <button class="secondary icon-button" type="button" data-routine-action="movement-up" th:disabled="${movementStatus.first}" aria-label="Move movement up" title="Move movement up"><svg th:replace="~{fragments/icons :: arrowUp}"></svg></button>
+                  <button class="secondary icon-button" type="button" data-routine-action="movement-down" th:disabled="${movementStatus.last}" aria-label="Move movement down" title="Move movement down"><svg th:replace="~{fragments/icons :: arrowDown}"></svg></button>
+                  <button class="secondary danger icon-button" type="button" data-routine-action="movement-remove" aria-label="Remove movement" title="Remove movement"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
+                </div>
+              </div>
+            </li>
+          </ol>
+          <button class="secondary" type="button" data-routine-action="movement-add">Add movement</button>
+        </fieldset>
+      </div>
+      <div><button class="secondary" type="button" data-routine-action="section-add">Add section</button></div>
+    </section>
+    <p class="muted" role="status" aria-live="polite" data-routine-status></p>
+    <div class="cluster">
+      <button type="submit">Save routine</button>
+      <a class="button secondary" th:href="${routineId == null ? '/routines' : '/routines/' + routineId}">Cancel</a>
+    </div>
+    <noscript><p class="muted">JavaScript is needed to add, remove, or reorder sections and movements. You can edit and save the existing text fields.</p></noscript>
+  </form>
+
+  <dialog id="routine-movement-picker" aria-labelledby="routine-picker-title" data-routine-picker>
+    <div class="stack">
+      <div class="cluster">
+        <h2 id="routine-picker-title">Add a movement</h2>
+        <button class="secondary" type="button" data-routine-picker-close aria-label="Close movement picker">Close</button>
+      </div>
+      <div class="field">
+        <label for="routine-picker-search">Search by name</label>
+        <input id="routine-picker-search" type="search" autocomplete="off" autofocus data-routine-picker-search>
+      </div>
+      <p class="muted" role="status" aria-live="polite" data-routine-picker-status></p>
+      <ul class="stack" aria-label="Available movements" data-routine-picker-options>
+        <li class="cluster" th:each="movement : ${movementChoices}" th:data-movement-search="${movement.name}">
+          <span th:text="${movement.name}">Movement</span>
+          <button class="secondary" type="button" data-routine-pick th:data-key="${movement.key.value}" th:data-name="${movement.name}" th:aria-label="|Add ${movement.name}|">Add</button>
+        </li>
+      </ul>
+    </div>
+  </dialog>
+
+  <template data-routine-section-template>
+    <fieldset class="card stack" data-routine-section>
+      <legend data-section-number>Section</legend>
+      <div class="cluster" aria-label="Section actions">
+        <button class="secondary icon-button" type="button" data-routine-action="section-up" aria-label="Move section up" title="Move section up"><svg th:replace="~{fragments/icons :: arrowUp}"></svg></button>
+        <button class="secondary icon-button" type="button" data-routine-action="section-down" aria-label="Move section down" title="Move section down"><svg th:replace="~{fragments/icons :: arrowDown}"></svg></button>
+        <button class="secondary danger icon-button" type="button" data-routine-action="section-remove" aria-label="Remove section" title="Remove section"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
+      </div>
+      <div class="field"><label data-section-label="name">Section name</label><input data-section-field="name" required maxlength="200" autocomplete="off"></div>
+      <div class="field"><label data-section-label="description">Section description <span class="muted">(optional)</span></label><textarea data-section-field="description" maxlength="20000" rows="2"></textarea></div>
+      <h3>Movements</h3>
+      <p class="muted" data-no-movements>No movements in this section.</p>
+      <ol class="stack" data-routine-movements></ol>
+      <button class="secondary" type="button" data-routine-action="movement-add">Add movement</button>
+    </fieldset>
+  </template>
+  <template data-routine-movement-template>
+    <li data-routine-movement>
+      <div class="cluster">
+        <span data-movement-name></span>
+        <input type="hidden" data-movement-key>
+        <div class="cluster" aria-label="Movement actions">
+          <button class="secondary icon-button" type="button" data-routine-action="movement-up" aria-label="Move movement up" title="Move movement up"><svg th:replace="~{fragments/icons :: arrowUp}"></svg></button>
+          <button class="secondary icon-button" type="button" data-routine-action="movement-down" aria-label="Move movement down" title="Move movement down"><svg th:replace="~{fragments/icons :: arrowDown}"></svg></button>
+          <button class="secondary danger icon-button" type="button" data-routine-action="movement-remove" aria-label="Remove movement" title="Remove movement"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
+        </div>
+      </div>
+    </li>
+  </template>
+</main>
+</body>
+</html>

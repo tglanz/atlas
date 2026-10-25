@@ -1,10 +1,12 @@
 package com.tglanz.atlas.backend.config;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,8 +15,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -23,6 +23,7 @@ import org.springframework.security.web.header.writers.CacheControlHeadersWriter
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Session-based authentication. Login: {@code POST /api/auth/login} (form fields {@code email},
@@ -58,22 +59,52 @@ class SecurityConfig {
                 form.loginProcessingUrl("/api/auth/login")
                     .usernameParameter("email")
                     .successHandler(
-                        (request, response, auth) ->
-                            response.setStatus(HttpStatus.NO_CONTENT.value()))
+                        (request, response, auth) -> {
+                          if (wantsHtml(request))
+                            response.sendRedirect(safeReturnTo(request.getParameter("returnTo")));
+                          else response.setStatus(HttpStatus.NO_CONTENT.value());
+                        })
                     .failureHandler(
-                        (request, response, e) ->
-                            response.setStatus(HttpStatus.UNAUTHORIZED.value())))
+                        (request, response, e) -> {
+                          if (wantsHtml(request))
+                            response.sendRedirect(
+                                "/login?error&returnTo="
+                                    + UriUtils.encode(
+                                        safeReturnTo(request.getParameter("returnTo")),
+                                        StandardCharsets.UTF_8));
+                          else response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                        }))
         .logout(
             logout ->
                 logout
                     .logoutUrl("/api/auth/logout")
                     .logoutSuccessHandler(
-                        new HttpStatusReturningLogoutSuccessHandler(HttpStatus.NO_CONTENT)))
+                        (request, response, auth) -> {
+                          if (wantsHtml(request)) response.sendRedirect("/");
+                          else response.setStatus(HttpStatus.NO_CONTENT.value());
+                        }))
         .exceptionHandling(
-            e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+            e ->
+                e.authenticationEntryPoint(
+                    (request, response, exception) -> {
+                      if (request.getRequestURI().equals("/api")
+                          || request.getRequestURI().startsWith("/api/"))
+                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                      else {
+                        String target =
+                            request.getRequestURI()
+                                + (request.getQueryString() == null
+                                    ? ""
+                                    : "?" + request.getQueryString());
+                        response.sendRedirect(
+                            "/login?returnTo=" + UriUtils.encode(target, StandardCharsets.UTF_8));
+                      }
+                    }))
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers(HttpMethod.POST, "/api/auth/register")
+                auth.dispatcherTypeMatchers(DispatcherType.ERROR)
+                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/auth/register", "/register")
                     .permitAll()
                     .requestMatchers("/api/auth/me", "/api/routines/**")
                     .authenticated()
@@ -96,11 +127,40 @@ class SecurityConfig {
                     .hasRole(MAINTAINER)
                     .requestMatchers("/api/**")
                     .denyAll()
+                    .requestMatchers("/routines", "/routines/**")
+                    .authenticated()
+                    .requestMatchers(
+                        "/settings/**",
+                        "/movements/new",
+                        "/movements/*/edit",
+                        "/movements/*/generations/**",
+                        "/movements/*/generation-status",
+                        "/movements/*/illustrations/**")
+                    .hasRole(MAINTAINER)
+                    .requestMatchers(HttpMethod.POST, "/movements/**")
+                    .hasRole(MAINTAINER)
                     .requestMatchers(HttpMethod.GET, "/**")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.HEAD, "/**")
                     .permitAll()
                     .anyRequest()
                     .denyAll());
     return http.build();
+  }
+
+  private static boolean wantsHtml(HttpServletRequest request) {
+    String accept = request.getHeader("Accept");
+    return accept != null && accept.contains("text/html");
+  }
+
+  private static String safeReturnTo(String path) {
+    if (path == null
+        || !path.startsWith("/")
+        || path.startsWith("//")
+        || path.contains("\\")
+        || path.contains("\r")
+        || path.contains("\n")) return "/movements";
+    return path.matches("/(?:movements|routines|settings)(?:[/?].*)?") ? path : "/movements";
   }
 
   @Bean

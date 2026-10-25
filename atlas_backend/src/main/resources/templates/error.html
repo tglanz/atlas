@@ -1,0 +1,4 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}"><body>
+<main class="stack narrow"><h1 th:text="${errorTitle}">Request failed</h1><p th:text="${errorMessage}">Please try again.</p><a class="button" th:href="@{/movements}">Explore movements</a></main>
+</body></html>

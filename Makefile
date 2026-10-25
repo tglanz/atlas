@@ -9,18 +9,16 @@ JAR := build/libs/atlas_backend.jar
 help: ## List the available commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
 
-run: build ## Build and run the app: one process, the backend serving the UI
+run: build ## Build and run the application
 	cd atlas_backend && java -jar $(JAR)
 
-build: ## Build the single runnable jar, with the UI inside
+build: ## Build the runnable application jar
 	cd atlas_backend && ./gradlew bootJar
 
-test: ## Run the backend, UI and utilities tests
+test: ## Run the application and utilities tests
 	cd atlas_backend && ./gradlew test
-	cd atlas_ui && pnpm install --frozen-lockfile && pnpm test
 	cd atlas_utils && uv run pytest
 
-format: ## Format the backend, UI and utilities code
+format: ## Format the application and utilities code
 	cd atlas_backend && ./gradlew spotlessApply
-	cd atlas_ui && pnpm install --frozen-lockfile && pnpm format
 	cd atlas_utils && uv run ruff format .

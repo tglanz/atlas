@@ -1,6 +1,6 @@
 # API
 
-The web application talks to the backend over an HTTP API under `/api`. The controllers in each backend feature define the endpoints, and the endpoint reference is generated from them as OpenAPI: the page is at `/swagger-ui.html` and the raw description at `/v3/api-docs`, both for Maintainers only. This document records the conventions and rules behind them, not the endpoint list.
+The HTTP API under `/api` serves programmatic clients. HTML pages use the same application use cases directly. The controllers in each backend feature define the API, and its reference is generated from them as OpenAPI: the page is at `/swagger-ui.html` and the raw description at `/v3/api-docs`, both for Maintainers only. This document records the conventions and rules behind it rather than duplicating the generated reference.
 
 ## Conventions
 
@@ -11,7 +11,7 @@ The web application talks to the backend over an HTTP API under `/api`. The cont
 ## Authentication
 
 - Signing in sets a session cookie. The web application is served from the same origin as the API, so cookies work without tokens in browser storage or CORS.
-- Unsafe requests (anything that changes data) must send the value of the `XSRF-TOKEN` cookie in the `X-XSRF-TOKEN` header. The token changes when the session changes, for example on sign-in, so clients refresh it and retry once on a 403.
+- Unsafe requests (anything that changes data) require a CSRF token. JSON clients send the value of the `XSRF-TOKEN` cookie in the `X-XSRF-TOKEN` header; HTML forms include the server's token as a hidden field. Session changes rotate the token, so clients must refresh it after signing in or out.
 
 ## Access
 

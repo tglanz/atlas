@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<article class="card movement-card stack" th:fragment="card(movement)">
+  <a th:if="${movement.representativeIllustration != null}" th:href="@{/movements/{key}(key=${movement.key})}" tabindex="-1" aria-hidden="true">
+    <img class="movement-card-image" th:src="${movement.representativeIllustration}" alt="" width="320" height="160" loading="lazy" decoding="async">
+  </a>
+  <h3><a th:href="@{/movements/{key}(key=${movement.key})}" th:text="${movement.name}">Movement</a></h3>
+  <div class="cluster tags" th:if="${!movement.tags.isEmpty()}">
+    <a class="tag" th:each="tag : ${movement.tags}" th:href="@{/movements(tags=${tag})}" th:text="${#strings.replace(tag, '_', ' ')}">Tag</a>
+  </div>
+</article>
+</body>
+</html>

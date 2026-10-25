@@ -2,20 +2,15 @@
 
 Form Atlas: a visual library of human movements, with routines built from them.
 
-- `atlas_backend`: Spring Boot API. It also serves the built UI in production.
-- `atlas_ui`: React web app.
-- `atlas_utils`: command line utilities for a deployment, such as exporting its data into seed migrations.
-- `docs`: product, domain, API and tooling documentation. Start with `docs/abstract.md`.
-
 ## Commands
 
-Run these from the top directory. `make help` lists them.
+Run these from the repository root. `make help` lists the available commands.
 
 ```
-make run      # build the jar and run the app (backend serving the UI)
-make build    # build the single runnable jar, UI included
-make test     # backend and UI tests
-make format   # format all code
+make run      # build and run the application
+make build    # build the runnable jar
+make test     # application and utilities tests
+make format   # format the code
 ```
 
-Each project's README has the tool-specific commands.
+See the [application README](atlas_backend/README.md) and [utilities README](atlas_utils/README.md) for their commands. Start with the [product introduction](docs/abstract.md), [architecture decisions](docs/stack.md), and [tooling](docs/tooling.md) for more context.

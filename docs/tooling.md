@@ -2,43 +2,19 @@
 
 ## Runtimes
 
-- Java 25 (LTS)
-- Node.js 24
-- pnpm 12
-- Python 3.14, with uv 0.13 managing it and the project's packages
+- Java 25 (LTS).
+- Python 3.14, with uv 0.13 managing the runtime and packages for the utilities.
 
-Gradle comes from the wrapper. Library and plugin versions are defined in `atlas_backend/build.gradle`, `atlas_ui/package.json` and `atlas_utils/pyproject.toml`, which are the source of truth.
+Gradle comes from the wrapper. Library and plugin versions are defined in the application build and the utilities' package configuration; those files are the source of truth.
 
-## Backend
+## Build and checks
 
-- Gradle builds the project. Flyway runs database migrations on startup.
-- Spotless formats the code. The compiler treats warnings as errors.
-- ArchUnit tests enforce the layering rules in `atlas_backend/ARCHITECTURE.md`.
+The application build packages Java, HTML templates, styles and browser scripts together. It does not require a JavaScript package manager or a separate asset build. Spring serves the application during local development as well as deployment, so authentication and page rendering use the same origin in both environments.
 
-## Frontend
+Spotless checks Java formatting, and compiler warnings fail the build. ArchUnit checks enforce the [architecture rules](../atlas_backend/ARCHITECTURE.md). The utilities use pytest and Ruff and are not part of the deployed application.
 
-- Vite builds and serves the app. Vitest runs tests.
-- Prettier formats the code. oxlint lints it, including the import rules in `atlas_ui/ARCHITECTURE.md`.
+## Commands and environments
 
-## Utilities
+Use `make help` at the repository root for common commands. Tool-specific commands live in the [application README](../atlas_backend/README.md) and [utilities README](../atlas_utils/README.md).
 
-- `atlas_utils` is a uv project with a Click command line for working with a deployment, such as exporting its data and building seed migrations. The command line only calls the scenarios package.
-- pytest runs the tests. Ruff formats and lints the code.
-- It is not part of the deployed app.
-
-## How the pieces fit
-
-- The backend build also builds the frontend and packages it into the backend jar. This needs Node and pnpm, unless the build is told to skip the UI.
-- The app normally runs as that single jar. The frontend also has its own dev server, which proxies `/api` to the backend, for faster UI iteration.
-
-## Commands
-
-Common tasks (`run`, `build`, `test`, `format`) are `make` targets at the top directory; `make help` lists them. They only call the projects' own tools. Tool-specific commands are in the README of each project.
-
-## Dev container
-
-`.devcontainer/devcontainer.json` provides the runtimes above and prepares both projects.
-
-## CI
-
-`.github/workflows/ci.yml` builds and tests both projects on pushes to `main` and on pull requests.
+The [dev container configuration](../.devcontainer/devcontainer.json) defines the development environment. The [CI workflow](../.github/workflows/ci.yml) defines the required automated checks. Keep their installation and execution details in those files rather than duplicating them here.

@@ -24,6 +24,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.flywaydb:flyway-database-postgresql'
 	implementation 'com.samskivert:jmustache'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0'
@@ -53,29 +54,6 @@ spotless {
 	}
 }
 
-// The UI is built by atlas_ui and served from the same origin as the API.
-// Pass -PskipUi to build the backend without Node.
-def uiDir = file('../atlas_ui')
-
-tasks.register('installUi', Exec) {
-	onlyIf { !project.hasProperty('skipUi') }
-	workingDir uiDir
-	commandLine 'pnpm', 'install', '--frozen-lockfile'
-	inputs.files(file("$uiDir/package.json"), file("$uiDir/pnpm-lock.yaml"))
-	outputs.dir(file("$uiDir/node_modules"))
-}
-
-tasks.register('buildUi', Exec) {
-	onlyIf { !project.hasProperty('skipUi') }
-	dependsOn 'installUi'
-	workingDir uiDir
-	commandLine 'pnpm', 'build'
-	inputs.dir(file("$uiDir/src"))
-	inputs.files(fileTree(uiDir) {
-		include 'index.html', 'package.json', 'vite.config.ts', 'tsconfig*.json'
-	})
-	outputs.dir(file("$uiDir/dist"))
-}
 // The plain jar is not runnable and not needed; the boot jar has a fixed name.
 tasks.named('jar') {
 	enabled = false
@@ -83,8 +61,4 @@ tasks.named('jar') {
 
 tasks.named('bootJar') {
 	archiveFileName = 'atlas_backend.jar'
-	dependsOn 'buildUi'
-	from(file("$uiDir/dist")) {
-		into 'BOOT-INF/classes/static'
-	}
 }

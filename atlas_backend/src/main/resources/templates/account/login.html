@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}"><body>
+<main class="stack narrow">
+  <h1>Sign in</h1>
+  <p class="muted">Welcome back to Form Atlas.</p>
+  <p class="alert error" role="alert" th:if="${param.error != null}">Email or password is incorrect.</p>
+  <form class="stack card" th:action="@{/api/auth/login}" method="post">
+    <input type="hidden" name="returnTo" th:value="${returnTo}">
+    <label class="field">Email<input type="email" name="email" autocomplete="username" required></label>
+    <label class="field">Password<input type="password" name="password" autocomplete="current-password" required></label>
+    <button type="submit">Sign in</button>
+  </form>
+  <p>New here? <a th:href="@{/register}">Create an account</a>.</p>
+</main></body></html>

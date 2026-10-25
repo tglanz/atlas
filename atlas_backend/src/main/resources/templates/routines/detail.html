@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
+<body>
+<main class="stack">
+  <a class="muted" th:href="@{/routines}">All routines</a>
+  <header class="cluster">
+    <div>
+      <h1 th:text="${routine.name}">Routine</h1>
+      <p class="muted prose" th:if="${!routine.description.isEmpty()}" th:text="${routine.description}">Description</p>
+    </div>
+    <div class="cluster">
+      <a class="button" th:href="@{/routines/{id}/edit(id=${routine.id})}">Edit routine</a>
+      <form method="post" th:action="@{/routines/{id}/delete(id=${routine.id})}" data-confirm="Delete this routine? This cannot be undone.">
+        <button class="secondary danger" type="submit">Delete routine</button>
+      </form>
+    </div>
+  </header>
+  <section class="card stack" th:if="${routine.sections.isEmpty()}">
+    <h2>Build your practice</h2>
+    <p class="muted">This routine has no sections yet.</p>
+    <a class="button secondary" th:href="@{/routines/{id}/edit(id=${routine.id})}">Add sections and movements</a>
+  </section>
+  <section class="card stack" th:each="section, sectionStatus : ${routine.sections}">
+    <h2 th:text="${section.name}">Section</h2>
+    <p class="muted prose" th:if="${!section.description.isEmpty()}" th:text="${section.description}">Description</p>
+    <p class="muted" th:if="${section.movements.isEmpty()}">No movements in this section.</p>
+    <ol class="stack" th:unless="${section.movements.isEmpty()}">
+      <li th:each="movement : ${section.movements}">
+        <a th:href="@{/movements/{key}(key=${movement.key})}" th:text="${movement.name}">Movement</a>
+      </li>
+    </ol>
+  </section>
+</main>
+</body>
+</html>

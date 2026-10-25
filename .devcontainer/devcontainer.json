@@ -8,18 +8,13 @@
       "installGradle": false,
       "installMaven": false
     },
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "24.21.0",
-      "pnpmVersion": "12.3.4"
-    },
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "forwardPorts": [5173, 8080],
+  "forwardPorts": [8080],
   "portsAttributes": {
-    "5173": { "label": "atlas_ui (Vite)" },
     "8080": { "label": "atlas_backend" }
   },
-  "postCreateCommand": "(command -v make >/dev/null || (sudo apt-get update && sudo apt-get install -y make)) && (command -v uv >/dev/null || (curl -LsSf https://astral.sh/uv/0.13.5/install.sh | sudo env UV_INSTALL_DIR=/usr/local/bin UV_NO_MODIFY_PATH=1 sh)) && cd atlas_ui && pnpm install --frozen-lockfile && cd ../atlas_backend && ./gradlew --console=plain classes testClasses && cd ../atlas_utils && uv sync",
+  "postCreateCommand": "(command -v make >/dev/null || (sudo apt-get update && sudo apt-get install -y make)) && (command -v uv >/dev/null || (curl -LsSf https://astral.sh/uv/0.13.5/install.sh | sudo env UV_INSTALL_DIR=/usr/local/bin UV_NO_MODIFY_PATH=1 sh)) && cd atlas_backend && ./gradlew --console=plain classes testClasses && cd ../atlas_utils && uv sync",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -29,14 +24,10 @@
         "ms-python.python",
         "charliermarsh.ruff",
         "esbenp.prettier-vscode",
-        "oxc.oxc-vscode",
-        "vitest.explorer",
         "anthropic.claude-code"
       ],
       "settings": {
         "editor.formatOnSave": true,
-        "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-        "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
         "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
         "[markdown]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
         "[python]": { "editor.defaultFormatter": "charliermarsh.ruff" },

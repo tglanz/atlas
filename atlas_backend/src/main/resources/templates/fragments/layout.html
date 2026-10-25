@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="page(content)">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title th:text="${meta.title}">Form Atlas</title>
+  <meta name="description" th:if="${!#strings.isEmpty(meta.description)}" th:content="${meta.description}">
+  <meta name="robots" th:content="${meta.robots}">
+  <link rel="canonical" th:if="${meta.canonical != null}" th:href="${meta.canonical}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Form Atlas">
+  <meta property="og:title" th:content="${meta.title}">
+  <meta property="og:description" th:if="${!#strings.isEmpty(meta.description)}" th:content="${meta.description}">
+  <meta property="og:url" th:if="${meta.canonical != null}" th:content="${meta.canonical}">
+  <meta property="og:image" th:if="${meta.image != null}" th:content="${meta.image}">
+  <meta name="twitter:card" th:content="${meta.image != null ? 'summary_large_image' : 'summary'}">
+  <meta name="twitter:title" th:content="${meta.title}">
+  <meta name="twitter:description" th:if="${!#strings.isEmpty(meta.description)}" th:content="${meta.description}">
+  <meta name="twitter:image" th:if="${meta.image != null}" th:content="${meta.image}">
+  <script type="application/ld+json" th:if="${meta.structuredData != null}" th:utext="${meta.structuredData}"></script>
+  <link rel="stylesheet" th:href="@{/assets/app.css}">
+  <script type="module" th:src="@{/assets/app.js}"></script>
+  <script type="module" th:each="script : ${pageScripts}" th:src="@{/assets/{name}.js(name=${script})}"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="container navigation" aria-label="Main navigation">
+      <a class="brand" th:href="@{/}">Form Atlas</a>
+      <button class="nav-toggle secondary" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="Open navigation" hidden><span class="menu-icon" aria-hidden="true"></span><span>Menu</span></button>
+      <div class="navigation-panel" id="site-navigation">
+      <div class="navigation-links">
+        <a th:href="@{/movements}" th:attr="aria-current=${currentPath != null and #strings.startsWith(currentPath, '/movements') ? 'page' : null}">Movements</a>
+        <a th:href="@{/routines}" th:attr="aria-current=${currentPath != null and #strings.startsWith(currentPath, '/routines') ? 'page' : null}">Routines</a>
+        <a th:if="${maintainer}" th:href="@{/settings/illustrations}" th:attr="aria-current=${currentPath != null and #strings.startsWith(currentPath, '/settings') ? 'page' : null}">Illustrations</a>
+      </div>
+      <div class="cluster account-navigation">
+        <th:block th:unless="${signedIn}"><a th:href="@{/login}">Sign in</a><a class="button small" th:href="@{/register}">Register</a></th:block>
+        <form th:if="${signedIn}" th:action="@{/api/auth/logout}" method="post"><button class="secondary" type="submit">Sign out</button></form>
+      </div>
+      </div>
+    </nav>
+  </header>
+  <div class="container page-content" id="main" tabindex="-1"><th:block th:replace="${content}"></th:block></div>
+  <footer class="container site-footer"><p>A visual library of human movement.</p></footer>
+</body>
+</html>

@@ -1,42 +1,23 @@
-# Stack
+# Architecture Decisions
 
-- Frontend
-  - Web application: React, TypeScript, Vite
-  - Client state management: Zustand
-  - API client: Native Fetch API
-  - Server state management: TanStack Query
-  - Client routing: React Router
-  - UI component library: Mantine
-  - Styling and theming: Mantine styles and theme
-  - Icons: Tabler Icons
+## Render pages in the application
 
-- Backend
-  - Framework: Java, Spring Boot
-  - Background jobs: Spring TaskExecutor
-  - ORM: JPA, Hibernate
-  - Schema migrations: Flyway
+Spring MVC and Thymeleaf render pages from application use cases. Public movement content and metadata belong in the initial HTML so visitors and crawlers can read them without executing browser code. Reading database content at request time also lets maintainers publish changes without rebuilding a frontend or regenerating static pages.
 
-- Database
-  - Relational database: PostgreSQL
-  - Local development: SQLite, swappable with PostgreSQL through configuration
-  - Hosting: Aiven
+The application owns page rendering and the JSON API in the same deployable. This keeps domain rules and authorization together and avoids operating another rendering service. The API remains a separate transport for utilities and other explicit clients; page rendering calls use cases directly rather than making HTTP requests back into the application.
 
-- Object Storage
-  - API: S3
-  - Provider: IDrive e2
+## Enhance interactions where they help
 
-- Authentication and Authorization
-  - Identity management: Spring Security with database users and session cookies
-  - Backend authorization: Spring Security
+Ordinary links and forms provide navigation and submission. Small browser scripts handle local editor drafts, searchable choices and targeted HTML updates where a full navigation would interrupt work. Templates share layout and UI fragments, while common styles preserve a consistent visual language.
 
-- Infrastructure and Deployment
-  - Single deployable: the backend also serves the built web application, so both share one origin and session cookies and CSRF protection work without CORS
-  - Backend hosting: Render
-  - Reverse proxy and TLS: Render-managed HTTPS
-  - Configuration and secrets: Render environment variables
-  - CI/CD: GitHub Actions
+Interactive state stays local until Save. Refreshing a generation panel must not replace unsaved movement inputs. Server validation remains authoritative, and unsuccessful submissions must preserve entered values.
 
-- Deferred
-  - Illustration generation provider: Undecided
-  - Logging and monitoring: Undecided
-  - Search engine: Undecided
+## Share an origin and protect private state
+
+Session cookies and CSRF protection stay within the application origin, avoiding a separate cross-origin authentication protocol. The server enforces authorization regardless of which controls a page displays.
+
+HTML containing session-dependent navigation, private content or CSRF tokens must not be shared between users through caches. Caching and asset invalidation must preserve the visibility of published edits and deployment changes.
+
+Public URLs in metadata come from a configured, trusted deployment origin. Search discovery depends on accurate content, crawlable links and correct HTTP behavior; rendering on the server alone does not establish indexing, rankings or faster loading.
+
+See the [backend architecture](../atlas_backend/ARCHITECTURE.md) for dependency boundaries and [tooling](tooling.md) for build commands and runtime requirements.

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
+<body>
+<main class="stack">
+  <h1 th:text="${movement == null ? 'New movement' : 'Edit ' + movement.content().name()}">Movement editor</h1>
+  <form method="post" th:action="${movement == null ? '/movements/new' : '/movements/' + movement.key() + '/edit'}" th:object="${form}" class="stack" data-movement-editor>
+    <div th:if="${#fields.hasAnyErrors()}" class="alert error" role="alert" tabindex="-1" data-form-errors>
+      <p>Could not save this movement. Check the following:</p>
+      <ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}">Error</li></ul>
+    </div>
+    <label class="field">Name<input th:field="*{name}" maxlength="200" required data-movement-name></label>
+    <label class="field" th:if="${movement == null}">Key
+      <input th:field="*{key}" pattern="[a-z0-9]+([_-][a-z0-9]+)*" maxlength="100" required data-movement-key>
+      <span class="muted">Identifier used in the address. Suggested from the name; you can change it.</span>
+    </label>
+    <input th:if="${movement != null}" type="hidden" th:field="*{key}">
+    <label class="field">Description<textarea th:field="*{description}" rows="3" maxlength="20000"></textarea></label>
+
+    <section class="stack" th:each="field : ${ {'cues', 'comments'} }" th:attr="data-list=${field}">
+      <h2 th:text="${field == 'cues' ? 'Cues' : 'Comments'}">Items</h2>
+      <div class="stack" data-rows>
+        <div class="cluster editor-row" data-row th:each="value, status : ${field == 'cues' ? form.cues : form.comments}">
+          <span data-row-number aria-hidden="true" th:text="${status.count}">1</span>
+          <label class="field grow"><span class="visually-hidden" th:text="${field == 'cues' ? 'Cue' : 'Comment'}">Item</span>
+            <textarea data-property="" th:name="|${field}[${status.index}]|" th:text="${value}" maxlength="2000" rows="2"></textarea>
+          </label>
+          <div class="cluster row-actions" th:replace="~{movements/row-actions :: actions(true)}"></div>
+        </div>
+      </div>
+      <button type="button" class="button secondary" data-add-row th:text="${field == 'cues' ? 'Add cue' : 'Add comment'}">Add item</button>
+      <template data-row-template>
+        <div class="cluster editor-row" data-row>
+          <span data-row-number aria-hidden="true"></span>
+          <label class="field grow"><span class="visually-hidden" th:text="${field == 'cues' ? 'Cue' : 'Comment'}">Item</span><textarea data-property="" maxlength="2000" rows="2"></textarea></label>
+          <div th:replace="~{movements/row-actions :: actions(true)}"></div>
+        </div>
+      </template>
+      <span class="visually-hidden" role="status" data-row-status></span>
+    </section>
+
+    <section class="stack" data-list="stages">
+      <h2>Stages</h2>
+      <div class="stack" data-rows>
+        <div class="card cluster editor-row" data-row th:each="stage, status : *{stages}">
+          <span data-row-number aria-hidden="true" th:text="${status.count}">1</span>
+          <div class="stack grow">
+            <label class="field">Stage name<input data-property="name" th:name="|stages[${status.index}].name|" th:value="${stage.name}" maxlength="200" required></label>
+            <label class="field">Stage description<textarea data-property="description" th:name="|stages[${status.index}].description|" th:text="${stage.description}" rows="2" maxlength="4000" required></textarea></label>
+          </div>
+          <div th:replace="~{movements/row-actions :: actions(true)}"></div>
+        </div>
+      </div>
+      <button type="button" class="button secondary" data-add-row>Add stage</button>
+      <template data-row-template>
+        <div class="card cluster editor-row" data-row>
+          <span data-row-number aria-hidden="true"></span>
+          <div class="stack grow">
+            <label class="field">Stage name<input data-property="name" maxlength="200" required></label>
+            <label class="field">Stage description<textarea data-property="description" rows="2" maxlength="4000" required></textarea></label>
+          </div>
+          <div th:replace="~{movements/row-actions :: actions(true)}"></div>
+        </div>
+      </template>
+      <span class="visually-hidden" role="status" data-row-status></span>
+    </section>
+
+    <section class="stack" data-list="tags">
+      <h2>Tags</h2>
+      <div class="stack" data-rows>
+        <div class="cluster editor-row" data-row th:each="tag, status : *{tags}">
+          <label class="field grow"><span class="visually-hidden">Tag</span><input data-property="" th:name="|tags[${status.index}]|" th:value="${tag}" maxlength="100"></label>
+          <div th:replace="~{movements/row-actions :: actions(false)}"></div>
+        </div>
+      </div>
+      <button type="button" class="button secondary" data-add-row>Add tag</button>
+      <template data-row-template><div class="cluster editor-row" data-row><label class="field grow"><span class="visually-hidden">Tag</span><input data-property="" maxlength="100"></label><div th:replace="~{movements/row-actions :: actions(false)}"></div></div></template>
+      <span class="visually-hidden" role="status" data-row-status></span>
+    </section>
+
+    <section class="stack" data-list="links">
+      <h2>Relationships</h2>
+      <p class="muted">Search for an existing movement by its name or key, then choose a relationship type.</p>
+      <div class="stack" data-rows>
+        <div class="card cluster editor-row" data-row th:each="link, status : *{links}">
+          <label class="field grow">Movement<input data-property="target" th:name="|links[${status.index}].target|" th:value="${link.target}" list="movement-choices" maxlength="100" autocomplete="off" required></label>
+          <label class="field grow">Type<select data-property="type" th:name="|links[${status.index}].type|" required><option value="">Choose a type</option><option th:each="type : ${relationshipTypes}" th:value="${type.key}" th:text="${type.value}" th:selected="${type.key == link.type}">Type</option></select></label>
+          <div th:replace="~{movements/row-actions :: actions(false)}"></div>
+        </div>
+      </div>
+      <button type="button" class="button secondary" data-add-row>Add relationship</button>
+      <template data-row-template>
+        <div class="card cluster editor-row" data-row>
+          <label class="field grow">Movement<input data-property="target" list="movement-choices" maxlength="100" autocomplete="off" required></label>
+          <label class="field grow">Type<select data-property="type" required><option value="">Choose a type</option><option th:each="type : ${relationshipTypes}" th:value="${type.key}" th:text="${type.value}">Type</option></select></label>
+          <div th:replace="~{movements/row-actions :: actions(false)}"></div>
+        </div>
+      </template>
+      <span class="visually-hidden" role="status" data-row-status></span>
+    </section>
+    <datalist id="movement-choices"><option th:each="name : ${movementNames}" th:value="${name.key}" th:label="${name.name}"></option></datalist>
+    <div class="cluster"><button type="submit" class="button">Save</button><a class="button secondary" th:href="${movement == null ? '/movements' : '/movements/' + movement.key()}">Cancel</a></div>
+  </form>
+  <section class="stack" th:if="${movement == null}"><h2>Illustrations</h2><p class="muted">Save the movement first, then edit it to generate illustrations.</p></section>
+  <th:block th:if="${movement != null}"><section th:replace="~{fragments/generation :: panel}"></section></th:block>
+</main>
+</body>
+</html>
