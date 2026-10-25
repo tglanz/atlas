@@ -28,6 +28,7 @@ export function AccountMenu() {
         <Button
           variant="default"
           size="xs"
+          maw={160}
           leftSection={<IconUser size={16} />}
         >
           {user.data.email}
