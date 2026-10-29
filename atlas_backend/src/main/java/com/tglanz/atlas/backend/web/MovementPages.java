@@ -12,6 +12,7 @@ import com.tglanz.atlas.backend.shared.error.ConflictException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -79,12 +80,13 @@ public class MovementPages {
   @GetMapping("/")
   String home(Model model) {
     var library = movements.search("", Set.of());
-    model.addAttribute(
-        "featuredMovements",
-        library.stream()
-            .sorted(Comparator.comparing(movement -> movement.representativeIllustration() == null))
-            .limit(3)
-            .toList());
+    var illustrated =
+        new ArrayList<>(
+            library.stream()
+                .filter(movement -> movement.representativeIllustration() != null)
+                .toList());
+    Collections.shuffle(illustrated);
+    model.addAttribute("featuredMovements", illustrated.stream().limit(3).toList());
     model.addAttribute("movementCount", library.size());
     model.addAttribute(
         "meta", metadata.publicPage("Movement library", LIBRARY_DESCRIPTION, "/", null));

@@ -1,0 +1,40 @@
+{
+  "key": "childs_pose",
+  "name": "Child's Pose",
+  "description": "Rest the torso forward from kneeling, with the arms reaching ahead and the forehead supported.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Kneel with the tops of the feet down and knees at a comfortable width."
+    },
+    {
+      "type": "CUE",
+      "content": "Move the hips toward the heels without forcing the knees or ankles."
+    },
+    {
+      "type": "CUE",
+      "content": "Fold the torso between the thighs and reach the arms forward with relaxed shoulders."
+    },
+    {
+      "type": "CUE",
+      "content": "Rest the forehead on the floor or a block; use a cushion under the torso or hips as needed."
+    },
+    {
+      "type": "CUE",
+      "content": "Breathe gently and ease out if there is joint discomfort."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hold",
+      "description": "Kneeling with knees apart, tops of feet on the floor and hips toward heels. Torso rests forward between thighs, arms reach along the floor and forehead is supported on the floor."
+    }
+  ],
+  "tags": [
+    "back",
+    "stretching",
+    "yoga"
+  ],
+  "illustrations": [],
+  "edges": []
+}

@@ -1,0 +1,40 @@
+{
+  "key": "cat_cow",
+  "name": "Cat-Cow",
+  "description": "Alternate between rounding and gently arching the spine from hands and knees.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Place hands beneath shoulders and knees beneath hips."
+    },
+    {
+      "type": "CUE",
+      "content": "Exhale to round the back, tuck the pelvis, and gently lower the chin."
+    },
+    {
+      "type": "CUE",
+      "content": "Inhale to tilt the pelvis forward, soften the belly, and draw the chest forward."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep elbows straight without locking; move smoothly without forcing the neck or lower back."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Cat",
+      "description": "On hands and knees with arms straight, back rounded toward the ceiling, pelvis tucked and chin gently lowered."
+    },
+    {
+      "name": "Cow",
+      "description": "On hands and knees with arms straight, pelvis tilted forward, belly lowered slightly and chest lifted forward. Neck follows the curve of the spine without the head being thrown back."
+    }
+  ],
+  "tags": [
+    "back",
+    "mobility",
+    "yoga"
+  ],
+  "illustrations": [],
+  "edges": []
+}

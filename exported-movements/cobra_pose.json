@@ -1,0 +1,40 @@
+{
+  "key": "cobra_pose",
+  "name": "Cobra Pose",
+  "description": "Lift the chest into a small backbend while lying face down, keeping the pelvis and legs grounded.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Lie face down with legs extended and tops of feet on the floor; place palms beside the lower ribs."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep elbows bent and close to the body as you draw the chest forward and up."
+    },
+    {
+      "type": "CUE",
+      "content": "Use the back muscles with light hand support; leave the pelvis and legs on the floor."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep the neck in line with the spine and lift only to a comfortable height without pinching the lower back."
+    },
+    {
+      "type": "CUE",
+      "content": "Breathe gently, then lower the chest slowly."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hold",
+      "description": "Lying face down with pelvis, legs and tops of feet grounded. Chest lifted a short distance, palms beside lower ribs, elbows bent alongside the torso and neck long."
+    }
+  ],
+  "tags": [
+    "back",
+    "mobility",
+    "yoga"
+  ],
+  "illustrations": [],
+  "edges": []
+}

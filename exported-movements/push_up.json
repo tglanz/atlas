@@ -50,17 +50,52 @@
     {
       "source": "push_up",
       "target": "pike_pushup",
-      "type": "progression"
+      "type": "progression",
+      "movement": {
+        "key": "pike_pushup",
+        "name": "Pike pushup",
+        "tags": [
+          "arms",
+          "calisthenics",
+          "push",
+          "shoulders"
+        ],
+        "representativeIllustration": null
+      }
     },
     {
       "source": "push_up",
       "target": "pseudo_planche_pushup",
-      "type": "progression"
+      "type": "progression",
+      "movement": {
+        "key": "pseudo_planche_pushup",
+        "name": "Pseudo planche pushup",
+        "tags": [
+          "arms",
+          "calisthenics",
+          "chest",
+          "push",
+          "shoulders"
+        ],
+        "representativeIllustration": null
+      }
     },
     {
       "source": "push_up",
       "target": "chicken_pushup",
-      "type": "regression"
+      "type": "regression",
+      "movement": {
+        "key": "chicken_pushup",
+        "name": "Chicken pushup",
+        "tags": [
+          "arms",
+          "calisthenics",
+          "chest",
+          "push",
+          "shoulders"
+        ],
+        "representativeIllustration": null
+      }
     }
   ]
 }

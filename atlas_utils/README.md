@@ -10,13 +10,17 @@ uv run atlas-utils --help
 
 ## Seeding from a deployment
 
-Export the movements of a running app, then turn the export into the seed migrations:
+The development database is disposable. Refresh its seed baseline from a deployment, then recreate it locally:
 
 ```
 uv run atlas-utils export-movements https://your-app.example.com -o export
 uv run atlas-utils make-seed export
 ```
 
-`export-movements` writes one JSON file per movement, named by key, into the directory and skips movements whose file already exists, so an interrupted export can be resumed. Add `--overwrite` to fetch them all again.
+The export includes public movements, items, stages, tags, illustration URLs and relationships. It does not copy accounts, routines, generation history or maintainer settings. Images stay at their existing URLs.
 
-`make-seed` reads the directory and replaces `V5__seed_movements.sql` and, when the export has illustrations, `V6__seed_illustrations.sql` in the backend's migration directory. Review the diff, then reset the databases, since changed migrations no longer match Flyway's checksums. The export reads only public endpoints.
+Use a fresh export directory to capture the current catalog without leaving files for removed movements. Existing files are skipped so an interrupted export can resume; `--overwrite` fetches them again.
+
+`make-seed` replaces the full movement seed and writes an illustration seed when images exist. The output names are defined in [make_seed.py](src/atlas_utils/scenarios/make_seed.py); keep their versions distinct from the other migrations. Use `--out-dir DIRECTORY` to inspect generated SQL elsewhere first.
+
+After reviewing the generated SQL, stop the local application, remove its SQLite database and restart it. The seeds are a fresh baseline, not incremental data updates. See [site configuration](../docs/config.md) for database paths and deployment settings.

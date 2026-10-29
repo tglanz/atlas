@@ -1,0 +1,40 @@
+{
+  "key": "glute_bridge",
+  "name": "Glute Bridge",
+  "description": "Raise the hips from a bent-knee lying position to train hip extension.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Lie on the back with feet flat and hip-width apart; keep knees aligned with the feet."
+    },
+    {
+      "type": "CUE",
+      "content": "Brace gently and push through the feet to lift the hips."
+    },
+    {
+      "type": "CUE",
+      "content": "Squeeze the glutes and stop when shoulders, hips and knees form a line; avoid arching the back."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep the neck relaxed and lower the pelvis with control."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Start",
+      "description": "Lying on the back with knees bent, feet flat and hip-width apart, and arms resting beside the body."
+    },
+    {
+      "name": "Top",
+      "description": "Shoulders and feet on the floor, hips raised into a straight line with shoulders and knees. Knees remain aligned with feet and arms rest beside the body."
+    }
+  ],
+  "tags": [
+    "calisthenics",
+    "hips",
+    "legs"
+  ],
+  "illustrations": [],
+  "edges": []
+}

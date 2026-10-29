@@ -1,0 +1,42 @@
+{
+  "key": "dead_hang",
+  "name": "Dead Hang",
+  "description": "Hang from a fixed overhead bar with straight arms to practice grip and overhead support.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Use a secure bar and wrap the thumbs around it with hands about shoulder-width apart."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep arms straight and allow the shoulder blades to rise naturally in a comfortable overhead position."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep the body quiet and breathe; avoid swinging or forcing a shoulder stretch."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep feet on a support to reduce the load if needed, and step down with control."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hang",
+      "description": "Hanging vertically from a fixed overhead bar with straight arms, overhand grip and feet off the floor. Head sits between the upper arms and legs hang together."
+    }
+  ],
+  "tags": [
+    "calisthenics",
+    "grip",
+    "pull"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "dead_hang",
+      "target": "scapular_pullup",
+      "type": "progression"
+    }
+  ]
+}

@@ -46,12 +46,30 @@
     {
       "source": "squats",
       "target": "pistol_squats",
-      "type": "progression"
+      "type": "progression",
+      "movement": {
+        "key": "pistol_squats",
+        "name": "Pistol squats",
+        "tags": [
+          "calisthenics",
+          "legs"
+        ],
+        "representativeIllustration": "https://v3b.fal.media/files/b/0aafccd0/Qcv2rDaNLdPgm2OF0k-0e_9Iryc3Sh.png"
+      }
     },
     {
       "source": "squats",
       "target": "barbell_squat",
-      "type": "variant"
+      "type": "variant",
+      "movement": {
+        "key": "barbell_squat",
+        "name": "Barbell squat",
+        "tags": [
+          "barbell",
+          "legs"
+        ],
+        "representativeIllustration": "https://v3b.fal.media/files/b/0aafcc86/uoSEWbYJNrw2vNXnJAgsw_td3rwL9r.png"
+      }
     }
   ]
 }

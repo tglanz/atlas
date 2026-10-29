@@ -1,0 +1,39 @@
+{
+  "key": "dead_bug",
+  "name": "Dead Bug",
+  "description": "Lower an opposite arm and leg while lying on the back, keeping the trunk steady.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Start with arms toward the ceiling and hips and knees bent to right angles."
+    },
+    {
+      "type": "CUE",
+      "content": "Gently brace and keep the lower back resting against the floor."
+    },
+    {
+      "type": "CUE",
+      "content": "Reach one arm overhead and the opposite leg away, stopping before the back arches."
+    },
+    {
+      "type": "CUE",
+      "content": "Return slowly, switch sides, and breathe without moving the pelvis."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Start",
+      "description": "Lying on the back with arms vertical, thighs vertical, knees bent to right angles and shins parallel to the floor."
+    },
+    {
+      "name": "Reach",
+      "description": "Lying on the back with one arm extended overhead and the opposite leg extended above the floor. Other arm remains vertical and other hip and knee remain bent; lower back stays on the floor."
+    }
+  ],
+  "tags": [
+    "calisthenics",
+    "core"
+  ],
+  "illustrations": [],
+  "edges": []
+}

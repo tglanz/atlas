@@ -1,0 +1,52 @@
+{
+  "key": "scapular_pullup",
+  "name": "Scapular Pullup",
+  "description": "Raise the body a small distance from a hang using the shoulder blades while keeping the elbows straight.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Start from a comfortable straight-arm hang on a secure bar, hands about shoulder-width apart."
+    },
+    {
+      "type": "CUE",
+      "content": "Draw the shoulder blades down to lift the chest and body slightly."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep elbows straight; avoid kicking, swinging, or flaring the ribs."
+    },
+    {
+      "type": "CUE",
+      "content": "Let the shoulders rise again slowly; use foot support to reduce the load if needed."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hang",
+      "description": "Body hanging vertically from an overhead bar, arms straight and shoulders raised near the ears. Legs hang together."
+    },
+    {
+      "name": "Active hang",
+      "description": "Body slightly higher beneath the same bar, arms still straight and shoulders farther from the ears. Chest is slightly lifted without bending the elbows or arching the lower back."
+    }
+  ],
+  "tags": [
+    "back",
+    "calisthenics",
+    "pull",
+    "shoulders"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "scapular_pullup",
+      "target": "dead_hang",
+      "type": "regression"
+    },
+    {
+      "source": "scapular_pullup",
+      "target": "pullup",
+      "type": "progression"
+    }
+  ]
+}

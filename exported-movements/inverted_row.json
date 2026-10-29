@@ -1,0 +1,40 @@
+{
+  "key": "inverted_row",
+  "name": "Inverted Row",
+  "description": "Pull the chest toward a fixed bar while the heels remain on the floor.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Use a securely fixed bar and grip just wider than shoulder width."
+    },
+    {
+      "type": "CUE",
+      "content": "Hang beneath the bar with straight arms, heels grounded, and trunk braced."
+    },
+    {
+      "type": "CUE",
+      "content": "Pull the chest toward the bar while keeping the hips in line with the shoulders and heels."
+    },
+    {
+      "type": "CUE",
+      "content": "Lower slowly without swinging; use a higher bar for an easier body angle."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Bottom",
+      "description": "Body beneath a fixed bar with arms straight and heels on the floor. Head, hips and heels align in a straight diagonal line."
+    },
+    {
+      "name": "Top",
+      "description": "Chest close to the fixed bar, elbows bent beside the body and heels on the floor. Head, hips and heels remain aligned."
+    }
+  ],
+  "tags": [
+    "back",
+    "calisthenics",
+    "pull"
+  ],
+  "illustrations": [],
+  "edges": []
+}

@@ -46,7 +46,16 @@
     {
       "source": "pistol_squats",
       "target": "squats",
-      "type": "regression"
+      "type": "regression",
+      "movement": {
+        "key": "squats",
+        "name": "Squats",
+        "tags": [
+          "calisthenics",
+          "legs"
+        ],
+        "representativeIllustration": "https://v3b.fal.media/files/b/0aafcccd/tV0r2rG_Q6miXbT5nZC-G_mH9tk2lu.png"
+      }
     }
   ]
 }

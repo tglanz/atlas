@@ -1,0 +1,45 @@
+{
+  "key": "parallel_bar_dip",
+  "name": "Parallel Bar Dip",
+  "description": "Lower and raise the body between fixed parallel bars using the chest and arms.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Grip stable bars beside the hips and support the body with straight arms."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep shoulders away from the ears, brace the trunk, and lean slightly forward."
+    },
+    {
+      "type": "CUE",
+      "content": "Bend the elbows back while keeping forearms close to vertical."
+    },
+    {
+      "type": "CUE",
+      "content": "Lower only through a comfortable shoulder range; do not bounce or let shoulders roll forward."
+    },
+    {
+      "type": "CUE",
+      "content": "Press back to straight arms without swinging; use foot assistance if needed."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Support",
+      "description": "Body supported above two fixed parallel bars with straight arms, hands beside hips, shoulders lowered and feet clear of the floor."
+    },
+    {
+      "name": "Lowered",
+      "description": "Body lowered between parallel bars with elbows bent, upper arms approximately horizontal and forearms near vertical. Torso leans slightly forward, knees are bent and feet remain clear of the floor."
+    }
+  ],
+  "tags": [
+    "arms",
+    "calisthenics",
+    "chest",
+    "push"
+  ],
+  "illustrations": [],
+  "edges": []
+}

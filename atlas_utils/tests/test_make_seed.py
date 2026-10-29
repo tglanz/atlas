@@ -93,3 +93,8 @@ def test_rejects_an_empty_directory(tmp_path):
 
     with pytest.raises(InvalidExportError):
         make_seed(tmp_path / "empty", tmp_path)
+
+
+def test_illustration_seed_version_does_not_collide_with_another_migration():
+    version = ILLUSTRATIONS_FILE.split("__")[0]
+    assert all(path.name == ILLUSTRATIONS_FILE for path in MIGRATIONS.glob(f"{version}__*.sql"))

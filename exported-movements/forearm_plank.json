@@ -1,0 +1,41 @@
+{
+  "key": "forearm_plank",
+  "name": "Forearm Plank",
+  "description": "Hold the body above the floor on the forearms and toes to train trunk stability.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Place elbows beneath shoulders and forearms parallel."
+    },
+    {
+      "type": "CUE",
+      "content": "Brace the abdomen and squeeze the glutes; keep hips in line with shoulders and heels."
+    },
+    {
+      "type": "CUE",
+      "content": "Press the floor away without shrugging, and look between the hands."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep breathing; lower the knees when the back starts to sag."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hold",
+      "description": "Body supported on parallel forearms and toes, elbows beneath shoulders. Head, hips and heels form a straight line, with the face toward the floor."
+    }
+  ],
+  "tags": [
+    "calisthenics",
+    "core"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "forearm_plank",
+      "target": "side_plank",
+      "type": "variant"
+    }
+  ]
+}

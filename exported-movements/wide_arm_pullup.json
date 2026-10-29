@@ -45,7 +45,18 @@
     {
       "source": "wide_arm_pullup",
       "target": "pullup",
-      "type": "regression"
+      "type": "regression",
+      "movement": {
+        "key": "pullup",
+        "name": "Pullup",
+        "tags": [
+          "arms",
+          "back",
+          "calisthenics",
+          "pull"
+        ],
+        "representativeIllustration": null
+      }
     }
   ]
 }

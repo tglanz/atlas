@@ -1,0 +1,41 @@
+{
+  "key": "side_plank",
+  "name": "Side Plank",
+  "description": "Support the body sideways on one forearm and the feet to train lateral trunk stability.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Set the supporting elbow beneath the shoulder and press firmly into the floor."
+    },
+    {
+      "type": "CUE",
+      "content": "Stack shoulders and hips; lift the hips into line with the head and feet."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep the neck long and avoid rolling the chest toward the floor."
+    },
+    {
+      "type": "CUE",
+      "content": "Stagger the feet or rest the lower knee down for support; breathe and repeat on both sides."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hold",
+      "description": "Body sideways above the floor, supported on one forearm and stacked feet. Elbow beneath shoulder, hips lifted, free hand on the upper hip, and head aligned with the torso."
+    }
+  ],
+  "tags": [
+    "calisthenics",
+    "core"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "side_plank",
+      "target": "forearm_plank",
+      "type": "variant"
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 MOVEMENTS_FILE = "V5__seed_movements.sql"
-ILLUSTRATIONS_FILE = "V6__seed_illustrations.sql"
+ILLUSTRATIONS_FILE = "V7__seed_illustrations.sql"
 
 
 class InvalidExportError(Exception):

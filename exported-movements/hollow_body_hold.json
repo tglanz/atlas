@@ -1,0 +1,35 @@
+{
+  "key": "hollow_body_hold",
+  "name": "Hollow Body Hold",
+  "description": "Hold a compact, rounded trunk position on the back, with shoulders and feet off the floor.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Lie on the back, bend the knees toward the chest, and reach arms toward the heels."
+    },
+    {
+      "type": "CUE",
+      "content": "Draw the ribs down and gently keep the lower back against the floor."
+    },
+    {
+      "type": "CUE",
+      "content": "Lift the shoulder blades slightly without pulling the head forward."
+    },
+    {
+      "type": "CUE",
+      "content": "Extend the legs only as far as the lower back stays down; keep breathing."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hold",
+      "description": "Lower back on the floor, shoulder blades lifted, arms reaching beside the thighs. Hips and knees bent with feet raised; chin gently tucked."
+    }
+  ],
+  "tags": [
+    "calisthenics",
+    "core"
+  ],
+  "illustrations": [],
+  "edges": []
+}

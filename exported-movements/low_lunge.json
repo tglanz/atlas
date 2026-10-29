@@ -1,0 +1,40 @@
+{
+  "key": "low_lunge",
+  "name": "Low Lunge",
+  "description": "Hold a kneeling lunge to stretch the front of the rear hip while keeping the trunk upright.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Step one foot forward from kneeling; place the front knee over the ankle and cushion the rear knee."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep the feet hip-width apart rather than on one narrow line."
+    },
+    {
+      "type": "CUE",
+      "content": "Gently tuck the pelvis and tighten the rear glute, keeping the ribs above the pelvis."
+    },
+    {
+      "type": "CUE",
+      "content": "Shift forward only until a mild stretch appears at the front of the rear hip; avoid arching the back."
+    },
+    {
+      "type": "CUE",
+      "content": "Rest hands on the front thigh for balance, breathe, and repeat on the other side."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hold",
+      "description": "Half-kneeling with front foot flat, front knee above ankle and rear knee on a folded mat behind the hip. Torso upright, pelvis facing forward and hands resting on the front thigh."
+    }
+  ],
+  "tags": [
+    "hips",
+    "stretching",
+    "yoga"
+  ],
+  "illustrations": [],
+  "edges": []
+}

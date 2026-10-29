@@ -86,7 +86,8 @@ a.tag { min-height: 36px; text-decoration: none; }
 .hero { max-width: 47rem; padding-block: 3rem; gap: 1.5rem; }
 .hero h1 { font-size: clamp(2.5rem, 8vw, 3.5rem); }
 .lead { font-size: 1.25rem; line-height: 1.7; }
-.movement-card-image { width: 100%; height: 10rem; object-fit: contain; border-radius: var(--radius); }
+.movement-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); align-items: start; }
+.movement-card-image { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; border-radius: var(--radius); background: #fff; }
 .movement-card h2, .movement-card h3 { font-size: 1.1rem; }
 .movement-card a { text-decoration: none; }
 .movement-image { width: 100%; max-width: 20rem; height: 14rem; object-fit: contain; }
@@ -97,7 +98,7 @@ a.tag { min-height: 36px; text-decoration: none; }
 .illustrations { scroll-snap-type: x proximity; }
 .illustrations figure { flex: 0 0 min(18rem, calc(100% - 2rem)); scroll-snap-align: start; }
 .illustrations figure:only-child { flex-basis: min(18rem, 100%); }
-.illustrations img { width: 100%; max-width: none; height: 14rem; object-fit: contain; border-radius: var(--radius); background: var(--subtle); }
+.illustrations img { width: 100%; max-width: none; height: 14rem; object-fit: contain; border-radius: var(--radius); background: #fff; }
 .routine-illustrations figure { flex-basis: min(16rem, calc(100% - 2rem)); }
 .routine-illustrations img { height: 12rem; }
 .routine-cues { gap: .5rem; }
@@ -161,7 +162,6 @@ dialog ul { list-style: none; padding: 0; }
 .practice-invitation .prose { max-width: 48ch; }
 .movement-card { gap: .9rem; padding: 1rem; transition: border-color 120ms ease; }
 .movement-card:has(h3 a:hover) { border-color: var(--primary); }
-.movement-card-image { height: 10rem; background: var(--subtle); }
 .movement-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .movement-card-heading h3 { flex: 1; }
 .movement-card-heading h3 a { display: flex; align-items: center; min-height: 44px; }

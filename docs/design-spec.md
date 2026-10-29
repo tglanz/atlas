@@ -12,7 +12,7 @@
 
 ## Landing Page
 
-Introduce the library with text and direct paths into exploring Movements or building a Routine. The introduction does not feature an example Movement or Illustration.
+Introduce the library with text and direct paths into exploring Movements or building a Routine. The introduction does not feature an example Movement or Illustration. Below it, show a random selection of Movements that have Illustrations.
 
 ## 1. Movement Index
 
@@ -31,6 +31,7 @@ URL: `/movements/:key`
 
 - Data: Name, description, illustrations, items grouped by type, tags, and related Movements, one section per relationship type, such as Progressions.
 - Actions: View illustrations in an ordered horizontal row with visible position captions and navigation controls when scrolling is needed; open related Movements.
+- Illustration areas use a white background and preserve image proportions. Related Movement cards keep consistent proportions even when a relationship has few results.
 - Maintainer actions: Edit Movement.
 
 ## 3. Movement Editor

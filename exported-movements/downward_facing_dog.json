@@ -1,0 +1,41 @@
+{
+  "key": "downward_facing_dog",
+  "name": "Downward-Facing Dog",
+  "description": "Form an inverted V on hands and feet, reaching the hips up and back while lengthening the spine.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Start on hands and knees, hands shoulder-width apart; spread the fingers and press through the palms."
+    },
+    {
+      "type": "CUE",
+      "content": "Tuck the toes and lift the knees, sending the hips up and back."
+    },
+    {
+      "type": "CUE",
+      "content": "Bend the knees as needed to keep the back long; heels do not need to touch the floor."
+    },
+    {
+      "type": "CUE",
+      "content": "Push the floor away, keep the neck relaxed, and avoid collapsing into the shoulders."
+    },
+    {
+      "type": "CUE",
+      "content": "Breathe steadily, then lower the knees to come out."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hold",
+      "description": "Hands and feet on the floor in an inverted V, hips high, arms straight and back long. Knees slightly bent, heels raised, and head aligned between the upper arms."
+    }
+  ],
+  "tags": [
+    "hamstrings",
+    "shoulders",
+    "stretching",
+    "yoga"
+  ],
+  "illustrations": [],
+  "edges": []
+}

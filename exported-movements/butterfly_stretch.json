@@ -1,0 +1,36 @@
+{
+  "key": "butterfly_stretch",
+  "name": "Butterfly Stretch",
+  "description": "Sit with the soles of the feet together and knees open to stretch the inner thighs.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Sit on the sitting bones, bringing the soles together and letting the knees open comfortably."
+    },
+    {
+      "type": "CUE",
+      "content": "Hold the ankles lightly and lift through the chest without arching the lower back."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep feet farther from the pelvis if the knees feel strained; support the thighs with cushions if needed."
+    },
+    {
+      "type": "CUE",
+      "content": "Breathe and let the hips relax; do not press or bounce the knees downward."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hold",
+      "description": "Seated upright with soles of feet touching, knees open to the sides and hands lightly holding the ankles. Back long and shoulders relaxed."
+    }
+  ],
+  "tags": [
+    "hips",
+    "stretching",
+    "yoga"
+  ],
+  "illustrations": [],
+  "edges": []
+}

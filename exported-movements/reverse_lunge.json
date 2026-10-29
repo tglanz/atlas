@@ -1,0 +1,39 @@
+{
+  "key": "reverse_lunge",
+  "name": "Reverse Lunge",
+  "description": "Step backward into a split stance, lower the body, then return to standing.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Start with feet hip-width apart and step one foot back, keeping space between the feet."
+    },
+    {
+      "type": "CUE",
+      "content": "Bend both knees and lower the rear knee toward the floor with control."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep the front foot flat and its knee tracking in the direction of the toes."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep the trunk steady; press through the front foot to stand, then switch legs."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Standing",
+      "description": "Standing upright with feet hip-width apart and arms by the sides."
+    },
+    {
+      "name": "Lowered",
+      "description": "One foot forward and flat, other foot behind on the ball of the foot. Both knees bent, rear knee hovering above the floor, front thigh near horizontal, and torso nearly upright."
+    }
+  ],
+  "tags": [
+    "calisthenics",
+    "legs"
+  ],
+  "illustrations": [],
+  "edges": []
+}

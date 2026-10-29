@@ -49,12 +49,36 @@
     {
       "source": "pike_pushup",
       "target": "handstand_pushup",
-      "type": "progression"
+      "type": "progression",
+      "movement": {
+        "key": "handstand_pushup",
+        "name": "Handstand pushup",
+        "tags": [
+          "arms",
+          "calisthenics",
+          "handstand",
+          "push",
+          "shoulders"
+        ],
+        "representativeIllustration": null
+      }
     },
     {
       "source": "pike_pushup",
       "target": "push_up",
-      "type": "regression"
+      "type": "regression",
+      "movement": {
+        "key": "push_up",
+        "name": "Push up",
+        "tags": [
+          "arms",
+          "calisthenics",
+          "chest",
+          "push",
+          "shoulders"
+        ],
+        "representativeIllustration": null
+      }
     }
   ]
 }

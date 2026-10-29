@@ -50,7 +50,19 @@
     {
       "source": "chicken_pushup",
       "target": "push_up",
-      "type": "progression"
+      "type": "progression",
+      "movement": {
+        "key": "push_up",
+        "name": "Push up",
+        "tags": [
+          "arms",
+          "calisthenics",
+          "chest",
+          "push",
+          "shoulders"
+        ],
+        "representativeIllustration": null
+      }
     }
   ]
 }

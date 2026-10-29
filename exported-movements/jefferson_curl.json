@@ -1,0 +1,44 @@
+{
+  "key": "jefferson_curl",
+  "name": "Jefferson Curl (Unloaded)",
+  "description": "Slowly roll the spine forward and return to standing without added weight, practicing controlled spinal flexion.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Stand on the floor with feet hip-width apart and knees softly bent; use no added weight."
+    },
+    {
+      "type": "CUE",
+      "content": "Gently nod the chin, then gradually round the upper, middle and lower back."
+    },
+    {
+      "type": "CUE",
+      "content": "Let the arms hang and hips shift back; stop within a comfortable, controlled range."
+    },
+    {
+      "type": "CUE",
+      "content": "Roll back up slowly, bringing the head upright last; do not bounce or force depth."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep breathing and stop if the movement causes pain, tingling or numbness."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Standing",
+      "description": "Standing upright on the floor, feet hip-width apart, knees softly bent, arms hanging by the sides and hands empty."
+    },
+    {
+      "name": "Rolled down",
+      "description": "Standing with softly bent knees, hips shifted slightly backward and spine rounded forward. Head and empty hands hang toward the floor, without reaching below foot level."
+    }
+  ],
+  "tags": [
+    "back",
+    "hamstrings",
+    "mobility"
+  ],
+  "illustrations": [],
+  "edges": []
+}

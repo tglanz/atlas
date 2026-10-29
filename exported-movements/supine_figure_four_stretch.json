@@ -1,0 +1,39 @@
+{
+  "key": "supine_figure_four_stretch",
+  "name": "Supine Figure-Four Stretch",
+  "description": "Cross one ankle over the opposite thigh while lying on the back to stretch the outer hip.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Lie on the back with knees bent and feet on the floor."
+    },
+    {
+      "type": "CUE",
+      "content": "Place one ankle on the opposite thigh just above the knee, keeping the crossed foot gently flexed."
+    },
+    {
+      "type": "CUE",
+      "content": "Hold behind the supporting thigh and draw it toward the chest until the outer hip stretches."
+    },
+    {
+      "type": "CUE",
+      "content": "Keep the head and pelvis resting down; do not push on the crossed knee."
+    },
+    {
+      "type": "CUE",
+      "content": "Breathe without forcing the stretch, release slowly, and switch sides."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hold",
+      "description": "Lying on the back with one ankle crossed above the opposite knee. Both hands hold behind the supporting thigh, drawing it toward the chest; head and pelvis rest on the floor."
+    }
+  ],
+  "tags": [
+    "hips",
+    "stretching"
+  ],
+  "illustrations": [],
+  "edges": []
+}

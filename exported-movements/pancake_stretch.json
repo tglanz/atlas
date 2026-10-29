@@ -1,0 +1,46 @@
+{
+  "key": "pancake_stretch",
+  "name": "Pancake Stretch",
+  "description": "Fold forward from a wide seated straddle to stretch the inner thighs and hamstrings.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Sit tall with legs spread to a comfortable width and knees and toes facing upward."
+    },
+    {
+      "type": "CUE",
+      "content": "Tilt the pelvis forward and hinge at the hips, keeping the spine long."
+    },
+    {
+      "type": "CUE",
+      "content": "Rest the hands in front for support; stop before the back collapses or the knees twist."
+    },
+    {
+      "type": "CUE",
+      "content": "Use a folded blanket under the hips or soften the knees if needed."
+    },
+    {
+      "type": "CUE",
+      "content": "Breathe in a mild stretch without bouncing or forcing the chest to the floor."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hold",
+      "description": "Seated with legs spread wide, knees and toes facing upward, and heels on the floor. Torso leans forward from the hips with a long back and hands resting on the floor ahead."
+    }
+  ],
+  "tags": [
+    "hamstrings",
+    "hips",
+    "stretching"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "pancake_stretch",
+      "target": "seated_forward_fold",
+      "type": "variant"
+    }
+  ]
+}

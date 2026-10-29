@@ -1,0 +1,46 @@
+{
+  "key": "seated_forward_fold",
+  "name": "Seated Forward Fold",
+  "description": "Hinge forward over the legs from sitting to stretch the hamstrings while keeping the back long.",
+  "items": [
+    {
+      "type": "CUE",
+      "content": "Sit tall with legs in front and knees and toes facing upward."
+    },
+    {
+      "type": "CUE",
+      "content": "Bend the knees or sit on a folded blanket if needed to keep the pelvis upright."
+    },
+    {
+      "type": "CUE",
+      "content": "Tip forward from the hips, reaching the chest toward the feet without forcing the back to round."
+    },
+    {
+      "type": "CUE",
+      "content": "Rest hands on the legs or floor; avoid pulling hard on the feet."
+    },
+    {
+      "type": "CUE",
+      "content": "Hold a mild stretch with easy breathing, then return upright slowly."
+    }
+  ],
+  "stages": [
+    {
+      "name": "Hold",
+      "description": "Seated with legs together in front, knees slightly bent and toes upward. Torso leans forward from the hips, spine long and hands resting on the shins."
+    }
+  ],
+  "tags": [
+    "hamstrings",
+    "stretching",
+    "yoga"
+  ],
+  "illustrations": [],
+  "edges": [
+    {
+      "source": "seated_forward_fold",
+      "target": "pancake_stretch",
+      "type": "variant"
+    }
+  ]
+}
