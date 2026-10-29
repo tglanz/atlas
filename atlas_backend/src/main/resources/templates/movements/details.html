@@ -2,20 +2,23 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
 <body>
 <main class="stack">
-  <div class="cluster between">
-    <h1 th:text="${movement.content().name()}">Movement</h1>
-    <a th:if="${maintainer}" class="button secondary" th:href="@{/movements/{key}/edit(key=${movement.key()})}">Edit</a>
+  <a class="back-link" th:href="@{/movements}">← All movements</a>
+  <header class="cluster between page-heading">
+    <div><p class="eyebrow">Movement guide</p><h1 th:text="${movement.content().name()}">Movement</h1></div>
+    <div class="cluster"><a class="button" th:href="@{/routines/add(movement=${movement.key.value})}">Add to routine <span aria-hidden="true">+</span></a><a th:if="${maintainer}" class="button secondary" th:href="@{/movements/{key}/edit(key=${movement.key()})}">Edit</a></div>
+  </header>
+  <p class="prose reading-copy" th:if="${!movement.content().description().isEmpty()}" th:text="${movement.content().description()}">Description</p>
+  <div class="practice-layout" th:classappend="${movement.illustrations().isEmpty() ? 'without-illustrations' : ''}">
+    <div th:if="${!movement.illustrations().isEmpty()}"><div th:replace="~{fragments/illustrations :: sequence(${movement.illustrations()}, ${movement.content().name()}, ${movement.content().stages()}, false)}"></div></div>
+    <div class="stack reading-copy movement-notes">
+      <section class="stack" th:each="group : ${itemGroups}" th:if="${!group.items.isEmpty()}">
+        <h2 th:text="${group.title}">Cues</h2>
+        <ol th:if="${group.ordered}"><li th:each="item : ${group.items}" th:text="${item.content}">Cue</li></ol>
+        <ul th:unless="${group.ordered}"><li th:each="item : ${group.items}" th:text="${item.content}">Comment</li></ul>
+      </section>
+    </div>
   </div>
-  <div class="cluster illustrations" th:if="${!movement.illustrations().isEmpty()}">
-    <img th:each="image, status : ${movement.illustrations()}" th:src="${image.imageUrl()}" th:alt="|${movement.content().name()}, step ${status.count}|" th:attr="loading=${status.first ? 'eager' : 'lazy'},fetchpriority=${status.first ? 'high' : 'auto'}" height="224" decoding="async">
-  </div>
-  <p class="prose" th:if="${!movement.content().description().isEmpty()}" th:text="${movement.content().description()}">Description</p>
-  <section class="stack" th:each="group : ${itemGroups}" th:if="${!group.items.isEmpty()}">
-    <h2 th:text="${group.title}">Cues</h2>
-    <ol th:if="${group.ordered}"><li th:each="item : ${group.items}" th:text="${item.content}">Cue</li></ol>
-    <ul th:unless="${group.ordered}"><li th:each="item : ${group.items}" th:text="${item.content}">Comment</li></ul>
-  </section>
-  <section class="stack" th:if="${!movement.content().stages().isEmpty()}">
+  <section class="stack reading-copy" th:if="${!movement.content().stages().isEmpty()}">
     <h2>Stages</h2>
     <ol><li th:each="stage : ${movement.content().stages()}"><strong th:text="${stage.name}">Stage</strong><span th:text="|: ${stage.description}|">Description</span></li></ol>
   </section>

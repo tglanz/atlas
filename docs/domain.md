@@ -75,6 +75,8 @@ A predefined way to specify the viewing angle when generating an Illustration. I
 - **Description**: Text.
 - **Sections**: Ordered collection of Sections.
 
+A Routine is private by default. Its owner can enable a public link that lets anyone view its current content without signing in. The link grants no editing rights and does not place the Routine in a public listing. Disabling sharing invalidates the link; enabling it again creates a new link.
+
 # Section
 
 - **Name**: String.

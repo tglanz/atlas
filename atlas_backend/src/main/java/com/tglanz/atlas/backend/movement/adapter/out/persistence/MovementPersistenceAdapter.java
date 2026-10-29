@@ -2,8 +2,10 @@ package com.tglanz.atlas.backend.movement.adapter.out.persistence;
 
 import com.tglanz.atlas.backend.movement.application.port.out.MovementRepository;
 import com.tglanz.atlas.backend.movement.domain.Illustration;
+import com.tglanz.atlas.backend.movement.domain.ItemType;
 import com.tglanz.atlas.backend.movement.domain.Movement;
 import com.tglanz.atlas.backend.movement.domain.MovementContent;
+import com.tglanz.atlas.backend.movement.domain.MovementInstructions;
 import com.tglanz.atlas.backend.movement.domain.MovementItem;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.movement.domain.MovementName;
@@ -48,6 +50,31 @@ class MovementPersistenceAdapter implements MovementRepository {
   @Override
   public List<MovementSummary> findSummaries(Collection<MovementKey> keys) {
     return toSummaries(jpa.summaryRowsByKeys(keys.stream().map(MovementKey::value).toList()));
+  }
+
+  @Override
+  public List<MovementInstructions> findInstructions(Collection<MovementKey> keys) {
+    List<String> values = keys.stream().map(MovementKey::value).toList();
+    List<Object[]> names = jpa.instructionNamesByKeys(values);
+    Map<String, List<String>> cues = new LinkedHashMap<>();
+    for (Object[] row : jpa.instructionItemsByKeys(values, ItemType.CUE)) {
+      cues.computeIfAbsent((String) row[0], ignored -> new ArrayList<>()).add((String) row[1]);
+    }
+    Map<String, List<Illustration>> illustrations = new LinkedHashMap<>();
+    for (Object[] row : jpa.instructionIllustrationsByKeys(values)) {
+      illustrations
+          .computeIfAbsent((String) row[0], ignored -> new ArrayList<>())
+          .add(new Illustration((String) row[1]));
+    }
+    return names.stream()
+        .map(
+            row ->
+                new MovementInstructions(
+                    new MovementKey((String) row[0]),
+                    (String) row[1],
+                    illustrations.getOrDefault((String) row[0], List.of()),
+                    cues.getOrDefault((String) row[0], List.of())))
+        .toList();
   }
 
   /** The rows are ordered, one for each tag of a Movement, so a Movement's rows are together. */

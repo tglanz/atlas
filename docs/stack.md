@@ -21,3 +21,9 @@ HTML containing session-dependent navigation, private content or CSRF tokens mus
 Public URLs in metadata come from a configured, trusted deployment origin. Search discovery depends on accurate content, crawlable links and correct HTTP behavior; rendering on the server alone does not establish indexing, rankings or faster loading.
 
 See the [backend architecture](../atlas_backend/ARCHITECTURE.md) for dependency boundaries and [tooling](tooling.md) for build commands and runtime requirements.
+
+## Discovery and shared previews
+
+Movement pages expose their names, descriptions, cues and relationships in the initial HTML. Social metadata uses the first Illustration as its preview image, with an absolute URL based on the trusted deployment origin. The sitemap lists the complete Movement catalog and its representative images; crawler rules allow public Movement discovery, including ChatGPT search.
+
+Public Routine links are intentionally excluded from the sitemap and request no indexing. They support sharing a particular practice, while catalog discovery belongs to Movements. Link revocation and private editing are enforced by the application rather than crawler instructions.

@@ -16,7 +16,7 @@ The HTTP API under `/api` serves programmatic clients. HTML pages use the same a
 ## Access
 
 - Public: reading Movements, registering, and signing in.
-- Signed-in users (practitioners): managing their own Routines. Another user's Routine looks like it does not exist, so its existence is not revealed.
+- Signed-in users (practitioners): managing their own Routines. Another user's private Routine URL looks like it does not exist, so its existence is not revealed. Public Routine links are read-only HTML views and do not grant access to the owner APIs.
 - Maintainers: everything that creates or changes Movements, Illustrations, Avatars, and Viewpoints, and reading generation requests.
 - Access is enforced on the backend for every request, independent of the UI.
 

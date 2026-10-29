@@ -2,7 +2,7 @@
 
 ## Runtimes
 
-- Java 25 (LTS).
+- Java 21 (LTS) minimum; Java 25 is also supported. Gradle uses the current JDK and targets Java 21 bytecode and APIs.
 - Python 3.14, with uv 0.13 managing the runtime and packages for the utilities.
 
 Gradle comes from the wrapper. Library and plugin versions are defined in the application build and the utilities' package configuration; those files are the source of truth.

@@ -1,6 +1,7 @@
 package com.tglanz.atlas.backend.movement.application.port.out;
 
 import com.tglanz.atlas.backend.movement.domain.Movement;
+import com.tglanz.atlas.backend.movement.domain.MovementInstructions;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.movement.domain.MovementName;
 import com.tglanz.atlas.backend.movement.domain.MovementSummary;
@@ -24,6 +25,9 @@ public interface MovementRepository {
 
   /** Summaries of the Movements with these keys, by name. Unknown keys are ignored. */
   List<MovementSummary> findSummaries(Collection<MovementKey> keys);
+
+  /** Current instructions of the Movements with these keys, by name. Unknown keys are ignored. */
+  List<MovementInstructions> findInstructions(Collection<MovementKey> keys);
 
   List<MovementName> findAllNames();
 

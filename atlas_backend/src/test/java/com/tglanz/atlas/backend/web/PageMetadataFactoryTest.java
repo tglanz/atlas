@@ -22,6 +22,8 @@ class PageMetadataFactoryTest {
     assertThat(page.description()).isEqualTo("A body hold. Keep straight.");
     assertThat(page.canonical()).isEqualTo("https://atlas.example/movements/plank");
     assertThat(page.image()).isEqualTo("https://atlas.example/images/plank.png");
+    assertThat(page.imageAlt()).isEqualTo("Plank </script>");
+    assertThat(page.withRobots("noindex,follow").imageAlt()).isEqualTo(page.imageAlt());
     assertThat(page.structuredData()).doesNotContain("</script>");
     var parsed = JsonMapper.builder().build().readTree(page.structuredData());
     assertThat(parsed.get("name").asString()).isEqualTo("Plank </script>");

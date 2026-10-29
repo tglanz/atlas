@@ -10,5 +10,5 @@
     <label class="field">Password<input type="password" name="password" autocomplete="current-password" required></label>
     <button type="submit">Sign in</button>
   </form>
-  <p>New here? <a th:href="@{/register}">Create an account</a>.</p>
+  <p>New here? <a th:href="@{/register(returnTo=${returnTo})}">Create an account</a>.</p>
 </main></body></html>

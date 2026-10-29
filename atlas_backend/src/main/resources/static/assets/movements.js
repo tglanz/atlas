@@ -1,6 +1,16 @@
 const searchForm = document.querySelector('[data-movement-search]');
 
 if (searchForm) {
+  const tagPanel = searchForm.querySelector('[data-tag-panel]');
+  const mobileFilters = window.matchMedia('(max-width: 40rem)');
+  const setFilterLayout = () => { if (tagPanel) tagPanel.open = !mobileFilters.matches; };
+  setFilterLayout();
+  mobileFilters.addEventListener('change', setFilterLayout);
+  const updateFilterCount = () => {
+    const count = searchForm.querySelectorAll('input[name="tags"]:checked').length;
+    const label = searchForm.querySelector('[data-filter-count]');
+    if (label) label.textContent = count ? `${count} selected` : 'By tag';
+  };
   let pending;
   let timer;
   let revision = 0;
@@ -55,6 +65,7 @@ if (searchForm) {
   });
   searchForm.addEventListener('change', event => {
     if (event.target.name !== 'tags') return;
+    updateFilterCount();
     clearTimeout(timer);
     update();
   });

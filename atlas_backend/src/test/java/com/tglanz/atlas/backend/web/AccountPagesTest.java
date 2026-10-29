@@ -54,6 +54,64 @@ class AccountPagesTest {
   }
 
   @Test
+  void registrationKeepsTheIntendedRoutineDestination() throws Exception {
+    String target = "/routines/add?movement=push_up";
+    String login =
+        mvc.perform(get("/login").param("returnTo", target))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertThat(login).contains("/register?returnTo=", "name=\"returnTo\"");
+    String registration =
+        mvc.perform(get("/register").param("returnTo", target))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertThat(registration).contains("value=\"" + target + "\"");
+
+    var response =
+        mvc.perform(
+                post("/register")
+                    .with(csrf())
+                    .param("email", "return-to-" + UUID.randomUUID() + "@example.com")
+                    .param("password", "A-valid-registration-password")
+                    .param("confirmPassword", "A-valid-registration-password")
+                    .param("returnTo", target))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl(target))
+            .andExpect(authenticated())
+            .andReturn();
+    MockHttpSession session = (MockHttpSession) response.getRequest().getSession(false);
+    mvc.perform(get(target).session(session)).andExpect(status().isOk());
+  }
+
+  @Test
+  void invalidRegistrationRetainsTheDestinationAndRejectsExternalRedirects() throws Exception {
+    String target = "/routines/new?movement=push_up";
+    String html =
+        mvc.perform(
+                post("/register")
+                    .with(csrf())
+                    .param("email", "retry@example.com")
+                    .param("password", "password-one")
+                    .param("confirmPassword", "password-two")
+                    .param("returnTo", target))
+            .andExpect(status().isBadRequest())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertThat(html).contains("value=\"" + target + "\"");
+    for (String unsafe :
+        new String[] {
+          "https://example.com", "//example.com", "/unknown", "/routines\\example.com"
+        }) {
+      assertThat(AccountPages.safeReturnTo(unsafe)).isEqualTo("/movements");
+    }
+  }
+
+  @Test
   void invalidRegistrationPreservesEmailWithoutEchoingEitherPassword() throws Exception {
     String email = "native-validation-" + UUID.randomUUID() + "@example.com";
     String password = "Never-echo-this-password";

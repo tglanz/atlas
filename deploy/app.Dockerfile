@@ -1,12 +1,12 @@
 # The application: API and web UI in one jar.
 # Build from the repository root: docker build -f deploy/app.Dockerfile -t atlas .
 
-FROM eclipse-temurin:25-jdk AS backend
+FROM eclipse-temurin:21-jdk AS backend
 WORKDIR /build/atlas_backend
 COPY atlas_backend ./
 RUN ./gradlew bootJar --no-daemon
 
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:21-jre
 RUN useradd --system --create-home atlas
 USER atlas
 WORKDIR /app

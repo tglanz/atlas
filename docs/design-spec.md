@@ -10,6 +10,10 @@
 - Practitioner and maintainer actions require authentication.
 - Backend authorization enforces all access restrictions.
 
+## Landing Page
+
+Introduce the library with direct paths into exploring Movements or building a Routine. Use an existing Movement Illustration when one is available; otherwise keep the introduction text-only. Do not substitute decorative figures for Movement Illustrations.
+
 ## 1. Movement Index
 
 URL: `/movements`
@@ -18,7 +22,7 @@ The landing page of the Movements section, for finding Movements.
 
 - Data: Movements as cards with an image, name and tags, and the tags in use with how many Movements have each.
 - Actions: Search by name, with name suggestions while typing. Filter by toggling tags in a panel; a Movement must have all of the selected tags. Open Movement Details. Clear the filters.
-- The search and the selected tags are part of the address, so a search can be shared.
+- The search and the selected tags are part of the address, so a search can be shared. On small screens, tags live in a collapsible filter panel; selected tags remain visible beside results and can be removed individually.
 - Maintainer actions: Create Movement.
 
 ## 2. Movement Details
@@ -26,8 +30,8 @@ The landing page of the Movements section, for finding Movements.
 URL: `/movements/:key`
 
 - Data: Name, description, illustrations, items grouped by type, tags, and related Movements, one section per relationship type, such as Progressions.
-- Actions: View illustrations, open related Movements.
-- Practitioner actions: Add Movement to a Routine.
+- Actions: View illustrations in an ordered horizontal row with visible position captions and navigation controls when scrolling is needed; open related Movements.
+- Practitioner actions: Add Movement to an existing Routine section or start a new Routine with it. Signing in or registering preserves this destination.
 - Maintainer actions: Edit Movement.
 
 ## 3. Movement Editor
@@ -41,7 +45,7 @@ URLs: `/movements/new`, `/movements/:key/edit`
 - Items are added per type, not as free text with a chosen type. Only the supported types are offered.
 - Generating illustrations follows the flow "Set Movement Illustrations". Progress is shown for each stage, and the result is reviewed before it replaces the illustrations.
 - Details, stages, tags and relationships are available when creating a new Movement as well as when editing one, and a single Save applies them all. Generating illustrations needs a saved Movement, so a new Movement shows a hint instead.
-- Buttons: Save, Cancel.
+- Buttons: Save, Cancel. Save remains accessible while scrolling through a long editor.
 - Only maintainers can access this page.
 
 ## 4. Illustrations
@@ -75,9 +79,9 @@ URL: `/routines`
 
 URL: `/routines/:id`
 
-- Data: Routine name, description, ordered Sections, and their ordered Movements.
+- Data: Routine name, description, ordered Sections, and their ordered Movements. Each Movement shows its current name, Illustrations in a horizontal row, and Cues inline, so a practitioner can follow the Routine in one place. Movement cards preserve their order without visible list numbering.
 - Links: Movement Details for each Movement.
-- Actions: Edit Routine, delete Routine.
+- Actions: Edit Routine, delete Routine, and share a public read-only link. The Share panel creates, copies, previews, or disables the link. Viewers need no account; only the owner controls sharing.
 
 ## 7. Routine Editor
 
@@ -86,17 +90,17 @@ URLs: `/routines/new`, `/routines/:id/edit`
 - Data: Routine name, description, ordered Sections, and ordered Movements.
 - Actions: Add, remove, and reorder Sections and Movements; edit Section names and descriptions.
 - Adding a Movement opens a searchable Movement picker modal.
-- Buttons: Save, Cancel.
+- Buttons: Save, Cancel. Save remains accessible while scrolling through a long editor.
 - Practitioners can edit only their own Routines.
 
 ## 8. Account
 
 - Registration, sign-in and sign-out are handled by the application.
-- Actions: Register, Sign In, Sign Out.
+- Actions: Register, Sign In, Sign Out. Account creation and sign-in continue to the application destination that prompted them.
 
 ## Access Rules
 
-- Public visitors can view the Movement Index and Movement Details.
+- Public visitors can view the Movement Index, Movement Details, and Routines through active public links. Shared Routine pages expose viewing content without owner controls.
 - Practitioners have public access and can manage their own Routines.
 - Maintainers can edit Movements and manage Avatars and Viewpoints.
 - Backend authorization enforces these rules independently of frontend navigation.

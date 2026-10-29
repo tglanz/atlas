@@ -14,11 +14,15 @@
   <meta property="og:description" th:if="${!#strings.isEmpty(meta.description)}" th:content="${meta.description}">
   <meta property="og:url" th:if="${meta.canonical != null}" th:content="${meta.canonical}">
   <meta property="og:image" th:if="${meta.image != null}" th:content="${meta.image}">
+  <meta property="og:image:secure_url" th:if="${meta.image != null and #strings.startsWith(meta.image, 'https://')}" th:content="${meta.image}">
+  <meta property="og:image:alt" th:if="${meta.imageAlt != null}" th:content="${meta.imageAlt}">
   <meta name="twitter:card" th:content="${meta.image != null ? 'summary_large_image' : 'summary'}">
   <meta name="twitter:title" th:content="${meta.title}">
   <meta name="twitter:description" th:if="${!#strings.isEmpty(meta.description)}" th:content="${meta.description}">
   <meta name="twitter:image" th:if="${meta.image != null}" th:content="${meta.image}">
+  <meta name="twitter:image:alt" th:if="${meta.imageAlt != null}" th:content="${meta.imageAlt}">
   <script type="application/ld+json" th:if="${meta.structuredData != null}" th:utext="${meta.structuredData}"></script>
+  <link rel="icon" type="image/svg+xml" th:href="@{/assets/favicon.svg}">
   <link rel="stylesheet" th:href="@{/assets/app.css}">
   <script type="module" th:src="@{/assets/app.js}"></script>
   <script type="module" th:each="script : ${pageScripts}" th:src="@{/assets/{name}.js(name=${script})}"></script>
@@ -36,7 +40,7 @@
         <a th:if="${maintainer}" th:href="@{/settings/illustrations}" th:attr="aria-current=${currentPath != null and #strings.startsWith(currentPath, '/settings') ? 'page' : null}">Illustrations</a>
       </div>
       <div class="cluster account-navigation">
-        <th:block th:unless="${signedIn}"><a th:href="@{/login}">Sign in</a><a class="button small" th:href="@{/register}">Register</a></th:block>
+        <th:block th:unless="${signedIn}"><a th:href="${#strings.isEmpty(returnTo)} ? @{/login} : @{/login(returnTo=${returnTo})}">Sign in</a><a class="button small" th:href="${#strings.isEmpty(returnTo)} ? @{/register} : @{/register(returnTo=${returnTo})}">Register</a></th:block>
         <form th:if="${signedIn}" th:action="@{/api/auth/logout}" method="post"><button class="secondary" type="submit">Sign out</button></form>
       </div>
       </div>

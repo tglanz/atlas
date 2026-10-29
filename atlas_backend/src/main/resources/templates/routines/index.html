@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
 <body>
 <main class="stack">
-  <header class="cluster">
+  <header class="cluster between page-heading">
     <div>
       <h1>Routines</h1>
       <p class="muted">Organize movements into a practice of your own.</p>
@@ -15,14 +15,12 @@
     <a class="button secondary" th:href="@{/routines/new}">Create your first routine</a>
   </section>
   <div class="stack" th:unless="${routines.isEmpty()}">
-    <article class="card cluster" th:each="routine : ${routines}">
+    <article class="card cluster between" th:each="routine : ${routines}">
       <div class="stack">
         <h2><a th:href="@{/routines/{id}(id=${routine.id})}" th:text="${routine.name}">Routine</a></h2>
         <p class="muted prose" th:if="${!routine.description.isEmpty()}" th:text="${routine.description}">Description</p>
       </div>
-      <form method="post" th:action="@{/routines/{id}/delete(id=${routine.id})}" data-confirm="Delete this routine? This cannot be undone.">
-        <button class="secondary danger" type="submit" th:aria-label="|Delete ${routine.name}|">Delete</button>
-      </form>
+      <details class="action-menu"><summary th:aria-label="|Actions for ${routine.name}|">More actions</summary><form method="post" th:action="@{/routines/{id}/delete(id=${routine.id})}" data-confirm="Delete this routine? This cannot be undone."><button class="secondary danger" type="submit" th:aria-label="|Delete ${routine.name}|">Delete</button></form></details>
     </article>
   </div>
 </main>

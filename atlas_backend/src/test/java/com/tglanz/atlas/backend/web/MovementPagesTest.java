@@ -63,7 +63,7 @@ class MovementPagesTest {
 
     mvc.perform(get("/"))
         .andExpect(status().isOk())
-        .andExpect(content().string(containsString("A visual, interconnected library")));
+        .andExpect(content().string(containsString("Understand the form.")));
     mvc.perform(get("/movements").param("text", "Rendered movement"))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("Rendered movement")))

@@ -14,9 +14,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.tglanz.atlas.backend.movement.application.port.in.MovementQueryUseCase;
+import com.tglanz.atlas.backend.movement.domain.Illustration;
+import com.tglanz.atlas.backend.movement.domain.MovementInstructions;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.movement.domain.MovementName;
-import com.tglanz.atlas.backend.movement.domain.MovementSummary;
 import com.tglanz.atlas.backend.routine.application.port.in.RoutineUseCase;
 import com.tglanz.atlas.backend.routine.domain.Routine;
 import com.tglanz.atlas.backend.routine.domain.RoutineContent;
@@ -152,7 +153,7 @@ class RoutinePagesTest {
   }
 
   @Test
-  void detailResolvesCurrentMovementNamesInOneBatchAndKeepsOrder() throws Exception {
+  void detailResolvesCurrentMovementInstructionsInOneBatchAndKeepsOrder() throws Exception {
     Routine routine =
         Routine.create(
             "owner",
@@ -161,12 +162,17 @@ class RoutinePagesTest {
                 "",
                 List.of(new Section("Main", "", List.of("squat", "push-up", "squat")))));
     when(routines.get("owner", routine.id())).thenReturn(routine);
-    when(movements.summaries(List.of(new MovementKey("squat"), new MovementKey("push-up"))))
+    when(movements.instructions(List.of(new MovementKey("squat"), new MovementKey("push-up"))))
         .thenReturn(
             List.of(
-                new MovementSummary(new MovementKey("push-up"), "Push Up", List.of(), null),
-                new MovementSummary(
-                    new MovementKey("squat"), "Current Squat Name", List.of(), null)));
+                new MovementInstructions(
+                    new MovementKey("push-up"), "Push Up", List.of(), List.of()),
+                new MovementInstructions(
+                    new MovementKey("squat"),
+                    "Current Squat Name",
+                    List.of(
+                        new Illustration("/squat-start.png"), new Illustration("/squat-end.png")),
+                    List.of("Stay balanced", "Stand tall"))));
 
     var response =
         mvc.perform(get("/routines/{id}", routine.id()).principal(() -> "owner"))
@@ -176,9 +182,36 @@ class RoutinePagesTest {
     RoutinePages.RoutineView detail =
         (RoutinePages.RoutineView) response.getModelAndView().getModel().get("routine");
     assertThat(detail.sections().getFirst().movements())
-        .extracting(RoutinePages.MovementLink::name)
+        .extracting(MovementInstructions::name)
         .containsExactly("Current Squat Name", "Push Up", "Current Squat Name");
-    verify(movements).summaries(List.of(new MovementKey("squat"), new MovementKey("push-up")));
+    var expanded = detail.sections().getFirst().movements();
+    assertThat(expanded.getFirst().illustrations())
+        .extracting(Illustration::imageUrl)
+        .containsExactly("/squat-start.png", "/squat-end.png");
+    assertThat(expanded.getFirst().cues()).containsExactly("Stay balanced", "Stand tall");
+    assertThat(expanded.get(2)).isEqualTo(expanded.getFirst());
+    verify(movements).instructions(List.of(new MovementKey("squat"), new MovementKey("push-up")));
+  }
+
+  @Test
+  void unavailableMovementKeepsItsPlaceWithoutHidingTheRoutine() throws Exception {
+    Routine routine =
+        Routine.create(
+            "owner",
+            new RoutineContent(
+                "Practice", "", List.of(new Section("Main", "", List.of("missing")))));
+    when(routines.get("owner", routine.id())).thenReturn(routine);
+    when(movements.instructions(List.of(new MovementKey("missing")))).thenReturn(List.of());
+
+    var response =
+        mvc.perform(get("/routines/{id}", routine.id()).principal(() -> "owner"))
+            .andExpect(status().isOk())
+            .andReturn();
+    RoutinePages.RoutineView detail =
+        (RoutinePages.RoutineView) response.getModelAndView().getModel().get("routine");
+    assertThat(detail.sections().getFirst().movements())
+        .containsExactly(
+            new MovementInstructions(new MovementKey("missing"), "missing", List.of(), List.of()));
   }
 
   @Test

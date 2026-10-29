@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -74,6 +75,20 @@ public class MovementPages {
 
   @GetMapping("/")
   String home(Model model) {
+    var library = movements.search("", Set.of());
+    model.addAttribute(
+        "featuredMovements",
+        library.stream()
+            .sorted(Comparator.comparing(movement -> movement.representativeIllustration() == null))
+            .limit(3)
+            .toList());
+    model.addAttribute(
+        "heroMovement",
+        library.stream()
+            .filter(movement -> movement.representativeIllustration() != null)
+            .findFirst()
+            .orElse(null));
+    model.addAttribute("movementCount", library.size());
     model.addAttribute(
         "meta", metadata.publicPage("Movement library", LIBRARY_DESCRIPTION, "/", null));
     return "home";
@@ -107,6 +122,16 @@ public class MovementPages {
     model.addAttribute("meta", meta);
     model.addAttribute("text", search);
     model.addAttribute("selectedTags", selected);
+    var filters = new ArrayList<TagFilter>();
+    for (String tag : selected) {
+      var withoutTag = UriComponentsBuilder.fromPath("/movements");
+      if (!search.isEmpty()) withoutTag.queryParam("text", search);
+      selected.stream()
+          .filter(other -> !other.equals(tag))
+          .forEach(other -> withoutTag.queryParam("tags", other));
+      filters.add(new TagFilter(tag, withoutTag.build().encode().toUriString()));
+    }
+    model.addAttribute("selectedFilters", filters);
     model.addAttribute("movements", movements.search(search, new LinkedHashSet<>(selected)));
     response.addHeader("Vary", "X-Atlas-Fragment");
     if ("movements".equals(fragment)) return "movements/index :: results";
@@ -268,6 +293,8 @@ public class MovementPages {
   }
 
   public record RelatedGroup(String title, List<RelatedMovement> movements) {}
+
+  public record TagFilter(String name, String url) {}
 
   public record ItemGroup(String title, boolean ordered, List<MovementItem> items) {}
 }

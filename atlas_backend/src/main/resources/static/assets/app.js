@@ -69,3 +69,66 @@ window.addEventListener('pageshow', () => {
     button.disabled = false; button.classList.remove('is-pending'); delete button.dataset.pendingButton;
   });
 });
+
+// The same sequence controls work on movement pages and inside routines.
+const initializedSequences = new WeakSet();
+const initializeSequences = () => {
+  document.querySelectorAll('[data-illustration-sequence]').forEach(sequence => {
+    if (initializedSequences.has(sequence)) return;
+    initializedSequences.add(sequence);
+    const track = sequence.querySelector('[data-sequence-track]');
+    const frames = [...track.querySelectorAll('figure')];
+    const controls = sequence.querySelector('[data-sequence-controls]');
+    const previous = sequence.querySelector('[data-sequence-prev]');
+    const next = sequence.querySelector('[data-sequence-next]');
+    const count = sequence.querySelector('[data-sequence-count]');
+    const activeIndex = () => {
+      const left = track.getBoundingClientRect().left;
+      return frames.reduce((best, frame, index) =>
+        Math.abs(frame.getBoundingClientRect().left - left) < Math.abs(frames[best].getBoundingClientRect().left - left) ? index : best, 0);
+    };
+    const update = () => {
+      const overflow = track.scrollWidth > track.clientWidth + 2;
+      controls.hidden = !overflow;
+      previous.disabled = track.scrollLeft <= 1;
+      next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+      count.textContent = `${activeIndex() + 1} / ${frames.length}`;
+      const hint = sequence.querySelector('.sequence-hint');
+      if (hint) hint.hidden = !overflow;
+    };
+    const step = direction => {
+      const index = Math.max(0, Math.min(frames.length - 1, activeIndex() + direction));
+      const left = frames[index].getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
+      track.scrollTo({ left, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    };
+    previous.addEventListener('click', () => step(-1));
+    next.addEventListener('click', () => step(1));
+    track.addEventListener('scroll', update, { passive: true });
+    track.addEventListener('keydown', event => {
+      if (event.target !== track || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+      event.preventDefault();
+      step(event.key === 'ArrowLeft' ? -1 : 1);
+    });
+    new ResizeObserver(update).observe(track);
+    update();
+  });
+};
+initializeSequences();
+document.addEventListener('atlas:fragment', initializeSequences);
+
+document.querySelectorAll('[data-share-link]').forEach(panel => {
+  const button = panel.querySelector('[data-copy-link]');
+  const input = panel.querySelector('[data-share-url]');
+  const status = panel.querySelector('[data-copy-status]');
+  button.hidden = false;
+  button.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(input.value);
+      status.textContent = 'Public link copied.';
+    } catch {
+      input.focus();
+      input.select();
+      status.textContent = 'Select and copy this link to share the routine.';
+    }
+  });
+});

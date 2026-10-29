@@ -3,6 +3,6 @@
 <div class="cluster row-actions" th:fragment="actions(ordered)">
   <button th:if="${ordered}" type="button" class="button secondary icon-button" data-row-action="up" aria-label="Move item up" title="Move up"><svg th:replace="~{fragments/icons :: arrowUp}"></svg></button>
   <button th:if="${ordered}" type="button" class="button secondary icon-button" data-row-action="down" aria-label="Move item down" title="Move down"><svg th:replace="~{fragments/icons :: arrowDown}"></svg></button>
-  <button type="button" class="button secondary danger icon-button" data-row-action="remove" aria-label="Remove item" title="Remove"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
+  <button type="button" class="button secondary icon-button row-remove" data-row-action="remove" aria-label="Remove item" title="Remove"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
 </div>
 </body></html>

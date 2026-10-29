@@ -6,11 +6,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.tglanz.atlas.backend.movement.application.port.in.MovementCommandUseCase;
 import com.tglanz.atlas.backend.movement.application.port.in.MovementQueryUseCase;
+import com.tglanz.atlas.backend.movement.domain.Illustration;
+import com.tglanz.atlas.backend.movement.domain.ItemType;
+import com.tglanz.atlas.backend.movement.domain.MovementContent;
+import com.tglanz.atlas.backend.movement.domain.MovementItem;
+import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.routine.application.port.in.RoutineUseCase;
 import com.tglanz.atlas.backend.routine.domain.RoutineContent;
 import com.tglanz.atlas.backend.routine.domain.Section;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +34,7 @@ class RoutineRenderingTest {
   @Autowired MockMvc mvc;
   @Autowired RoutineUseCase routines;
   @Autowired MovementQueryUseCase movements;
+  @Autowired MovementCommandUseCase commands;
 
   @Test
   void newEditorRendersANativePrivateFormWithCsrfAndMovementChoices() throws Exception {
@@ -78,6 +88,82 @@ class RoutineRenderingTest {
             "name=\"sections[0].movements[1]\"",
             "name=\"sections[1].name\"")
         .contains("value=\"First\"", "value=\"Second\"", "name=\"_csrf\"");
+  }
+
+  @Test
+  void routineMovementsExpandCurrentIllustrationsAndOnlyCuesInOrder() throws Exception {
+    var illustrated = new MovementKey("routine_" + UUID.randomUUID().toString().replace("-", ""));
+    var empty = new MovementKey("routine_" + UUID.randomUUID().toString().replace("-", ""));
+    commands.create(
+        illustrated, new MovementContent("Original name", "", List.of(), List.of(), Set.of()));
+    commands.create(
+        empty,
+        new MovementContent("Movement without instructions", "", List.of(), List.of(), Set.of()));
+    var routine =
+        routines.create(
+            "routine-render-owner",
+            new RoutineContent(
+                "Expanded practice",
+                "",
+                List.of(
+                    new Section("First", "", List.of(illustrated.value(), empty.value())),
+                    new Section("Repeat", "", List.of(illustrated.value())))));
+    commands.update(
+        illustrated,
+        new MovementContent(
+            "Current <movement>",
+            "Description outside routine scope",
+            List.of(
+                new MovementItem(ItemType.CUE, "First <cue>"),
+                new MovementItem(ItemType.COMMENT, "Comment outside routine scope"),
+                new MovementItem(ItemType.CUE, "Second cue")),
+            List.of(),
+            Set.of()));
+    commands.replaceIllustrations(
+        illustrated,
+        List.of(new Illustration("/routine-start.png"), new Illustration("/routine-end.png")));
+
+    String html =
+        mvc.perform(get("/routines/{id}", routine.id()))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    var cards =
+        Pattern.compile(
+                "<article class=\"card stack routine-movement\">(.*?)</article>", Pattern.DOTALL)
+            .matcher(html)
+            .results()
+            .map(match -> match.group(1))
+            .toList();
+
+    assertThat(cards).hasSize(3);
+    assertThat(cards.getFirst())
+        .containsSubsequence(
+            "Current &lt;movement&gt;",
+            "src=\"/routine-start.png\"",
+            "src=\"/routine-end.png\"",
+            "<h4>Cues</h4>",
+            "First &lt;cue&gt;",
+            "Second cue")
+        .contains(
+            "href=\"/movements/" + illustrated.value() + "\"",
+            "class=\"illustrations routine-illustrations\"",
+            "tabindex=\"0\"",
+            "role=\"region\"",
+            "alt=\"Current &lt;movement&gt;, step 1\"",
+            "alt=\"Current &lt;movement&gt;, step 2\"");
+    assertThat(cards.get(1))
+        .contains("Movement without instructions", "No illustrations yet.", "No cues yet.")
+        .doesNotContain("<img", "class=\"illustrations routine-illustrations\"");
+    assertThat(cards.get(2)).isEqualTo(cards.getFirst());
+    assertThat(html)
+        .doesNotContain(
+            "Original name",
+            "Description outside routine scope",
+            "Comment outside routine scope",
+            "First <cue>")
+        .contains("noindex,nofollow");
   }
 
   @Test

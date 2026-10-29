@@ -1,23 +1,33 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
 <body>
-<main class="stack">
-  <section class="hero stack" aria-labelledby="hero-title">
-    <h1 id="hero-title">Form Atlas</h1>
-    <p class="lead muted">A visual, interconnected library of human movement designed to make movement knowledge easier to explore, understand, and apply.</p>
-    <div class="cluster">
-      <a class="button" th:href="@{/movements}">Explore movements</a>
-      <a class="button secondary" th:href="@{/routines}">Build routines</a>
+<main class="stack home-content">
+  <section class="home-hero" th:classappend="${heroMovement == null ? 'home-hero-text' : ''}" aria-labelledby="hero-title">
+    <div class="stack hero-copy">
+      <p class="eyebrow">A field guide to human movement</p>
+      <h1 id="hero-title">Understand the form.<br><span>Make it your practice.</span></h1>
+      <p class="lead muted">Explore movements, learn the details, and build a routine that moves you forward.</p>
+      <div class="cluster">
+        <a class="button" th:href="@{/movements}">Explore movements <span aria-hidden="true">→</span></a>
+        <a class="button secondary" th:href="@{/routines}">Build a routine</a>
+      </div>
+      <p class="hero-note">Clear cues. Connected progressions. A practice of your own.</p>
     </div>
+    <figure class="hero-study" th:if="${heroMovement != null}">
+      <a th:href="@{/movements/{key}(key=${heroMovement.key})}" tabindex="-1" aria-hidden="true"><img th:src="${heroMovement.representativeIllustration}" width="720" height="540" th:alt="${heroMovement.name}" fetchpriority="high" decoding="async"></a>
+      <figcaption><a class="text-link" th:href="@{/movements/{key}(key=${heroMovement.key})}" th:text="|Explore ${heroMovement.name} →|">Explore movement →</a></figcaption>
+    </figure>
   </section>
-  <section class="stack" aria-labelledby="features-title">
-    <h2 id="features-title">What you can do</h2>
-    <div class="grid feature-grid">
-      <article class="card stack"><h3>Movement Library</h3><p class="muted">A structured catalog of movements, each with clear descriptions, practical cues, and visual illustrations, organized with searchable tags.</p></article>
-      <article class="card stack"><h3>Visual Representation</h3><p class="muted">Every movement is illustrated step by step in one consistent visual style, so positions and techniques are easy to understand and compare.</p></article>
-      <article class="card stack"><h3>Connected Movements</h3><p class="muted">Movements are linked into a graph of progressions, variants and other relationships, so you can see what leads to a movement and where it can take you next.</p></article>
-      <article class="card stack"><h3>Routine Building</h3><p class="muted">Organize movements into personalized routines with ordered sections.</p></article>
-    </div>
+  <section class="stack" aria-labelledby="featured-title" th:unless="${featuredMovements.isEmpty()}">
+    <header class="cluster between section-heading">
+      <div><p class="eyebrow">The library</p><h2 id="featured-title">Find your next movement</h2></div>
+      <a class="text-link" th:href="@{/movements}" th:text="|Explore all ${movementCount} movements →|">Explore the library →</a>
+    </header>
+    <div class="grid movement-grid"><th:block th:each="movement : ${featuredMovements}"><article th:replace="~{movements/cards :: card(${movement})}"></article></th:block></div>
+  </section>
+  <section class="practice-invitation" aria-labelledby="practice-title">
+    <div class="stack"><p class="eyebrow">From learning to doing</p><h2 id="practice-title">A little structure.<br>A practice that is yours.</h2><p class="muted prose">Bring movements together, arrange your sections, and keep illustrations and cues beside you as you practice.</p></div>
+    <a class="button" th:href="@{/routines}">Build your routine <span aria-hidden="true">→</span></a>
   </section>
 </main>
 </body>

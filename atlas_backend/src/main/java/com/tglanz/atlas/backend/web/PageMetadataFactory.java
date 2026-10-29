@@ -50,7 +50,11 @@ public class PageMetadataFactory {
     data.put("description", summary);
     data.put("url", canonical);
     data.put("isPartOf", Map.of("@type", "WebSite", "name", BRAND, "url", absolute("/")));
-    if (picture != null) data.put("image", picture);
+    if (picture != null) {
+      data.put("image", picture);
+      data.put(
+          "primaryImageOfPage", Map.of("@type", "ImageObject", "url", picture, "caption", title));
+    }
     // JSON is inserted in a script element. Escape HTML delimiters even inside JSON strings.
     String structured =
         json.writeValueAsString(data)
@@ -60,11 +64,17 @@ public class PageMetadataFactory {
             .replace("\u2028", "\\u2028")
             .replace("\u2029", "\\u2029");
     return new PageMetadata(
-        branded(title), summary, canonical, "index,follow", picture, structured);
+        branded(title),
+        summary,
+        canonical,
+        "index,follow",
+        picture,
+        picture == null ? null : title,
+        structured);
   }
 
   public PageMetadata privatePage(String title) {
-    return new PageMetadata(branded(title), "", null, "noindex,nofollow", null, null);
+    return new PageMetadata(branded(title), "", null, "noindex,nofollow", null, null, null);
   }
 
   private static String branded(String title) {
@@ -78,7 +88,7 @@ public class PageMetadataFactory {
     return value.substring(0, end > 100 ? end : 157) + "…";
   }
 
-  private String imageUrl(String image) {
+  public String imageUrl(String image) {
     if (image == null || image.isBlank()) return null;
     try {
       if (image.startsWith("/") && !image.startsWith("//")) return absolute(image);

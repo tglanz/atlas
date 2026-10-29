@@ -127,6 +127,10 @@ class SecurityConfig {
                     .hasRole(MAINTAINER)
                     .requestMatchers("/api/**")
                     .denyAll()
+                    .requestMatchers(HttpMethod.GET, "/routines/shared/*")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.HEAD, "/routines/shared/*")
+                    .permitAll()
                     .requestMatchers("/routines", "/routines/**")
                     .authenticated()
                     .requestMatchers(

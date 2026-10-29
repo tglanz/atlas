@@ -29,9 +29,10 @@ class AccountPages {
   }
 
   @GetMapping("/register")
-  String register(Model model) {
+  String register(@RequestParam(defaultValue = "") String returnTo, Model model) {
     model.addAttribute("meta", metadata.privatePage("Register"));
     model.addAttribute("email", "");
+    model.addAttribute("returnTo", safeReturnTo(returnTo));
     return "account/register";
   }
 
@@ -40,18 +41,20 @@ class AccountPages {
       @RequestParam(defaultValue = "") String email,
       @RequestParam(defaultValue = "") String password,
       @RequestParam(defaultValue = "") String confirmPassword,
+      @RequestParam(defaultValue = "") String returnTo,
       Model model,
       HttpServletRequest request,
       HttpServletResponse response)
       throws ServletException {
     model.addAttribute("meta", metadata.privatePage("Register"));
     model.addAttribute("email", email);
+    model.addAttribute("returnTo", safeReturnTo(returnTo));
     try {
       if (!password.equals(confirmPassword))
         throw new IllegalArgumentException("Passwords must match");
       var user = accounts.register(email, password);
       request.login(user.email(), password);
-      return "redirect:/movements";
+      return "redirect:" + safeReturnTo(returnTo);
     } catch (IllegalArgumentException | ConflictException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       model.addAttribute("error", e.getMessage());

@@ -1,6 +1,7 @@
 package com.tglanz.atlas.backend.movement.application.port.in;
 
 import com.tglanz.atlas.backend.movement.domain.Movement;
+import com.tglanz.atlas.backend.movement.domain.MovementInstructions;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.movement.domain.MovementName;
 import com.tglanz.atlas.backend.movement.domain.MovementSummary;
@@ -19,6 +20,9 @@ public interface MovementQueryUseCase {
 
   /** Summaries of the Movements with these keys, by name. Unknown keys are ignored. */
   List<MovementSummary> summaries(Collection<MovementKey> keys);
+
+  /** Current instructions of the Movements with these keys, by name. Unknown keys are ignored. */
+  List<MovementInstructions> instructions(Collection<MovementKey> keys);
 
   /** The name of every Movement, by name. */
   List<MovementName> names();

@@ -5,7 +5,7 @@ import com.tglanz.atlas.backend.routine.domain.RoutineContent;
 import java.util.List;
 import java.util.UUID;
 
-/** All operations act on the given owner's Routines only. */
+/** Owner operations remain private; shared reads require an active public-link token. */
 public interface RoutineUseCase {
   List<Routine> list(String ownerId);
 
@@ -14,6 +14,15 @@ public interface RoutineUseCase {
   Routine create(String ownerId, RoutineContent content);
 
   Routine update(String ownerId, UUID id, RoutineContent content);
+
+  /** Append to an existing section, or create the first section of an empty Routine. */
+  Routine addMovement(String ownerId, UUID id, int sectionIndex, String movementKey);
+
+  Routine getShared(UUID token);
+
+  UUID enableSharing(String ownerId, UUID id);
+
+  void disableSharing(String ownerId, UUID id);
 
   void delete(String ownerId, UUID id);
 }

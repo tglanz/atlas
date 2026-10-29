@@ -6,8 +6,9 @@ public record PageMetadata(
     String canonical,
     String robots,
     String image,
+    String imageAlt,
     String structuredData) {
   public PageMetadata withRobots(String value) {
-    return new PageMetadata(title, description, canonical, value, image, structuredData);
+    return new PageMetadata(title, description, canonical, value, image, imageAlt, structuredData);
   }
 }

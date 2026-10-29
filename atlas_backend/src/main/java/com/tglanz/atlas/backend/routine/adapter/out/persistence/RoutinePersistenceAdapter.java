@@ -29,6 +29,22 @@ class RoutinePersistenceAdapter implements RoutineRepository {
   }
 
   @Override
+  public Optional<Routine> findByShareToken(UUID token) {
+    return jpa.findByShareToken(token.toString()).map(this::toDomain);
+  }
+
+  @Override
+  public Optional<UUID> enableSharing(UUID id) {
+    jpa.enableSharing(id.toString(), UUID.randomUUID().toString());
+    return jpa.shareToken(id.toString()).map(UUID::fromString);
+  }
+
+  @Override
+  public void disableSharing(UUID id) {
+    jpa.disableSharing(id.toString());
+  }
+
+  @Override
   public void save(Routine routine) {
     RoutineEntity entity =
         jpa.findById(routine.id().toString())
@@ -39,6 +55,7 @@ class RoutinePersistenceAdapter implements RoutineRepository {
                   created.ownerId = routine.ownerId();
                   return created;
                 });
+    // Sharing changes independently, so saving content cannot restore a revoked link.
     RoutineContent content = routine.content();
     entity.name = content.name();
     entity.description = content.description();
@@ -69,6 +86,9 @@ class RoutinePersistenceAdapter implements RoutineRepository {
             .map(s -> new Section(s.name, s.description, List.copyOf(s.movements)))
             .toList();
     return Routine.restore(
-        UUID.fromString(e.id), e.ownerId, new RoutineContent(e.name, e.description, sections));
+        UUID.fromString(e.id),
+        e.ownerId,
+        new RoutineContent(e.name, e.description, sections),
+        e.shareToken == null ? null : UUID.fromString(e.shareToken));
   }
 }

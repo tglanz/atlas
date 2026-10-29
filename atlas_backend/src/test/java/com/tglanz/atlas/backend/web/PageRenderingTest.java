@@ -65,6 +65,61 @@ class PageRenderingTest {
   }
 
   @Test
+  void sharingCrawlersReceiveTheMovementNameAndFirstIllustrationInTheInitialHead()
+      throws Exception {
+    String key = key();
+    commands.create(
+        new MovementKey(key),
+        movementContent("Barbell Squat", "A controlled squat with a barbell."));
+    commands.replaceIllustrations(
+        new MovementKey(key),
+        List.of(
+            new Illustration("/images/barbell-first.png"),
+            new Illustration("https://images.example/barbell-second.png")));
+    for (String agent : List.of("WhatsApp/2.0", "Googlebot/2.1", "OAI-SearchBot/1.4")) {
+      String html =
+          mvc.perform(
+                  get("/movements/" + key)
+                      .header("User-Agent", agent)
+                      .header("Host", "untrusted.example"))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      String head = html.substring(0, html.indexOf("</head>"));
+      assertThat(head)
+          .contains(
+              "property=\"og:title\" content=\"Barbell Squat | Form Atlas\"",
+              "property=\"og:image\" content=\"https://atlas.example/images/barbell-first.png\"",
+              "property=\"og:image:secure_url\" content=\"https://atlas.example/images/barbell-first.png\"",
+              "property=\"og:image:alt\" content=\"Barbell Squat\"",
+              "property=\"og:url\" content=\"https://atlas.example/movements/" + key + "\"")
+          .doesNotContain("barbell-second.png", "untrusted.example");
+    }
+    commands.replaceIllustrations(
+        new MovementKey(key), List.of(new Illustration("https://images.example/new-first.png")));
+    String updated =
+        mvc.perform(get("/movements/" + key).header("User-Agent", "WhatsApp/2.0"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertThat(updated.substring(0, updated.indexOf("</head>")))
+        .contains("property=\"og:image\" content=\"https://images.example/new-first.png\"")
+        .doesNotContain("barbell-first.png");
+    commands.replaceIllustrations(new MovementKey(key), List.of());
+    String withoutImage =
+        mvc.perform(get("/movements/" + key))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertThat(withoutImage.substring(0, withoutImage.indexOf("</head>")))
+        .contains("Barbell Squat | Form Atlas")
+        .doesNotContain("property=\"og:image\"", "name=\"twitter:image\"");
+  }
+
+  @Test
   void indexFiltersHaveReloadableUrlsAndServerRenderedResults() throws Exception {
     String key = key();
     commands.create(new MovementKey(key), movementContent("Searchable " + key, "Description."));

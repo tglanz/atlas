@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
+<body>
+<main class="stack content-column">
+  <a class="back-link" th:href="@{/movements/{key}(key=${movement.key.value})}">← Back to movement</a>
+  <header class="stack page-heading">
+    <p class="eyebrow">Your practice</p>
+    <h1>Add to a routine</h1>
+    <p class="muted">Choose where to add <strong th:text="${movement.content.name}">Movement</strong>.</p>
+  </header>
+  <section class="card stack" th:if="${routines.isEmpty()}">
+    <h2>Your first routine starts here</h2>
+    <p class="muted">Give it a name. This movement will already be waiting in your first section.</p>
+    <a class="button" th:href="@{/routines/new(movement=${movement.key.value})}">Create a routine with this movement</a>
+  </section>
+  <article class="card stack" th:each="routine : ${routines}">
+    <h2 th:text="${routine.content.name}">Routine</h2>
+    <p class="muted prose" th:if="${!routine.content.description.isEmpty()}" th:text="${routine.content.description}">Description</p>
+    <form class="cluster search-controls" method="post" th:action="@{/routines/{id}/add-movement(id=${routine.id})}">
+      <input type="hidden" name="movement" th:value="${movement.key.value}">
+      <label class="field grow">Section
+        <select name="section" required>
+          <option th:if="${routine.content.sections.isEmpty()}" value="0">Practice · new section</option>
+          <option th:each="section, status : ${routine.content.sections}" th:value="${status.index}" th:text="${section.name}">Section</option>
+        </select>
+      </label>
+      <button type="submit" th:aria-label="|Add ${movement.content.name} to ${routine.content.name}|">Add movement</button>
+    </form>
+  </article>
+  <a th:unless="${routines.isEmpty()}" th:href="@{/routines/new(movement=${movement.key.value})}">Create a new routine instead</a>
+</main>
+</body>
+</html>

@@ -2,31 +2,59 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
 <body>
 <main class="stack">
-  <a class="muted" th:href="@{/routines}">All routines</a>
-  <header class="cluster">
+  <a class="back-link" th:unless="${publicView}" th:href="@{/routines}">← All routines</a>
+  <a class="back-link" th:if="${publicView}" th:href="@{/movements}">Explore movements</a>
+  <header class="cluster between page-heading">
     <div>
+      <p class="eyebrow" th:if="${publicView}">Shared routine</p>
       <h1 th:text="${routine.name}">Routine</h1>
       <p class="muted prose" th:if="${!routine.description.isEmpty()}" th:text="${routine.description}">Description</p>
     </div>
-    <div class="cluster">
+    <div class="cluster" th:unless="${publicView}">
+      <a class="button secondary" th:href="@{/routines/{id}(id=${routine.id},sharing=true)}">Share</a>
       <a class="button" th:href="@{/routines/{id}/edit(id=${routine.id})}">Edit routine</a>
-      <form method="post" th:action="@{/routines/{id}/delete(id=${routine.id})}" data-confirm="Delete this routine? This cannot be undone.">
-        <button class="secondary danger" type="submit">Delete routine</button>
-      </form>
+      <details class="action-menu"><summary>More actions</summary><form method="post" th:action="@{/routines/{id}/delete(id=${routine.id})}" data-confirm="Delete this routine? This cannot be undone."><button class="secondary danger" type="submit">Delete routine</button></form></details>
     </div>
   </header>
-  <section class="card stack" th:if="${routine.sections.isEmpty()}">
-    <h2>Build your practice</h2>
-    <p class="muted">This routine has no sections yet.</p>
-    <a class="button secondary" th:href="@{/routines/{id}/edit(id=${routine.id})}">Add sections and movements</a>
+  <section id="routine-sharing" class="card stack share-panel" tabindex="-1" th:if="${!publicView and sharingOpen}">
+    <header class="cluster between"><h2>Share routine</h2><a class="text-link" th:href="@{/routines/{id}(id=${routine.id})}">Done</a></header>
+    <th:block th:if="${shareUrl == null}">
+      <p class="muted">This routine is private. Create a public link so anyone can view it without signing in.</p>
+      <form method="post" th:action="@{/routines/{id}/share(id=${routine.id})}"><button type="submit">Create public link</button></form>
+    </th:block>
+    <div class="stack" th:unless="${shareUrl == null}" data-share-link>
+      <p class="muted">Anyone with this link can view the routine without signing in. Your edits appear on the shared page.</p>
+      <div class="cluster search-controls">
+        <label class="field grow">Public link<input type="url" readonly th:value="${shareUrl}" data-share-url></label>
+        <button type="button" class="secondary" data-copy-link hidden>Copy link</button>
+      </div>
+      <p class="muted share-status" role="status" aria-live="polite" data-copy-status></p>
+      <div class="cluster between"><a class="text-link" th:href="${shareUrl}" target="_blank" rel="noopener noreferrer">Preview public page ↗</a><form method="post" th:action="@{/routines/{id}/unshare(id=${routine.id})}"><button class="secondary" type="submit">Disable public link</button></form></div>
+    </div>
   </section>
-  <section class="card stack" th:each="section, sectionStatus : ${routine.sections}">
+  <section class="card stack" th:if="${routine.sections.isEmpty()}">
+    <h2 th:text="${publicView ? 'No movements yet' : 'Build your practice'}">Build your practice</h2>
+    <p class="muted">This routine has no sections yet.</p>
+    <a th:unless="${publicView}" class="button secondary" th:href="@{/routines/{id}/edit(id=${routine.id})}">Add sections and movements</a>
+  </section>
+  <section class="stack routine-section" th:each="section : ${routine.sections}">
     <h2 th:text="${section.name}">Section</h2>
     <p class="muted prose" th:if="${!section.description.isEmpty()}" th:text="${section.description}">Description</p>
     <p class="muted" th:if="${section.movements.isEmpty()}">No movements in this section.</p>
-    <ol class="stack" th:unless="${section.movements.isEmpty()}">
+    <ol class="stack routine-movements" role="list" th:unless="${section.movements.isEmpty()}">
       <li th:each="movement : ${section.movements}">
-        <a th:href="@{/movements/{key}(key=${movement.key})}" th:text="${movement.name}">Movement</a>
+        <article class="card stack routine-movement">
+          <h3><a th:href="@{/movements/{key}(key=${movement.key.value})}" th:text="${movement.name}">Movement</a></h3>
+          <div class="practice-layout" th:classappend="${movement.illustrations.isEmpty() ? 'without-illustrations' : ''}">
+            <div th:if="${!movement.illustrations.isEmpty()}"><div th:replace="~{fragments/illustrations :: sequence(${movement.illustrations}, ${movement.name}, null, true)}"></div></div>
+            <p class="muted" th:if="${movement.illustrations.isEmpty()}">No illustrations yet.</p>
+            <div class="stack routine-cues">
+              <h4>Cues</h4>
+              <ol th:if="${!movement.cues.isEmpty()}"><li class="prose" th:each="cue : ${movement.cues}" th:text="${cue}">Cue</li></ol>
+              <p class="muted" th:if="${movement.cues.isEmpty()}">No cues yet.</p>
+            </div>
+          </div>
+        </article>
       </li>
     </ol>
   </section>

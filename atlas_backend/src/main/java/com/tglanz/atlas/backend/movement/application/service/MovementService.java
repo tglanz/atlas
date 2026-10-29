@@ -6,6 +6,7 @@ import com.tglanz.atlas.backend.movement.application.port.out.MovementRepository
 import com.tglanz.atlas.backend.movement.domain.Illustration;
 import com.tglanz.atlas.backend.movement.domain.Movement;
 import com.tglanz.atlas.backend.movement.domain.MovementContent;
+import com.tglanz.atlas.backend.movement.domain.MovementInstructions;
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.movement.domain.MovementName;
 import com.tglanz.atlas.backend.movement.domain.MovementSummary;
@@ -46,6 +47,12 @@ public class MovementService implements MovementQueryUseCase, MovementCommandUse
   @Transactional(readOnly = true)
   public List<MovementSummary> summaries(Collection<MovementKey> keys) {
     return keys.isEmpty() ? List.of() : repository.findSummaries(keys);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<MovementInstructions> instructions(Collection<MovementKey> keys) {
+    return keys.isEmpty() ? List.of() : repository.findInstructions(keys);
   }
 
   @Override

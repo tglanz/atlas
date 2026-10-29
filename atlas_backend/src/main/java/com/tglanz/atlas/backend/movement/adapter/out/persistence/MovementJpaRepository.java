@@ -1,5 +1,6 @@
 package com.tglanz.atlas.backend.movement.adapter.out.persistence;
 
+import com.tglanz.atlas.backend.movement.domain.ItemType;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,6 +43,34 @@ interface MovementJpaRepository extends JpaRepository<MovementEntity, String> {
       order by m.name, m.movementKey, t
       """)
   List<Object[]> summaryRowsByKeys(@Param("keys") Collection<String> keys);
+
+  @Query(
+      """
+      select m.movementKey, m.name
+      from MovementEntity m
+      where m.movementKey in :keys
+      order by m.name, m.movementKey
+      """)
+  List<Object[]> instructionNamesByKeys(@Param("keys") Collection<String> keys);
+
+  @Query(
+      """
+      select m.movementKey, item.content
+      from MovementEntity m join m.items item
+      where m.movementKey in :keys and item.type = :type
+      order by m.movementKey, index(item)
+      """)
+  List<Object[]> instructionItemsByKeys(
+      @Param("keys") Collection<String> keys, @Param("type") ItemType type);
+
+  @Query(
+      """
+      select m.movementKey, image.imageUrl
+      from MovementEntity m join m.illustrations image
+      where m.movementKey in :keys
+      order by m.movementKey, index(image)
+      """)
+  List<Object[]> instructionIllustrationsByKeys(@Param("keys") Collection<String> keys);
 
   @Query("select m.movementKey, m.name from MovementEntity m order by m.name")
   List<Object[]> findNames();

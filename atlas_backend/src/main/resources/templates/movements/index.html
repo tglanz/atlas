@@ -3,7 +3,7 @@
 <body>
 <main class="stack">
   <div class="cluster between">
-    <h1>Movement index</h1>
+    <div><p class="eyebrow">Find your form</p><h1>Movements</h1></div>
     <a th:if="${maintainer}" class="button" th:href="@{/movements/new}">New movement</a>
   </div>
   <form method="get" th:action="@{/movements}" class="stack" data-movement-search>
@@ -14,6 +14,8 @@
       <button class="button" type="submit">Search</button>
     </div>
     <datalist id="movement-names"><option th:each="name : ${movementNames}" th:value="${name.name}"></option></datalist>
+    <details class="filter-panel" data-tag-panel open>
+      <summary>Filters <span class="badge" data-filter-count th:text="${selectedTags.size() == 0 ? 'By tag' : selectedTags.size() + ' selected'}">By tag</span></summary>
     <fieldset class="card stack">
       <legend>Tags</legend>
       <div class="cluster tag-filters">
@@ -27,11 +29,16 @@
       </div>
       <p class="muted">Movements must have all of the selected tags.</p>
     </fieldset>
+    </details>
   </form>
   <p class="error" role="alert" data-search-error hidden>Search could not be updated. Use the Search button to try again.</p>
   <section id="movement-results" class="stack" th:fragment="results" aria-live="polite" aria-label="Movement results">
-    <a th:href="@{/movements}" th:if="${!text.isEmpty() || !selectedTags.isEmpty()}">Clear filters</a>
-    <p class="muted" th:text="${movements.isEmpty() ? 'No movements found.' : movements.size() + (movements.size() == 1 ? ' movement' : ' movements')}">Movements</p>
+    <div class="cluster active-filters" th:if="${!text.isEmpty() || !selectedTags.isEmpty()}">
+      <a class="tag removable-tag" th:each="filter : ${selectedFilters}" th:href="${filter.url}" th:aria-label="|Remove ${filter.name} filter|"><span th:text="${#strings.replace(filter.name, '_', ' ')}">Tag</span><span aria-hidden="true">×</span></a>
+      <a class="text-link" th:href="@{/movements}">Clear filters</a>
+    </div>
+    <p class="muted" th:unless="${movements.isEmpty()}" th:text="${movements.size() + (movements.size() == 1 ? ' movement' : ' movements')}">Movements</p>
+    <div class="empty-state stack" th:if="${movements.isEmpty()}"><h2>No movements found.</h2><p class="muted">Try a broader search or remove a tag. Movements must match every selected tag.</p><a th:href="@{/movements}" class="button secondary">Browse all movements</a></div>
     <div class="grid movement-grid" th:if="${!movements.isEmpty()}">
       <th:block th:each="movement : ${movements}"><article th:replace="~{movements/cards :: card(${movement})}"></article></th:block>
     </div>

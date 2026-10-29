@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"><body>
+<div class="illustration-sequence stack" th:fragment="sequence(images, name, stages, compact)" data-illustration-sequence>
+  <div class="cluster between sequence-heading">
+    <p class="eyebrow">Illustrations <span class="muted" th:text="|· ${images.size()} ${images.size() == 1 ? 'position' : 'positions'}|">· 2 positions</span></p>
+    <div class="cluster sequence-controls" data-sequence-controls hidden>
+      <button class="secondary icon-button" type="button" data-sequence-prev aria-label="Previous illustration"><span aria-hidden="true">←</span></button>
+      <span class="muted" data-sequence-count aria-live="polite" th:text="|1 / ${images.size()}|">1 / 2</span>
+      <button class="secondary icon-button" type="button" data-sequence-next aria-label="Next illustration"><span aria-hidden="true">→</span></button>
+    </div>
+  </div>
+  <div th:class="${compact ? 'illustrations routine-illustrations' : 'illustrations'}" tabindex="0" role="region" th:attr="aria-label=|Illustrations for ${name}|" data-sequence-track>
+    <figure th:each="image, status : ${images}">
+      <img th:src="${image.imageUrl}" th:alt="|${name}, step ${status.count}|" width="320" height="224" th:attr="loading=${!compact and status.first ? 'eager' : 'lazy'},fetchpriority=${!compact and status.first ? 'high' : 'auto'}" decoding="async">
+      <figcaption><span class="step-number" th:text="${status.count}">1</span><span th:text="${stages != null and status.index &lt; stages.size() ? stages[status.index].name : 'Position ' + status.count}">Position</span></figcaption>
+    </figure>
+  </div>
+  <p class="sequence-hint muted" th:if="${images.size() > 1}">Scroll to explore every position.</p>
+</div>
+</body></html>

@@ -14,8 +14,10 @@ import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
+@DynamicUpdate
 @Table(name = "routine")
 class RoutineEntity {
 
@@ -26,6 +28,9 @@ class RoutineEntity {
 
   String name;
   String description;
+
+  @Column(name = "share_token")
+  String shareToken;
 
   @OneToMany(mappedBy = "routine", cascade = CascadeType.ALL, orphanRemoval = true)
   @OrderBy("position")

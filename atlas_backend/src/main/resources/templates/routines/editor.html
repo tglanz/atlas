@@ -30,7 +30,7 @@
           <div class="cluster" aria-label="Section actions">
             <button class="secondary icon-button" type="button" data-routine-action="section-up" th:disabled="${sectionStatus.first}" aria-label="Move section up" title="Move section up"><svg th:replace="~{fragments/icons :: arrowUp}"></svg></button>
             <button class="secondary icon-button" type="button" data-routine-action="section-down" th:disabled="${sectionStatus.last}" aria-label="Move section down" title="Move section down"><svg th:replace="~{fragments/icons :: arrowDown}"></svg></button>
-            <button class="secondary danger icon-button" type="button" data-routine-action="section-remove" aria-label="Remove section" title="Remove section"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
+            <button class="secondary icon-button row-remove" type="button" data-routine-action="section-remove" aria-label="Remove section" title="Remove section"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
           </div>
           <div class="field">
             <label data-section-label="name" th:for="|section-${sectionStatus.index}-name|">Section name</label>
@@ -50,7 +50,7 @@
                 <div class="cluster" aria-label="Movement actions">
                   <button class="secondary icon-button" type="button" data-routine-action="movement-up" th:disabled="${movementStatus.first}" aria-label="Move movement up" title="Move movement up"><svg th:replace="~{fragments/icons :: arrowUp}"></svg></button>
                   <button class="secondary icon-button" type="button" data-routine-action="movement-down" th:disabled="${movementStatus.last}" aria-label="Move movement down" title="Move movement down"><svg th:replace="~{fragments/icons :: arrowDown}"></svg></button>
-                  <button class="secondary danger icon-button" type="button" data-routine-action="movement-remove" aria-label="Remove movement" title="Remove movement"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
+                  <button class="secondary icon-button row-remove" type="button" data-routine-action="movement-remove" aria-label="Remove movement" title="Remove movement"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
                 </div>
               </div>
             </li>
@@ -61,7 +61,8 @@
       <div><button class="secondary" type="button" data-routine-action="section-add">Add section</button></div>
     </section>
     <p class="muted" role="status" aria-live="polite" data-routine-status></p>
-    <div class="cluster">
+    <div class="cluster editor-actions">
+      <span class="muted editor-actions-label" th:text="${routineId == null ? 'New routine' : routineForm.name}">Routine</span>
       <button type="submit">Save routine</button>
       <a class="button secondary" th:href="${routineId == null ? '/routines' : '/routines/' + routineId}">Cancel</a>
     </div>
@@ -94,7 +95,7 @@
       <div class="cluster" aria-label="Section actions">
         <button class="secondary icon-button" type="button" data-routine-action="section-up" aria-label="Move section up" title="Move section up"><svg th:replace="~{fragments/icons :: arrowUp}"></svg></button>
         <button class="secondary icon-button" type="button" data-routine-action="section-down" aria-label="Move section down" title="Move section down"><svg th:replace="~{fragments/icons :: arrowDown}"></svg></button>
-        <button class="secondary danger icon-button" type="button" data-routine-action="section-remove" aria-label="Remove section" title="Remove section"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
+        <button class="secondary icon-button row-remove" type="button" data-routine-action="section-remove" aria-label="Remove section" title="Remove section"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
       </div>
       <div class="field"><label data-section-label="name">Section name</label><input data-section-field="name" required maxlength="200" autocomplete="off"></div>
       <div class="field"><label data-section-label="description">Section description <span class="muted">(optional)</span></label><textarea data-section-field="description" maxlength="20000" rows="2"></textarea></div>
@@ -112,7 +113,7 @@
         <div class="cluster" aria-label="Movement actions">
           <button class="secondary icon-button" type="button" data-routine-action="movement-up" aria-label="Move movement up" title="Move movement up"><svg th:replace="~{fragments/icons :: arrowUp}"></svg></button>
           <button class="secondary icon-button" type="button" data-routine-action="movement-down" aria-label="Move movement down" title="Move movement down"><svg th:replace="~{fragments/icons :: arrowDown}"></svg></button>
-          <button class="secondary danger icon-button" type="button" data-routine-action="movement-remove" aria-label="Remove movement" title="Remove movement"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
+          <button class="secondary icon-button row-remove" type="button" data-routine-action="movement-remove" aria-label="Remove movement" title="Remove movement"><svg th:replace="~{fragments/icons :: trash}"></svg></button>
         </div>
       </div>
     </li>
