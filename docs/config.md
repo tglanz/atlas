@@ -101,6 +101,14 @@ For real generation, set `ATLAS_GENERATION_PROVIDER=fal` and `ATLAS_FAL_AI_API_K
 
 Maintainers edit avatars and viewpoints under **Illustrations** in the site navigation; those settings live in the database. Movement stages are edited on each movement. Prompt templates live under [generation resources](../atlas_backend/src/main/resources/generation/); changing templates requires a rebuild. See [generation templates](specs/generation-template.md).
 
+## Sharing preview images
+
+The first illustration is served as a smaller JPEG for social previews. The original stays unchanged in storage and on movement pages. Resizing happens on the first image request; a bounded memory cache and public HTTP caching reuse the result. Restarting the app clears its memory cache. Normal page rendering does not fetch or resize images.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `ATLAS_PREVIEW_ALLOWED_HOSTS` | `fal.media` | Comma-separated image hosts the server may download for previews, including their subdomains. Empty disables resizing. URLs on other hosts stay as original preview URLs. Add only trusted image hosts; redirects are not followed. |
+
 ## Other application settings
 
 These are Spring properties already defined by the app. Prefer the variables above for ordinary deployment. For an advanced override, use a Spring command-line argument, for example:

@@ -70,11 +70,15 @@ public class PageMetadataFactory {
         "index,follow",
         picture,
         picture == null ? null : title,
-        structured);
+        structured,
+        null,
+        null,
+        null);
   }
 
   public PageMetadata privatePage(String title) {
-    return new PageMetadata(branded(title), "", null, "noindex,nofollow", null, null, null);
+    return new PageMetadata(
+        branded(title), "", null, "noindex,nofollow", null, null, null, null, null, null);
   }
 
   private static String branded(String title) {

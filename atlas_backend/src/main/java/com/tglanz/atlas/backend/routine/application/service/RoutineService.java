@@ -5,9 +5,7 @@ import com.tglanz.atlas.backend.routine.application.port.out.MovementCatalog;
 import com.tglanz.atlas.backend.routine.application.port.out.RoutineRepository;
 import com.tglanz.atlas.backend.routine.domain.Routine;
 import com.tglanz.atlas.backend.routine.domain.RoutineContent;
-import com.tglanz.atlas.backend.routine.domain.Section;
 import com.tglanz.atlas.backend.shared.error.NotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -51,29 +49,6 @@ public class RoutineService implements RoutineUseCase {
   @Override
   public Routine update(String ownerId, UUID id, RoutineContent content) {
     Routine routine = get(ownerId, id);
-    requireExisting(content);
-    routine.edit(content);
-    repository.save(routine);
-    return routine;
-  }
-
-  @Override
-  public Routine addMovement(String ownerId, UUID id, int sectionIndex, String movementKey) {
-    Routine routine = get(ownerId, id);
-    var sections = new ArrayList<>(routine.content().sections());
-    if (sectionIndex < 0 || sectionIndex >= Math.max(1, sections.size())) {
-      throw new IllegalArgumentException("Choose an existing section");
-    }
-    if (sections.isEmpty()) {
-      sections.add(new Section("Practice", "", List.of(movementKey)));
-    } else {
-      Section section = sections.get(sectionIndex);
-      var keys = new ArrayList<>(section.movements());
-      keys.add(movementKey);
-      sections.set(sectionIndex, new Section(section.name(), section.description(), keys));
-    }
-    RoutineContent content =
-        new RoutineContent(routine.content().name(), routine.content().description(), sections);
     requireExisting(content);
     routine.edit(content);
     repository.save(routine);

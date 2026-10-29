@@ -149,15 +149,12 @@ dialog ul { list-style: none; padding: 0; }
 .reading-copy, .prose { max-width: 65ch; }
 .content-column { width: min(100%, 52rem); margin-inline: auto; }
 .home-content { gap: 4.5rem; }
-.home-hero { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 3.5rem; padding-block: 2rem; }
+.home-hero { max-width: 52rem; padding-block: 2rem; }
 .hero-copy { gap: 1.5rem; }
 .hero-copy h1 { font-size: clamp(2.6rem, 4.5vw, 4rem); line-height: 1.08; letter-spacing: -.045em; }
 .hero-copy h1 span { color: var(--primary); }
 .hero-copy .lead { max-width: 38ch; font-size: 1.1rem; }
 .hero-note { color: var(--muted); font-size: .8rem; }
-.home-hero-text { grid-template-columns: minmax(0, 1fr); max-width: 52rem; }
-.hero-study img { width: 100%; max-height: 32rem; object-fit: contain; border: 1px solid var(--border); border-radius: 1.25rem; background: var(--surface); }
-.hero-study figcaption { margin-top: .75rem; font-size: .8rem; color: var(--muted); }
 .section-heading h2 { margin-top: .4rem; font-size: 1.75rem; letter-spacing: -.025em; }
 .practice-invitation { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2rem; padding: 2.5rem; background: var(--primary-soft); border-radius: 1rem; }
 .practice-invitation h2 { font-size: clamp(1.75rem, 3vw, 2.5rem); letter-spacing: -.035em; }
@@ -206,17 +203,15 @@ dialog ul { list-style: none; padding: 0; }
 .editor-actions-label { margin-inline-end: auto; font-size: .85rem; }
 @media (min-width: 40.001rem) { .filter-panel > summary { display: none; } }
 @media (max-width: 56rem) {
-  .home-hero { gap: 2rem; }
   .practice-layout { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
 }
 @media (max-width: 40rem) {
   .home-content { gap: 2.5rem; }
-  .home-hero { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; padding-block: .5rem; }
+  .home-hero { padding-block: .5rem; }
   .hero-copy { gap: 1.25rem; }
   .hero-copy h1 { font-size: clamp(2.25rem, 10vw, 3rem); }
   .hero-copy .lead { font-size: 1rem; }
   .hero-note { display: none; }
-  .hero-study img { max-height: 18rem; object-fit: contain; }
   .practice-invitation { padding: 1.5rem; }
   .section-heading { align-items: flex-start; }
   .section-heading h2 { font-size: 1.5rem; }

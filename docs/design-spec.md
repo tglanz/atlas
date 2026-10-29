@@ -12,7 +12,7 @@
 
 ## Landing Page
 
-Introduce the library with direct paths into exploring Movements or building a Routine. Use an existing Movement Illustration when one is available; otherwise keep the introduction text-only. Do not substitute decorative figures for Movement Illustrations.
+Introduce the library with text and direct paths into exploring Movements or building a Routine. The introduction does not feature an example Movement or Illustration.
 
 ## 1. Movement Index
 
@@ -31,7 +31,6 @@ URL: `/movements/:key`
 
 - Data: Name, description, illustrations, items grouped by type, tags, and related Movements, one section per relationship type, such as Progressions.
 - Actions: View illustrations in an ordered horizontal row with visible position captions and navigation controls when scrolling is needed; open related Movements.
-- Practitioner actions: Add Movement to an existing Routine section or start a new Routine with it. Signing in or registering preserves this destination.
 - Maintainer actions: Edit Movement.
 
 ## 3. Movement Editor

@@ -31,6 +31,18 @@ class PageMetadataFactoryTest {
   }
 
   @Test
+  void imageDetailsSurviveRobotsChanges() {
+    var page =
+        metadata
+            .publicPage("Plank", "A hold", "/movements/plank", "/preview.jpg")
+            .withImageDetails("image/jpeg", 512, 512)
+            .withRobots("noindex,follow");
+    assertThat(page.imageType()).isEqualTo("image/jpeg");
+    assertThat(page.imageWidth()).isEqualTo(512);
+    assertThat(page.imageHeight()).isEqualTo(512);
+  }
+
+  @Test
   void privatePagesHaveNoCanonicalOrStructuredData() {
     var page = metadata.privatePage("My routine");
     assertThat(page.robots()).isEqualTo("noindex,nofollow");

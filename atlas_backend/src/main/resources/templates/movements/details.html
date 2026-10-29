@@ -5,7 +5,7 @@
   <a class="back-link" th:href="@{/movements}">← All movements</a>
   <header class="cluster between page-heading">
     <div><p class="eyebrow">Movement guide</p><h1 th:text="${movement.content().name()}">Movement</h1></div>
-    <div class="cluster"><a class="button" th:href="@{/routines/add(movement=${movement.key.value})}">Add to routine <span aria-hidden="true">+</span></a><a th:if="${maintainer}" class="button secondary" th:href="@{/movements/{key}/edit(key=${movement.key()})}">Edit</a></div>
+    <a th:if="${maintainer}" class="button secondary" th:href="@{/movements/{key}/edit(key=${movement.key()})}">Edit</a>
   </header>
   <p class="prose reading-copy" th:if="${!movement.content().description().isEmpty()}" th:text="${movement.content().description()}">Description</p>
   <div class="practice-layout" th:classappend="${movement.illustrations().isEmpty() ? 'without-illustrations' : ''}">

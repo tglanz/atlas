@@ -24,6 +24,6 @@ See the [backend architecture](../atlas_backend/ARCHITECTURE.md) for dependency 
 
 ## Discovery and shared previews
 
-Movement pages expose their names, descriptions, cues and relationships in the initial HTML. Social metadata uses the first Illustration as its preview image, with an absolute URL based on the trusted deployment origin. The sitemap lists the complete Movement catalog and its representative images; crawler rules allow public Movement discovery, including ChatGPT search.
+Movement pages expose their names, descriptions, cues and relationships in the initial HTML. Social metadata uses the first Illustration as its preview image, with an absolute URL based on the trusted deployment origin. Small cached JPEG derivatives keep shared previews inexpensive to fetch without altering the stored Illustration. Only trusted image hosts may supply derivatives; page rendering does not wait for image downloads. The sitemap lists the complete Movement catalog and its representative images; crawler rules allow public Movement discovery, including ChatGPT search.
 
 Public Routine links are intentionally excluded from the sitemap and request no indexing. They support sharing a particular practice, while catalog discovery belongs to Movements. Link revocation and private editing are enforced by the application rather than crawler instructions.

@@ -44,18 +44,21 @@ public class MovementPages {
   private final MovementPageService saves;
   private final PageMetadataFactory metadata;
   private final GenerationPanel generation;
+  private final PreviewImages previews;
 
   public MovementPages(
       MovementQueryUseCase movements,
       GraphUseCase graph,
       MovementPageService saves,
       PageMetadataFactory metadata,
-      GenerationPanel generation) {
+      GenerationPanel generation,
+      PreviewImages previews) {
     this.movements = movements;
     this.graph = graph;
     this.saves = saves;
     this.metadata = metadata;
     this.generation = generation;
+    this.previews = previews;
   }
 
   @InitBinder("form")
@@ -82,12 +85,6 @@ public class MovementPages {
             .sorted(Comparator.comparing(movement -> movement.representativeIllustration() == null))
             .limit(3)
             .toList());
-    model.addAttribute(
-        "heroMovement",
-        library.stream()
-            .filter(movement -> movement.representativeIllustration() != null)
-            .findFirst()
-            .orElse(null));
     model.addAttribute("movementCount", library.size());
     model.addAttribute(
         "meta", metadata.publicPage("Movement library", LIBRARY_DESCRIPTION, "/", null));
@@ -189,15 +186,18 @@ public class MovementPages {
                     .toList()));
     String image =
         movement.illustrations().isEmpty() ? null : movement.illustrations().getFirst().imageUrl();
-    model.addAttribute(
-        "meta",
+    String preview = previews.path(key, image);
+    PageMetadata page =
         metadata.publicPage(
             movement.content().name(),
             movement.content().description().isBlank()
                 ? LIBRARY_DESCRIPTION
                 : movement.content().description(),
             "/movements/" + key,
-            image));
+            preview == null ? image : preview);
+    if (preview != null)
+      page = page.withImageDetails("image/jpeg", PreviewImages.SIZE, PreviewImages.SIZE);
+    model.addAttribute("meta", page);
     model.addAttribute("movement", movement);
     model.addAttribute("itemGroups", items);
     model.addAttribute("relatedGroups", related);

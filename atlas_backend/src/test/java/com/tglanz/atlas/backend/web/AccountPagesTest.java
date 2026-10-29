@@ -55,7 +55,7 @@ class AccountPagesTest {
 
   @Test
   void registrationKeepsTheIntendedRoutineDestination() throws Exception {
-    String target = "/routines/add?movement=push_up";
+    String target = "/routines/new";
     String login =
         mvc.perform(get("/login").param("returnTo", target))
             .andExpect(status().isOk())
@@ -89,7 +89,7 @@ class AccountPagesTest {
 
   @Test
   void invalidRegistrationRetainsTheDestinationAndRejectsExternalRedirects() throws Exception {
-    String target = "/routines/new?movement=push_up";
+    String target = "/routines/new";
     String html =
         mvc.perform(
                 post("/register")

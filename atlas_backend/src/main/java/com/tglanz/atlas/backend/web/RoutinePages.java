@@ -70,36 +70,9 @@ public class RoutinePages {
   }
 
   @GetMapping("/new")
-  String create(@RequestParam(required = false) String movement, Model model) {
-    var form = new RoutineForm();
-    if (movement != null) {
-      var selected = movements.get(new MovementKey(movement));
-      var section = new RoutineForm.SectionForm();
-      section.setName("Practice");
-      section.setMovements(List.of(selected.key().value()));
-      form.setSections(List.of(section));
-    }
-    model.addAttribute("routineForm", form);
+  String create(Model model) {
+    model.addAttribute("routineForm", new RoutineForm());
     return editor(model, null);
-  }
-
-  @GetMapping("/add")
-  String chooseRoutine(Principal principal, @RequestParam String movement, Model model) {
-    var selected = movements.get(new MovementKey(movement));
-    model.addAttribute("meta", metadata.privatePage("Add to a routine"));
-    model.addAttribute("movement", selected);
-    model.addAttribute("routines", routines.list(principal.getName()));
-    return "routines/add";
-  }
-
-  @PostMapping("/{id}/add-movement")
-  String addMovement(
-      Principal principal,
-      @PathVariable UUID id,
-      @RequestParam String movement,
-      @RequestParam int section) {
-    routines.addMovement(principal.getName(), id, section, movement);
-    return "redirect:/routines/" + id;
   }
 
   @GetMapping("/{id}")

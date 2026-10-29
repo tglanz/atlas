@@ -15,6 +15,9 @@
   <meta property="og:url" th:if="${meta.canonical != null}" th:content="${meta.canonical}">
   <meta property="og:image" th:if="${meta.image != null}" th:content="${meta.image}">
   <meta property="og:image:secure_url" th:if="${meta.image != null and #strings.startsWith(meta.image, 'https://')}" th:content="${meta.image}">
+  <meta property="og:image:type" th:if="${meta.imageType != null}" th:content="${meta.imageType}">
+  <meta property="og:image:width" th:if="${meta.imageWidth != null}" th:content="${meta.imageWidth}">
+  <meta property="og:image:height" th:if="${meta.imageHeight != null}" th:content="${meta.imageHeight}">
   <meta property="og:image:alt" th:if="${meta.imageAlt != null}" th:content="${meta.imageAlt}">
   <meta name="twitter:card" th:content="${meta.image != null ? 'summary_large_image' : 'summary'}">
   <meta name="twitter:title" th:content="${meta.title}">

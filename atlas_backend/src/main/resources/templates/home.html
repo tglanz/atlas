@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
 <body>
 <main class="stack home-content">
-  <section class="home-hero" th:classappend="${heroMovement == null ? 'home-hero-text' : ''}" aria-labelledby="hero-title">
+  <section class="home-hero" aria-labelledby="hero-title">
     <div class="stack hero-copy">
       <p class="eyebrow">A field guide to human movement</p>
       <h1 id="hero-title">Understand the form.<br><span>Make it your practice.</span></h1>
@@ -13,10 +13,6 @@
       </div>
       <p class="hero-note">Clear cues. Connected progressions. A practice of your own.</p>
     </div>
-    <figure class="hero-study" th:if="${heroMovement != null}">
-      <a th:href="@{/movements/{key}(key=${heroMovement.key})}" tabindex="-1" aria-hidden="true"><img th:src="${heroMovement.representativeIllustration}" width="720" height="540" th:alt="${heroMovement.name}" fetchpriority="high" decoding="async"></a>
-      <figcaption><a class="text-link" th:href="@{/movements/{key}(key=${heroMovement.key})}" th:text="|Explore ${heroMovement.name} →|">Explore movement →</a></figcaption>
-    </figure>
   </section>
   <section class="stack" aria-labelledby="featured-title" th:unless="${featuredMovements.isEmpty()}">
     <header class="cluster between section-heading">

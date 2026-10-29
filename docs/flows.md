@@ -8,17 +8,13 @@ Find Movements in the Movement Index by name, with suggestions while typing, and
 
 View its description, items grouped by type (such as cues and comments), illustrations, tags, and the Movements related to it. Each relationship type appears in its own subsection, such as Progressions, with previews of candidate Movements.
 
-## Add a Movement to a Routine
-
-From a Movement, choose a Routine and one of its Sections, or create a Routine with the Movement already selected. If the Routine has no Sections, adding its first Movement creates a Practice section. Authentication continues to the same choice after sign-in or registration.
-
 ## Create a Routine
 
-Create a Routine with a name and description, organized into ordered Sections containing Movements.
+Create a Routine with a name and description, organized into ordered Sections. Choose its Movements inside the Routine editor.
 
 ## Edit a Routine
 
-Update the Routine details, manage its Sections, and reorder or replace Movements.
+Update the Routine details, manage its Sections, and add, reorder or replace Movements.
 
 ## View a Routine
 

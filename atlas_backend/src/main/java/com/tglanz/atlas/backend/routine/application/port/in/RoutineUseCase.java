@@ -15,9 +15,6 @@ public interface RoutineUseCase {
 
   Routine update(String ownerId, UUID id, RoutineContent content);
 
-  /** Append to an existing section, or create the first section of an empty Routine. */
-  Routine addMovement(String ownerId, UUID id, int sectionIndex, String movementKey);
-
   Routine getShared(UUID token);
 
   UUID enableSharing(String ownerId, UUID id);
