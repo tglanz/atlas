@@ -35,6 +35,17 @@ class PageRenderingTest {
   @Autowired AccountUseCase accounts;
 
   @Test
+  void optionalIntegrationsAreAbsentWhenUnconfigured() throws Exception {
+    String html =
+        mvc.perform(get("/"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertThat(html).doesNotContain("googletagmanager.com", "gtag(", "Buy me a coffee");
+  }
+
+  @Test
   void publicHtmlIncludesCurrentContentRelatedLinksAndServerMetadata() throws Exception {
     String key = key();
     String related = key();

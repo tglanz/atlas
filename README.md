@@ -13,4 +13,4 @@ make test     # application and utilities tests
 make format   # format the code
 ```
 
-See the [application README](atlas_backend/README.md) and [utilities README](atlas_utils/README.md) for their commands. Start with the [product introduction](docs/abstract.md), [architecture decisions](docs/stack.md), and [tooling](docs/tooling.md) for more context.
+See the [application README](atlas_backend/README.md) and [utilities README](atlas_utils/README.md) for their commands. See [site configuration](docs/config.md) for all deployment settings. Start with the [product introduction](docs/abstract.md), [architecture decisions](docs/stack.md), and [tooling](docs/tooling.md) for more context.

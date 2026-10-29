@@ -22,6 +22,15 @@
   <meta name="twitter:image" th:if="${meta.image != null}" th:content="${meta.image}">
   <meta name="twitter:image:alt" th:if="${meta.imageAlt != null}" th:content="${meta.imageAlt}">
   <script type="application/ld+json" th:if="${meta.structuredData != null}" th:utext="${meta.structuredData}"></script>
+  <th:block th:if="${!#strings.isEmpty(gaMeasurementId)}">
+    <script async th:src="@{https://www.googletagmanager.com/gtag/js(id=${gaMeasurementId})}"></script>
+    <script th:inline="javascript">
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', /*[[${gaMeasurementId}]]*/ '');
+    </script>
+  </th:block>
   <link rel="icon" type="image/svg+xml" th:href="@{/assets/favicon.svg}">
   <link rel="stylesheet" th:href="@{/assets/app.css}">
   <script type="module" th:src="@{/assets/app.js}"></script>
@@ -47,6 +56,6 @@
     </nav>
   </header>
   <div class="container page-content" id="main" tabindex="-1"><th:block th:replace="${content}"></th:block></div>
-  <footer class="container site-footer"><p>A visual library of human movement.</p></footer>
+  <footer class="container site-footer"><p>A visual library of human movement.</p><p th:if="${!#strings.isEmpty(coffeeUrl)}"><a th:href="${coffeeUrl}" target="_blank" rel="noopener noreferrer">Buy me a coffee</a></p></footer>
 </body>
 </html>

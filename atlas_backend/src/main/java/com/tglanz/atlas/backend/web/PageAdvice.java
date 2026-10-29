@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
@@ -14,8 +15,16 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 class PageAdvice {
   private final PageMetadataFactory metadata;
 
-  PageAdvice(PageMetadataFactory metadata) {
+  private final String gaMeasurementId;
+  private final String coffeeUrl;
+
+  PageAdvice(
+      PageMetadataFactory metadata,
+      @Value("${atlas.analytics.measurement-id:}") String gaMeasurementId,
+      @Value("${atlas.coffee-url:}") String coffeeUrl) {
     this.metadata = metadata;
+    this.gaMeasurementId = gaMeasurementId.strip();
+    this.coffeeUrl = coffeeUrl.strip();
   }
 
   @ModelAttribute
@@ -26,6 +35,8 @@ class PageAdvice {
       HttpServletResponse response) {
     addShell(model.asMap(), authentication, request, response);
     model.addAttribute("meta", metadata.privatePage("Form Atlas"));
+    model.addAttribute("gaMeasurementId", gaMeasurementId);
+    model.addAttribute("coffeeUrl", coffeeUrl);
   }
 
   static void addShell(
