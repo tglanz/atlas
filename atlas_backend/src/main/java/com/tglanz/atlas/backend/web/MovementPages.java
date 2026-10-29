@@ -44,7 +44,6 @@ public class MovementPages {
   private final GraphUseCase graph;
   private final MovementPageService saves;
   private final PageMetadataFactory metadata;
-  private final GenerationPanel generation;
   private final PreviewImages previews;
 
   public MovementPages(
@@ -52,13 +51,11 @@ public class MovementPages {
       GraphUseCase graph,
       MovementPageService saves,
       PageMetadataFactory metadata,
-      GenerationPanel generation,
       PreviewImages previews) {
     this.movements = movements;
     this.graph = graph;
     this.saves = saves;
     this.metadata = metadata;
-    this.generation = generation;
     this.previews = previews;
   }
 
@@ -264,7 +261,7 @@ public class MovementPages {
   }
 
   private String editor(Model model, Movement movement) {
-    model.addAttribute("pageScripts", List.of("movements", "generation"));
+    model.addAttribute("pageScripts", List.of("movements"));
     model.addAttribute(
         "meta",
         metadata.privatePage(
@@ -280,7 +277,6 @@ public class MovementPages {
         .filter(type -> !type.isBlank())
         .forEach(type -> types.putIfAbsent(type, capitalize(type)));
     model.addAttribute("relationshipTypes", types);
-    generation.addTo(model, movement);
     return "movements/editor";
   }
 

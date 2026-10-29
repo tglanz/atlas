@@ -26,6 +26,32 @@ class GenerationEntity {
   @Column(name = "movement_key")
   String movementKey;
 
+  @Column(name = "input_name")
+  String inputName;
+
+  @Column(name = "input_description")
+  String inputDescription;
+
+  String guidelines;
+
+  @Column(name = "avatar_specification")
+  String avatarSpecification;
+
+  @Column(name = "viewpoint_specification")
+  String viewpointSpecification;
+
+  @Column(name = "stage_fingerprint")
+  String stageFingerprint;
+
+  @Column(name = "target_stage_position")
+  Integer targetStagePosition;
+
+  @ElementCollection
+  @CollectionTable(name = "generation_input_cue", joinColumns = @JoinColumn(name = "request_id"))
+  @OrderColumn(name = "position")
+  @Column(name = "content")
+  List<String> inputCues = new ArrayList<>();
+
   @Enumerated(EnumType.STRING)
   GenerationStatus status;
 

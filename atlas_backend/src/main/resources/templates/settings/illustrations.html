@@ -3,6 +3,7 @@
 <body>
 <main class="stack">
   <h1>Illustrations</h1>
+  <a th:href="@{/illustrations}">Generate illustrations</a>
   <nav class="cluster" aria-label="Illustration settings">
     <a class="button secondary" th:href="@{/settings/illustrations(tab='avatars')}" th:attr="aria-current=${settingsTab == 'avatars' ? 'page' : null}">Avatars</a>
     <a class="button secondary" th:href="@{/settings/illustrations(tab='viewpoints')}" th:attr="aria-current=${settingsTab == 'viewpoints' ? 'page' : null}">Viewpoints</a>

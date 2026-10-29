@@ -10,9 +10,9 @@
     </div>
   </div>
   <div th:class="${compact ? 'illustrations routine-illustrations' : 'illustrations'}" tabindex="0" role="region" th:attr="aria-label=|Illustrations for ${name}|" data-sequence-track>
-    <figure th:each="image, status : ${images}">
+    <figure th:each="image, status : ${images}" th:with="stageIndex=${image.stagePosition != null ? image.stagePosition : status.index}">
       <img th:src="${image.imageUrl}" th:alt="|${name}, step ${status.count}|" width="320" height="224" th:attr="loading=${!compact and status.first ? 'eager' : 'lazy'},fetchpriority=${!compact and status.first ? 'high' : 'auto'}" decoding="async">
-      <figcaption><span class="step-number" th:text="${status.count}">1</span><span th:text="${stages != null and status.index &lt; stages.size() ? stages[status.index].name : 'Position ' + status.count}">Position</span></figcaption>
+      <figcaption><span class="step-number" th:text="${status.count}">1</span><span th:text="${stages != null and stageIndex &lt; stages.size() ? stages[stageIndex].name : 'Position ' + status.count}">Position</span></figcaption>
     </figure>
   </div>
   <p class="sequence-hint muted" th:if="${images.size() > 1}">Scroll to explore every position.</p>

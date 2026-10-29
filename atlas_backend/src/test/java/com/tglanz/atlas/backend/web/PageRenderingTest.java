@@ -183,7 +183,7 @@ class PageRenderingTest {
     mvc.perform(get("/movements/" + key + "/edit").with(user("maintainer").roles("MAINTAINER")))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("Saved description")))
-        .andExpect(content().string(containsString("generation-panel")));
+        .andExpect(content().string(containsString("Manage illustrations")));
   }
 
   @Test

@@ -1,66 +1,92 @@
-const scheduled = new WeakMap();
-const refreshing = new WeakSet();
+let timer;
+let polling = false;
+let submitting = false;
+let revision = 0;
+const panelSelector = '[data-generation-panel]';
+const currentPanel = () => document.querySelector(panelSelector);
 
-function showRefreshError(panel, message) {
-  const error = panel.querySelector('[data-generation-refresh-error]');
-  error.textContent = message;
-  error.hidden = false;
+function showError(panel, message) {
+  const error = panel?.querySelector('[data-generation-refresh-error]');
+  if (error) { error.textContent = message; error.hidden = false; }
 }
 
-function schedulePanels() {
-  for (const panel of document.querySelectorAll('[data-generation-panel][data-generation-running="true"]')) {
-    if (scheduled.has(panel) || refreshing.has(panel)) continue;
-    scheduled.set(panel, window.setTimeout(() => refresh(panel), 10_000));
-  }
+function schedule() {
+  window.clearTimeout(timer);
+  const running = currentPanel()?.dataset.generationRunning === 'true';
+  document.querySelectorAll('[data-generate-button]').forEach(button => { button.disabled = submitting || running; });
+  const hint = document.querySelector('[data-generation-form-status]');
+  if (hint) hint.textContent = running ? 'Generation is running. You can keep editing inputs for the next run.' : 'Results appear below for review before they are applied.';
+  if (running && !polling && !submitting) timer = window.setTimeout(poll, 3000);
 }
 
-async function refresh(panel, userRequested = false) {
-  window.clearTimeout(scheduled.get(panel));
-  scheduled.delete(panel);
-  if (!panel.isConnected || refreshing.has(panel)) return;
-  if (panel.getAttribute('aria-busy') === 'true' || (!userRequested && panel.contains(document.activeElement))) {
-    schedulePanels();
-    return;
-  }
-  refreshing.add(panel);
-  const revision = panel.dataset.generationRevision ?? '0';
-  const isCurrent = () => panel.isConnected && panel.getAttribute('aria-busy') !== 'true'
-    && (panel.dataset.generationRevision ?? '0') === revision;
+function replacePanel(responseHtml, expected) {
+  const html = new DOMParser().parseFromString(responseHtml, 'text/html');
+  const replacement = html.querySelector(panelSelector);
+  if (!replacement) throw new Error('Could not load generation status.');
+  if (expected.isConnected) expected.replaceWith(replacement);
+  document.dispatchEvent(new CustomEvent('atlas:fragment'));
+}
+
+async function poll() {
+  const panel = currentPanel();
+  if (!panel || polling || submitting) return;
+  if (document.visibilityState === 'hidden') { schedule(); return; }
+  polling = true;
+  const startedAt = revision;
   try {
     const response = await fetch(panel.dataset.generationStatusUrl, {
-      headers: { 'X-Fragment': 'true', Accept: 'text/html' },
-      credentials: 'same-origin',
-      cache: 'no-store',
+      headers: { 'X-Fragment': 'true', Accept: 'text/html' }, credentials: 'same-origin', cache: 'no-store',
     });
-    if (!isCurrent()) return;
+    if (!panel.isConnected || revision !== startedAt) return;
     if (response.redirected || response.status === 401 || response.status === 403) {
       panel.dataset.generationRunning = 'false';
-      showRefreshError(panel, 'Your session has expired. Sign in again to continue.');
+      showError(panel, 'Your session has expired. Sign in again to continue.');
       return;
     }
-    if (!response.ok) throw new Error('Generation status could not be refreshed. Retrying shortly.');
-    const html = new DOMParser().parseFromString(await response.text(), 'text/html');
-    const replacement = html.querySelector('[data-generation-panel]');
-    if (!replacement) throw new Error('Generation status could not be refreshed. Retrying shortly.');
-    // Only this panel is replaced; the movement editor retains its unsaved fields.
-    if (isCurrent() && (userRequested || !panel.contains(document.activeElement))) panel.replaceWith(replacement);
+    if (!response.ok) throw new Error('Could not refresh generation status. Retrying automatically.');
+    const body = await response.text();
+    if (panel.isConnected && revision === startedAt) replacePanel(body, panel);
   } catch {
-    if (isCurrent()) showRefreshError(panel, 'Generation status could not be refreshed. Retrying shortly.');
+    if (panel.isConnected && revision === startedAt) showError(panel, 'Could not refresh generation status. Retrying automatically.');
   } finally {
-    refreshing.delete(panel);
-    schedulePanels();
+    polling = false;
+    schedule();
   }
 }
 
-document.addEventListener('atlas:fragment', schedulePanels);
-document.addEventListener('submit', (event) => {
-  const panel = event.target.closest('[data-generation-panel]');
-  if (panel) panel.dataset.generationRevision = String(Number(panel.dataset.generationRevision ?? '0') + 1);
-}, true);
-document.addEventListener('click', (event) => {
-  const link = event.target.closest('[data-generation-refresh]');
-  if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+document.addEventListener('submit', async event => {
+  const form = event.target;
+  if (!form.matches('[data-generation-form]')) {
+    if (form.closest(panelSelector)) revision += 1;
+    return;
+  }
   event.preventDefault();
-  refresh(link.closest('[data-generation-panel]'), true);
-});
-schedulePanels();
+  if (submitting || currentPanel()?.dataset.generationRunning === 'true') return;
+  const panel = currentPanel();
+  const body = new FormData(form);
+  if (event.submitter?.name) body.append(event.submitter.name, event.submitter.value);
+  submitting = true;
+  revision += 1;
+  form.setAttribute('aria-busy', 'true');
+  schedule();
+  try {
+    const response = await fetch(form.action, { method: 'POST', body, credentials: 'same-origin',
+      headers: { 'X-Fragment': 'true', Accept: 'text/html' } });
+    if (response.redirected || response.status === 401 || response.status === 403) {
+      throw new Error('Your session has expired. Sign in again to continue.');
+    }
+    if (![200, 400, 409].includes(response.status)) throw new Error('Could not start generation. Please try again.');
+    // The form stays intact: only results are replaced, including during subsequent polling.
+    replacePanel(await response.text(), panel);
+  } catch (error) {
+    showError(currentPanel(), error.message);
+  } finally {
+    submitting = false;
+    form.removeAttribute('aria-busy');
+    schedule();
+  }
+}, true);
+
+document.addEventListener('atlas:fragment', schedule);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') schedule(); });
+schedule();

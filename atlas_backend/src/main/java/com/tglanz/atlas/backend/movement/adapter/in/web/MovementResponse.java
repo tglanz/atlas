@@ -12,7 +12,8 @@ record MovementResponse(
     List<ItemResponse> items,
     List<StageResponse> stages,
     List<String> tags,
-    List<String> illustrations) {
+    List<String> illustrations,
+    List<Integer> illustrationStagePositions) {
 
   record ItemResponse(String type, String content) {}
 
@@ -27,6 +28,13 @@ record MovementResponse(
         c.items().stream().map(i -> new ItemResponse(i.type().name(), i.content())).toList(),
         c.stages().stream().map(s -> new StageResponse(s.name(), s.description())).toList(),
         c.tags().stream().sorted().toList(),
-        m.illustrations().stream().map(Illustration::imageUrl).toList());
+        m.illustrations().stream().map(Illustration::imageUrl).toList(),
+        java.util.stream.IntStream.range(0, m.illustrations().size())
+            .mapToObj(
+                i ->
+                    m.illustrations().get(i).stagePosition() == null
+                        ? i
+                        : m.illustrations().get(i).stagePosition())
+            .toList());
   }
 }

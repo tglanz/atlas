@@ -27,7 +27,7 @@ The HTTP API under `/api` serves programmatic clients. HTML pages use the same a
 - A Routine can only reference existing Movements.
 - Relationships between Movements are managed through the graph, not the Movement. Both ends must exist, and a Movement cannot relate to itself.
 - Generation is asynchronous. A request returns immediately and its status is polled.
-- A generation makes one image for each stage of the Movement. Its images are only candidates: they replace the Movement's Illustrations when a maintainer approves them, and are dropped when discarded.
+- A generation captures its inputs, optional guidelines and preset specifications, and generates all stages or a selected stage. Input overrides never update the saved Movement. Images are candidates until approved; approving a single stage preserves other Illustrations. Saved stage changes invalidate approval so images cannot be applied to the wrong position.
 - A Movement has at most one generation in progress, and a request while one is running is a conflict.
 - Saving a Movement never changes its Illustrations.
 - An Avatar or Viewpoint that a generation request uses cannot be deleted.

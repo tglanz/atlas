@@ -49,7 +49,7 @@
       <div class="navigation-links">
         <a th:href="@{/movements}" th:attr="aria-current=${currentPath != null and #strings.startsWith(currentPath, '/movements') ? 'page' : null}">Movements</a>
         <a th:href="@{/routines}" th:attr="aria-current=${currentPath != null and #strings.startsWith(currentPath, '/routines') ? 'page' : null}">Routines</a>
-        <a th:if="${maintainer}" th:href="@{/settings/illustrations}" th:attr="aria-current=${currentPath != null and #strings.startsWith(currentPath, '/settings') ? 'page' : null}">Illustrations</a>
+        <a th:if="${maintainer}" th:href="@{/illustrations}" th:attr="aria-current=${currentPath != null and (#strings.startsWith(currentPath, '/illustrations') or #strings.startsWith(currentPath, '/settings')) ? 'page' : null}">Illustrations</a>
       </div>
       <div class="cluster account-navigation">
         <th:block th:unless="${signedIn}"><a th:href="${#strings.isEmpty(returnTo)} ? @{/login} : @{/login(returnTo=${returnTo})}">Sign in</a><a class="button small" th:href="${#strings.isEmpty(returnTo)} ? @{/register} : @{/register(returnTo=${returnTo})}">Register</a></th:block>

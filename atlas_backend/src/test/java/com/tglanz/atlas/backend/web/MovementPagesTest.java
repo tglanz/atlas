@@ -201,4 +201,29 @@ class MovementPagesTest {
     assertThat(saved.illustrations())
         .containsExactly(new Illustration("https://example.com/step.png"));
   }
+
+  @Test
+  void sparseIllustrationUsesItsOwnStageCaptionAndExportsTheAssociation() throws Exception {
+    String value = key();
+    commands.create(
+        new MovementKey(value),
+        new MovementContent(
+            "Sparse movement",
+            "",
+            List.of(),
+            List.of(
+                new MovementStage("Bottom", "Bottom pose"), new MovementStage("Top", "Top pose")),
+            Set.of()));
+    commands.replaceIllustrations(
+        new MovementKey(value), List.of(new Illustration("https://example.com/top.png", 1)));
+    mvc.perform(get("/movements/" + value))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("<span>Top</span>")));
+    mvc.perform(get("/api/movements/" + value))
+        .andExpect(status().isOk())
+        .andExpect(
+            org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath(
+                    "$.illustrationStagePositions[0]")
+                .value(1));
+  }
 }

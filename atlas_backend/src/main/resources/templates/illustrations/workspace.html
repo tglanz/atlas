@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(~{::main})}">
+<body><main class="stack">
+  <header class="cluster between"><div><p class="eyebrow">Illustration studio</p><h1>Illustrations</h1></div><a class="button secondary" th:href="@{/settings/illustrations}">Avatars and viewpoints</a></header>
+  <form class="card cluster" method="get" th:action="@{/illustrations}">
+    <label class="field grow" for="illustration-movement">Movement
+      <select id="illustration-movement" name="movement" required>
+        <option value="">Choose a movement</option>
+        <option th:each="choice : ${movementNames}" th:value="${choice.key().value()}" th:text="${choice.name()}" th:selected="${movement != null and choice.key() == movement.key()}"></option>
+      </select>
+    </label><button class="button secondary" type="submit">Load movement</button>
+  </form>
+  <p class="muted" th:if="${movement == null}">Choose a movement to prepare its illustrations.</p>
+  <th:block th:if="${movement != null}">
+    <div class="cluster"><h2 th:text="${movement.content().name()}">Movement</h2><a th:href="@{/movements/{key}(key=${movement.key().value()})}">View movement</a></div>
+    <p class="muted">These inputs are a temporary copy. Editing them here changes this generation only; the saved movement stays unchanged.</p>
+    <p class="alert" th:if="${movement.content().stages().isEmpty()}">Add stages in the <a th:href="@{/movements/{key}/edit(key=${movement.key().value()})}">movement editor</a> before generating.</p>
+    <p class="alert" th:if="${generationAvatars.isEmpty() or generationViewpoints.isEmpty()}">Create an avatar and viewpoint in <a th:href="@{/settings/illustrations}">illustration settings</a> first.</p>
+    <div class="illustration-workspace">
+    <form class="card stack" th:unless="${movement.content().stages().isEmpty() or generationAvatars.isEmpty() or generationViewpoints.isEmpty()}" method="post" th:action="@{/illustrations/{key}/generations(key=${movement.key().value()})}" th:object="${generationForm}" data-generation-form>
+      <h2>Generation inputs</h2>
+      <div class="grid">
+        <label class="field" for="generation-avatar">Avatar<select id="generation-avatar" th:field="*{avatarId}" required><option value="">Choose an avatar</option><option th:each="avatar : ${generationAvatars}" th:value="${avatar.id()}" th:text="${avatar.name()}"></option></select></label>
+        <label class="field" for="generation-viewpoint">Viewpoint<select id="generation-viewpoint" th:field="*{viewpointId}" required><option value="">Choose a viewpoint</option><option th:each="viewpoint : ${generationViewpoints}" th:value="${viewpoint.id()}" th:text="${viewpoint.name()}"></option></select></label>
+      </div>
+      <label class="field">Movement name<input th:field="*{name}" maxlength="200" required></label>
+      <label class="field">Description<textarea th:field="*{description}" rows="3" maxlength="20000"></textarea></label>
+      <label class="field">Cues <span class="muted">One cue per line</span><textarea th:field="*{cues}" rows="5" maxlength="200000"></textarea></label>
+      <label class="field">Additional guidelines<textarea th:field="*{guidelines}" rows="4" maxlength="10000" placeholder="For example: keep the whole body visible and emphasize the hand position."></textarea></label>
+      <section class="stack" aria-labelledby="generation-stages-title"><h3 id="generation-stages-title">Stages</h3>
+        <p class="muted">Adjust each position for this generation. Generate one stage below, or all stages together.</p>
+        <div class="card stack" th:each="stage, position : *{stages}">
+          <label class="field">Stage name<input th:field="*{stages[__${position.index}__].name}" maxlength="200" required></label>
+          <label class="field">Stage description<textarea th:field="*{stages[__${position.index}__].description}" rows="3" maxlength="4000" required></textarea></label>
+          <div class="cluster"><button class="button secondary" type="submit" name="stagePosition" th:value="${position.index}" data-generate-button th:disabled="${generationRunning}">Generate this stage</button></div>
+        </div>
+      </section>
+      <div class="cluster"><button class="button" type="submit" name="stagePosition" value="" data-generate-button th:disabled="${generationRunning}">Generate all stages</button><a class="button secondary" th:href="@{/illustrations(movement=${movement.key().value()})}">Reload saved inputs</a></div>
+      <p class="muted" data-generation-form-status th:text="${generationRunning ? 'Generation is running. You can keep editing inputs for the next run.' : 'Results appear below for review before they are applied.'}"></p>
+    </form>
+    <section th:replace="~{fragments/generation :: panel}"></section>
+    </div>
+  </th:block>
+</main></body></html>

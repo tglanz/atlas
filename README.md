@@ -11,6 +11,7 @@ make run      # build and run the application
 make build    # build the runnable jar
 make test     # application and utilities tests
 make format   # format the code
+node --test atlas_backend/src/test/js/*.test.cjs  # polling tests (requires Node.js)
 ```
 
 See the [application README](atlas_backend/README.md) and [utilities README](atlas_utils/README.md) for their commands. See [site configuration](docs/config.md) for all deployment settings. Start with the [product introduction](docs/abstract.md), [architecture decisions](docs/stack.md), and [tooling](docs/tooling.md) for more context.

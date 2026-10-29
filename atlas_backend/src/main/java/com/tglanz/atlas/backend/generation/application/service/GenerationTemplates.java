@@ -28,7 +28,8 @@ public class GenerationTemplates {
       String avatarSpecification,
       String viewpointSpecification,
       String stageName,
-      String stageDescription) {}
+      String stageDescription,
+      String guidelines) {}
 
   private final Template systemPrompt = load("system-prompt");
   private final Template imagePrompt = load("image-prompt");
@@ -46,7 +47,9 @@ public class GenerationTemplates {
             "viewpoint",
             Map.of("specification", model.viewpointSpecification()),
             "stage",
-            Map.of("name", model.stageName(), "description", model.stageDescription()));
+            Map.of("name", model.stageName(), "description", model.stageDescription()),
+            "guidelines",
+            nullToEmpty(model.guidelines()));
     return new ImageRequest(
         systemPrompt.execute(context).strip(), imagePrompt.execute(context).strip());
   }

@@ -44,8 +44,24 @@ class MovementsAdapter implements Movements {
   }
 
   @Override
+  public void replaceStageIllustration(String movementKey, int stagePosition, String url) {
+    Movement movement = queries.get(new MovementKey(movementKey));
+    var images = new java.util.TreeMap<Integer, Illustration>();
+    for (int i = 0; i < movement.illustrations().size(); i++) {
+      var image = movement.illustrations().get(i);
+      int index = image.stagePosition() == null ? i : image.stagePosition();
+      images.put(index, image);
+    }
+    images.put(stagePosition, new Illustration(url, stagePosition));
+    commands.replaceIllustrations(new MovementKey(movementKey), List.copyOf(images.values()));
+  }
+
+  @Override
   public void replaceIllustrations(String movementKey, List<String> urls) {
     commands.replaceIllustrations(
-        new MovementKey(movementKey), urls.stream().map(Illustration::new).toList());
+        new MovementKey(movementKey),
+        java.util.stream.IntStream.range(0, urls.size())
+            .mapToObj(i -> new Illustration(urls.get(i), i))
+            .toList());
   }
 }

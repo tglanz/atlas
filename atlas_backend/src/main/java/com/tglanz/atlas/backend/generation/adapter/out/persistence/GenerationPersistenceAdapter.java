@@ -1,6 +1,7 @@
 package com.tglanz.atlas.backend.generation.adapter.out.persistence;
 
 import com.tglanz.atlas.backend.generation.application.port.out.GenerationRepository;
+import com.tglanz.atlas.backend.generation.domain.GenerationInput;
 import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations;
 import com.tglanz.atlas.backend.generation.domain.GenerationStatus;
 import com.tglanz.atlas.backend.generation.domain.IllustrationCandidate;
@@ -60,6 +61,18 @@ class GenerationPersistenceAdapter implements GenerationRepository {
                   created.createdAt = generation.createdAt();
                   return created;
                 });
+    if (generation.input() != null) {
+      var input = generation.input();
+      entity.inputName = input.name();
+      entity.inputDescription = input.description();
+      entity.guidelines = input.guidelines();
+      entity.avatarSpecification = input.avatarSpecification();
+      entity.viewpointSpecification = input.viewpointSpecification();
+      entity.inputCues.clear();
+      entity.inputCues.addAll(input.cues());
+    }
+    entity.stageFingerprint = generation.stageFingerprint();
+    entity.targetStagePosition = generation.targetStagePosition();
     entity.status = generation.status();
     entity.failureReason = generation.failureReason();
     entity.finishedAt = generation.finishedAt();
@@ -129,6 +142,17 @@ class GenerationPersistenceAdapter implements GenerationRepository {
         e.failureReason,
         e.createdAt,
         e.finishedAt,
-        stages);
+        stages,
+        e.inputName == null
+            ? null
+            : new GenerationInput(
+                e.inputName,
+                e.inputDescription,
+                e.inputCues,
+                e.guidelines,
+                e.avatarSpecification,
+                e.viewpointSpecification),
+        e.stageFingerprint,
+        e.targetStagePosition);
   }
 }

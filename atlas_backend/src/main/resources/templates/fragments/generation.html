@@ -1,9 +1,8 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-<section th:fragment="panel" id="generation-panel" class="card stack" aria-labelledby="generation-title" data-fragment-container data-generation-panel th:attr="data-generation-running=${generationRunning},data-generation-status-url=@{/movements/{key}/generation-status(key=${movement.key().value()})}">
-  <h2 id="generation-title">Illustrations</h2>
-  <p class="muted">Illustration changes use the saved movement. Save changes to the stages before generating.</p>
+<section th:fragment="panel" id="generation-panel" class="card stack" aria-labelledby="generation-title" data-fragment-container data-generation-panel th:attr="data-generation-running=${generationRunning},data-generation-status-url=@{/illustrations/{key}/status(key=${movement.key().value()})}">
+  <h2 id="generation-title">Results</h2>
   <p class="alert" role="status" th:if="${generationNotice}" th:text="${generationNotice}"></p>
   <p class="alert error" role="alert" th:if="${generationError}" th:text="${generationError}"></p>
   <p class="muted" role="status" data-generation-refresh-error hidden></p>
@@ -12,12 +11,13 @@
     <h3>Current illustrations</h3>
     <div class="grid">
       <figure class="stack" th:each="illustration, position : ${movement.illustrations()}">
+        <figcaption th:with="stageIndex=${illustration.stagePosition() != null ? illustration.stagePosition() : position.index}" th:text="${stageIndex &lt; movement.content().stages().size() ? movement.content().stages()[stageIndex].name() : 'Position ' + (position.index + 1)}"></figcaption>
         <img class="movement-image" th:src="${illustration.imageUrl()}" th:alt="${movement.content().name() + ', step ' + (position.index + 1)}" loading="lazy" decoding="async">
       </figure>
     </div>
     <details>
       <summary>Remove all illustrations</summary>
-      <form class="stack" data-fragment-form th:action="@{/movements/{key}/illustrations/clear(key=${movement.key().value()})}" method="post">
+      <form class="stack" data-fragment-form th:action="@{/illustrations/{key}/clear(key=${movement.key().value()})}" method="post">
         <p>Remove every current illustration from this movement?</p>
         <div class="cluster"><button class="button danger" type="submit">Confirm removal</button></div>
       </form>
@@ -27,58 +27,30 @@
 
   <section class="stack" th:if="${latestGeneration != null and latestGeneration.status().name() != 'APPLIED' and latestGeneration.status().name() != 'DISCARDED'}" aria-labelledby="generation-review-title">
     <h3 id="generation-review-title">New illustrations</h3>
+    <p class="muted" th:if="${latestGeneration.targetStagePosition() != null}" th:text="|Only stage ${latestGeneration.targetStagePosition() + 1} will be replaced. Other illustrations stay unchanged.|"></p>
+    <details th:if="${latestGeneration.input() != null}"><summary>Inputs used for this generation</summary><div class="stack"><p th:text="${latestGeneration.input().name()}"></p><p class="preserve-lines" th:text="${latestGeneration.input().description()}"></p><ul><li th:each="cue : ${latestGeneration.input().cues()}" th:text="${cue}"></li></ul><p class="preserve-lines" th:if="${!latestGeneration.input().guidelines().isEmpty()}" th:text="${latestGeneration.input().guidelines()}"></p></div></details>
     <p role="status" th:if="${generationRunning}">Generation is in progress. This panel updates automatically.</p>
-    <a data-generation-refresh th:if="${generationRunning}" th:href="@{/movements/{key}/edit(key=${movement.key().value()})} + '#generation-panel'">Refresh generation status</a>
     <p role="status" th:if="${latestGeneration.status().name() == 'READY_FOR_REVIEW'}">Illustrations are ready for review.</p>
     <p class="alert error" role="alert" th:if="${latestGeneration.failureReason() != null}" th:text="${latestGeneration.failureReason()}"></p>
     <div class="grid">
       <figure class="card stack" th:each="stage : ${latestGeneration.stages()}">
         <figcaption th:text="${stage.name()}"></figcaption>
+        <p class="muted" th:text="${stage.description()}"></p>
         <img class="movement-image" th:if="${stage.candidate().state().name() == 'DONE' and stage.candidate().imageUrl() != null}" th:src="${stage.candidate().imageUrl()}" th:alt="${'New illustration: ' + stage.name()}" loading="lazy" decoding="async">
         <p class="error" th:if="${stage.candidate().state().name() == 'FAILED'}" th:text="${stage.candidate().failureReason() != null ? stage.candidate().failureReason() : 'Generation failed.'}"></p>
         <p class="muted" th:if="${stage.candidate().state().name() == 'PENDING'}" th:text="${latestGeneration.status().name() == 'FAILED' ? 'Not generated' : (stage.candidate().progress() != null ? stage.candidate().progress() : 'Waiting for generation…')}"></p>
       </figure>
     </div>
     <div class="cluster" th:if="${latestGeneration.status().name() == 'READY_FOR_REVIEW'}">
-      <form data-fragment-form th:action="@{/movements/{key}/generations/{id}/apply(key=${movement.key().value()},id=${latestGeneration.id()})}" method="post">
+      <form data-fragment-form th:action="@{/illustrations/{key}/generations/{id}/apply(key=${movement.key().value()},id=${latestGeneration.id()})}" method="post">
         <button class="button" type="submit">Approve illustrations</button>
       </form>
-      <form data-fragment-form th:action="@{/movements/{key}/generations/{id}/discard(key=${movement.key().value()},id=${latestGeneration.id()})}" method="post">
+      <form data-fragment-form th:action="@{/illustrations/{key}/generations/{id}/discard(key=${movement.key().value()},id=${latestGeneration.id()})}" method="post">
         <button class="button secondary" type="submit">Discard generation</button>
       </form>
     </div>
   </section>
 
-  <p class="alert" th:if="${movement.content().stages().isEmpty()}">Add stages to this movement and save it to generate illustrations.</p>
-  <th:block th:unless="${movement.content().stages().isEmpty()}">
-    <p class="alert" th:if="${generationAvatars.isEmpty() or generationViewpoints.isEmpty()}">
-      Create at least one avatar and viewpoint in <a th:href="@{/settings/illustrations}">Illustration settings</a> first.
-    </p>
-    <form class="stack" data-fragment-form th:unless="${generationAvatars.isEmpty() or generationViewpoints.isEmpty()}" th:action="@{/movements/{key}/generations(key=${movement.key().value()})}" method="post">
-      <fieldset class="stack" th:disabled="${generationRunning}">
-        <legend>Generate illustrations</legend>
-        <div class="grid">
-          <label class="field" for="generation-avatar">Avatar
-            <select id="generation-avatar" name="avatarId" required>
-              <option value="">Choose an avatar</option>
-              <option th:each="avatar : ${generationAvatars}" th:value="${avatar.id()}" th:text="${avatar.name()}" th:selected="${avatar.id().toString() == generationAvatarId}"></option>
-            </select>
-          </label>
-          <label class="field" for="generation-viewpoint">Viewpoint
-            <select id="generation-viewpoint" name="viewpointId" required>
-              <option value="">Choose a viewpoint</option>
-              <option th:each="viewpoint : ${generationViewpoints}" th:value="${viewpoint.id()}" th:text="${viewpoint.name()}" th:selected="${viewpoint.id().toString() == generationViewpointId}"></option>
-            </select>
-          </label>
-        </div>
-        <p class="muted">One image is generated for each saved stage:</p>
-        <ol>
-          <li th:each="stage : ${movement.content().stages()}"><strong th:text="${stage.name()}"></strong>: <span th:text="${stage.description()}"></span></li>
-        </ol>
-        <div class="cluster"><button class="button" type="submit">Generate illustrations</button></div>
-      </fieldset>
-    </form>
-  </th:block>
 </section>
 </body>
 </html>

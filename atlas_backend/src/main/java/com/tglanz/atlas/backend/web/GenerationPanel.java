@@ -10,7 +10,7 @@ import java.util.Comparator;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
-/** Composes the saved illustration state independently of an editor's unsaved form. */
+/** Composes illustration results independently of the workspace's editable generation draft. */
 @Component
 public class GenerationPanel {
   private final AvatarUseCase avatars;

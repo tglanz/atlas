@@ -20,6 +20,9 @@ public final class GenerationMovementIllustrations {
   private final UUID id;
   private final String movementKey;
   private final Instant createdAt;
+  private final GenerationInput input;
+  private final String stageFingerprint;
+  private final Integer targetStagePosition;
   private GenerationStatus status;
   private String failureReason;
   private Instant finishedAt;
@@ -32,7 +35,10 @@ public final class GenerationMovementIllustrations {
       String failureReason,
       Instant createdAt,
       Instant finishedAt,
-      List<IllustrationStage> stages) {
+      List<IllustrationStage> stages,
+      GenerationInput input,
+      String stageFingerprint,
+      Integer targetStagePosition) {
     if (id == null || movementKey == null || status == null) {
       throw new IllegalArgumentException("Id, movement and status are required");
     }
@@ -40,6 +46,12 @@ public final class GenerationMovementIllustrations {
       throw new IllegalArgumentException(
           "Between 1 and %d stages are required".formatted(MAX_STAGES));
     }
+    if (targetStagePosition != null && (targetStagePosition < 0 || stages.size() != 1)) {
+      throw new IllegalArgumentException("A single-stage generation needs one valid target stage");
+    }
+    this.input = input;
+    this.stageFingerprint = stageFingerprint;
+    this.targetStagePosition = targetStagePosition;
     this.id = id;
     this.movementKey = movementKey;
     this.status = status;
@@ -51,6 +63,16 @@ public final class GenerationMovementIllustrations {
 
   public static GenerationMovementIllustrations create(
       String movementKey, List<StageDefinition> definitions, Instant now) {
+    return create(movementKey, definitions, now, null, null, null);
+  }
+
+  public static GenerationMovementIllustrations create(
+      String movementKey,
+      List<StageDefinition> definitions,
+      Instant now,
+      GenerationInput input,
+      String stageFingerprint,
+      Integer targetStagePosition) {
     if (definitions == null) {
       throw new IllegalArgumentException("Stages are required");
     }
@@ -67,7 +89,16 @@ public final class GenerationMovementIllustrations {
               IllustrationCandidate.pending()));
     }
     return new GenerationMovementIllustrations(
-        UUID.randomUUID(), movementKey, GenerationStatus.PENDING, null, now, null, stages);
+        UUID.randomUUID(),
+        movementKey,
+        GenerationStatus.PENDING,
+        null,
+        now,
+        null,
+        stages,
+        input,
+        stageFingerprint,
+        targetStagePosition);
   }
 
   public static GenerationMovementIllustrations restore(
@@ -77,9 +108,21 @@ public final class GenerationMovementIllustrations {
       String failureReason,
       Instant createdAt,
       Instant finishedAt,
-      List<IllustrationStage> stages) {
+      List<IllustrationStage> stages,
+      GenerationInput input,
+      String stageFingerprint,
+      Integer targetStagePosition) {
     return new GenerationMovementIllustrations(
-        id, movementKey, status, failureReason, createdAt, finishedAt, stages);
+        id,
+        movementKey,
+        status,
+        failureReason,
+        createdAt,
+        finishedAt,
+        stages,
+        input,
+        stageFingerprint,
+        targetStagePosition);
   }
 
   public boolean isInProgress() {
@@ -176,6 +219,18 @@ public final class GenerationMovementIllustrations {
 
   private void requireRunning() {
     require(GenerationStatus.RUNNING, "The generation is not running");
+  }
+
+  public GenerationInput input() {
+    return input;
+  }
+
+  public String stageFingerprint() {
+    return stageFingerprint;
+  }
+
+  public Integer targetStagePosition() {
+    return targetStagePosition;
   }
 
   public UUID id() {

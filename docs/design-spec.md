@@ -32,27 +32,29 @@ URL: `/movements/:key`
 - Data: Name, description, illustrations, items grouped by type, tags, and related Movements, one section per relationship type, such as Progressions.
 - Actions: View illustrations in an ordered horizontal row with visible position captions and navigation controls when scrolling is needed; open related Movements.
 - Illustration areas use a white background and preserve image proportions. Related Movement cards keep consistent proportions even when a relationship has few results.
-- Maintainer actions: Edit Movement.
+- Maintainer actions: Edit Movement; open Illustrations for this Movement.
 
 ## 3. Movement Editor
 
 URLs: `/movements/new`, `/movements/:key/edit`
 
-- Data: Movement name, description, items, stages, tags, outgoing relationships, and the illustrations.
-- Actions: Add, remove, and reorder items of the supported types and stages; add and remove tags; manage outgoing relationships; generate illustrations; remove all illustrations.
+- Data: Movement name, description, items, stages, tags, and outgoing relationships.
+- Actions: Add, remove, and reorder items of the supported types and stages; add and remove tags; manage outgoing relationships; open the Illustrations workspace.
 - A relationship's target is chosen with a movement search and its type from the offered types. Targets must be existing Movements.
 - When creating a Movement, the key is suggested from the name and can be changed.
 - Items are added per type, not as free text with a chosen type. Only the supported types are offered.
-- Generating illustrations follows the flow "Set Movement Illustrations". Progress is shown for each stage, and the result is reviewed before it replaces the illustrations.
-- Details, stages, tags and relationships are available when creating a new Movement as well as when editing one, and a single Save applies them all. Generating illustrations needs a saved Movement, so a new Movement shows a hint instead.
+- Illustration generation lives in a dedicated workspace, linked from the Movement.
+- Details, stages, tags and relationships are available when creating a new Movement as well as when editing one, and a single Save applies them all. A new Movement must be saved before it is available in Illustrations.
 - Buttons: Save, Cancel. Save remains accessible while scrolling through a long editor.
 - Only maintainers can access this page.
 
 ## 4. Illustrations
 
-URL: `/settings/illustrations`
+URL: `/illustrations`
 
-Maintainer-only page with two tabs.
+Maintainer-only workspace. Select a Movement to load editable generation inputs, choose an Avatar and Viewpoint, and add optional guidelines. These edits are temporary and do not save Movement data. Each stage can be generated individually, or all stages together.
+
+The inputs and results are separate regions. Status polls automatically while a request is queued or running, without replacing editable fields. Results are reviewed before approval; a single-stage approval preserves other images. Avatar and Viewpoint settings remain accessible from the workspace.
 
 ### Avatars
 

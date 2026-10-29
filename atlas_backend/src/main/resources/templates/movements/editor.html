@@ -100,8 +100,8 @@
     <datalist id="movement-choices"><option th:each="name : ${movementNames}" th:value="${name.key}" th:label="${name.name}"></option></datalist>
     <div class="cluster editor-actions"><span class="muted editor-actions-label" th:text="${movement == null ? 'New movement' : movement.content.name}">Movement</span><button type="submit" class="button">Save</button><a class="button secondary" th:href="${movement == null ? '/movements' : '/movements/' + movement.key()}">Cancel</a></div>
   </form>
-  <section class="stack" th:if="${movement == null}"><h2>Illustrations</h2><p class="muted">Save the movement first, then edit it to generate illustrations.</p></section>
-  <th:block th:if="${movement != null}"><section th:replace="~{fragments/generation :: panel}"></section></th:block>
+  <p class="muted" th:if="${movement == null}">Save the movement to make it available in Illustrations.</p>
+  <p th:if="${movement != null}"><a th:href="@{/illustrations(movement=${movement.key().value()})}">Manage illustrations</a></p>
 </main>
 </body>
 </html>

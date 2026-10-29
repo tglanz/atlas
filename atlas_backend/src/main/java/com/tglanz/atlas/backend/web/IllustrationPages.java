@@ -8,11 +8,16 @@ import com.tglanz.atlas.backend.movement.application.port.in.MovementQueryUseCas
 import com.tglanz.atlas.backend.movement.domain.MovementKey;
 import com.tglanz.atlas.backend.shared.error.ConflictException;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -46,6 +51,43 @@ public class IllustrationPages {
     this.movementCommands = movementCommands;
     this.panel = panel;
     this.metadata = metadata;
+  }
+
+  @InitBinder("generationForm")
+  void bindGeneration(WebDataBinder binder) {
+    binder.setAllowedFields(
+        "avatarId",
+        "viewpointId",
+        "name",
+        "description",
+        "cues",
+        "guidelines",
+        "stagePosition",
+        "stages[*].name",
+        "stages[*].description");
+    binder.setAutoGrowCollectionLimit(20);
+  }
+
+  @GetMapping("/illustrations")
+  String workspace(@RequestParam(name = "movement", required = false) String key, Model model) {
+    model.addAttribute("meta", metadata.privatePage("Illustrations"));
+    model.addAttribute("pageScripts", List.of("generation"));
+    model.addAttribute("movementNames", movements.names());
+    if (key != null && !key.isBlank()) {
+      var movement = movements.get(new MovementKey(key));
+      model.addAttribute("movement", movement);
+      panel.addTo(model, movement);
+      if (!model.containsAttribute("generationForm")) {
+        var form = GenerationForm.from(movement);
+        String avatarId = (String) model.getAttribute("generationAvatarId");
+        String viewpointId = (String) model.getAttribute("generationViewpointId");
+        if (avatarId != null && !avatarId.isEmpty()) form.setAvatarId(UUID.fromString(avatarId));
+        if (viewpointId != null && !viewpointId.isEmpty())
+          form.setViewpointId(UUID.fromString(viewpointId));
+        model.addAttribute("generationForm", form);
+      }
+    }
+    return "illustrations/workspace";
   }
 
   @GetMapping("/settings/illustrations")
@@ -159,7 +201,7 @@ public class IllustrationPages {
         "viewpoints", () -> viewpoints.makeDefault(id), model, response, redirect);
   }
 
-  @GetMapping("/movements/{key}/generation-status")
+  @GetMapping({"/illustrations/{key}/status", "/movements/{key}/generation-status"})
   String generationStatus(@PathVariable String key, Model model, HttpServletResponse response) {
     response.setHeader("Cache-Control", "no-store");
     var movement = movements.get(new MovementKey(key));
@@ -168,32 +210,55 @@ public class IllustrationPages {
     return "fragments/generation :: panel";
   }
 
-  @PostMapping("/movements/{key}/generations")
+  @PostMapping({"/illustrations/{key}/generations", "/movements/{key}/generations"})
   String generate(
       @PathVariable String key,
-      @RequestParam UUID avatarId,
-      @RequestParam UUID viewpointId,
+      @Valid @ModelAttribute("generationForm") GenerationForm form,
+      BindingResult errors,
       @RequestHeader(name = "X-Fragment", defaultValue = "false") boolean fragment,
       Model model,
       HttpServletResponse response,
       RedirectAttributes redirect) {
-    model.addAttribute("generationAvatarId", avatarId.toString());
-    model.addAttribute("generationViewpointId", viewpointId.toString());
-    if (!fragment) {
-      redirect.addFlashAttribute("generationAvatarId", avatarId.toString());
-      redirect.addFlashAttribute("generationViewpointId", viewpointId.toString());
+    String error =
+        errors.hasErrors()
+            ? "Check the generation inputs: "
+                + String.join(
+                    "; ", errors.getAllErrors().stream().map(e -> e.getDefaultMessage()).toList())
+            : null;
+    if (error == null) {
+      try {
+        generations.request(
+            key,
+            form.getAvatarId(),
+            form.getViewpointId(),
+            form.toDraft(),
+            form.getStagePosition());
+      } catch (IllegalArgumentException | ConflictException e) {
+        error = e.getMessage();
+        response.setStatus(e instanceof ConflictException ? 409 : 400);
+      }
+    } else {
+      response.setStatus(400);
     }
-    return changeGeneration(
-        key,
-        fragment,
-        () -> generations.request(key, avatarId, viewpointId),
-        "Generation requested.",
-        model,
-        response,
-        redirect);
+    if (error != null) {
+      model.addAttribute("generationError", error);
+      return fragment ? generationStatus(key, model, response) : workspace(key, model);
+    }
+    if (fragment) {
+      model.addAttribute(
+          "generationNotice", "Generation requested. Progress updates automatically.");
+      return generationStatus(key, model, response);
+    }
+    redirect.addFlashAttribute("generationForm", form);
+    redirect.addFlashAttribute(
+        "generationNotice", "Generation requested. Progress updates automatically.");
+    return "redirect:/illustrations?movement=" + key;
   }
 
-  @PostMapping("/movements/{key}/generations/{id}/apply")
+  @PostMapping({
+    "/illustrations/{key}/generations/{id}/apply",
+    "/movements/{key}/generations/{id}/apply"
+  })
   String apply(
       @PathVariable String key,
       @PathVariable UUID id,
@@ -211,7 +276,10 @@ public class IllustrationPages {
         redirect);
   }
 
-  @PostMapping("/movements/{key}/generations/{id}/discard")
+  @PostMapping({
+    "/illustrations/{key}/generations/{id}/discard",
+    "/movements/{key}/generations/{id}/discard"
+  })
   String discard(
       @PathVariable String key,
       @PathVariable UUID id,
@@ -229,7 +297,7 @@ public class IllustrationPages {
         redirect);
   }
 
-  @PostMapping("/movements/{key}/illustrations/clear")
+  @PostMapping({"/illustrations/{key}/clear", "/movements/{key}/illustrations/clear"})
   String clear(
       @PathVariable String key,
       @RequestHeader(name = "X-Fragment", defaultValue = "false") boolean fragment,
@@ -288,13 +356,13 @@ public class IllustrationPages {
       change.run();
       if (!fragment) {
         redirect.addFlashAttribute("generationNotice", notice);
-        return "redirect:/movements/" + key + "/edit#generation-panel";
+        return "redirect:/illustrations?movement=" + key;
       }
       model.addAttribute("generationNotice", notice);
     } catch (IllegalArgumentException | ConflictException error) {
       if (!fragment) {
         redirect.addFlashAttribute("generationError", error.getMessage());
-        return "redirect:/movements/" + key + "/edit#generation-panel";
+        return "redirect:/illustrations?movement=" + key;
       }
       response.setStatus(error instanceof ConflictException ? 409 : 400);
       model.addAttribute("generationError", error.getMessage());

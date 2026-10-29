@@ -43,7 +43,7 @@ The graph can be traversed: from a start Movement, follow Edges outgoing, incomi
 
 # Illustration
 
-An image created for a Movement and shown on it. A Movement's Illustrations are ordered, for example the bottom and top phases of a push-up.
+An image created for a Movement and shown on it. A Movement's Illustrations are ordered, for example the bottom and top phases of a push-up. A generated Illustration retains its stage association even when other stages have no image.
 
 ## Illustrations Generation Spec
 
@@ -58,7 +58,7 @@ The model does not require the Stage Specs of a sequence to be of the same kind.
 
 ## Generation Request
 
-A request to produce a Movement's Illustration sequence from a spec. It moves from pending to running to succeeded or failed. A failed request records why and can be retried. A successful request replaces the Movement's whole sequence.
+A request captures the Movement inputs, additional guidelines and preset specifications used for generation. It targets all stages or a specific stage. Temporary input edits belong to the request and do not change the saved Movement. Candidates require approval before becoming Illustrations. Approval replaces the whole sequence or only the targeted stage; discarding preserves existing Illustrations. A failed request records why and can be retried.
 
 ## Avatar
 

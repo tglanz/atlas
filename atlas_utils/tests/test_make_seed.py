@@ -6,6 +6,7 @@ import pytest
 from atlas_utils.scenarios.make_seed import (
     ILLUSTRATIONS_FILE,
     MOVEMENTS_FILE,
+    STAGE_POSITIONS_FILE,
     InvalidExportError,
     make_seed,
 )
@@ -16,6 +17,7 @@ def load_into_database(*files: Path) -> sqlite3.Connection:
     """A database with the real schema and the given seed files applied."""
     connection = sqlite3.connect(":memory:")
     connection.executescript((MIGRATIONS / "V1__domain.sql").read_text())
+    connection.executescript((MIGRATIONS / "V8__generation_workspace.sql").read_text())
     for file in files:
         connection.executescript(file.read_text())
     return connection
@@ -24,7 +26,11 @@ def load_into_database(*files: Path) -> sqlite3.Connection:
 def test_seed_loads_into_the_schema_and_keeps_everything(tmp_path, export_dir):
     written = make_seed(export_dir, tmp_path)
 
-    assert [path.name for path in written] == [MOVEMENTS_FILE, ILLUSTRATIONS_FILE]
+    assert [path.name for path in written] == [
+        MOVEMENTS_FILE,
+        ILLUSTRATIONS_FILE,
+        STAGE_POSITIONS_FILE,
+    ]
     db = load_into_database(*written)
     assert db.execute(
         "select name, description from movement where movement_key='push_up'"
@@ -98,3 +104,24 @@ def test_rejects_an_empty_directory(tmp_path):
 def test_illustration_seed_version_does_not_collide_with_another_migration():
     version = ILLUSTRATIONS_FILE.split("__")[0]
     assert all(path.name == ILLUSTRATIONS_FILE for path in MIGRATIONS.glob(f"{version}__*.sql"))
+
+
+def test_partial_stage_associations_survive_a_seed_round_trip(tmp_path, export_data):
+    export_data[0]["illustrations"] = ["https://example.com/later.png"]
+    export_data[0]["illustrationStagePositions"] = [1]
+    written = make_seed(write_export(tmp_path / "export", export_data), tmp_path)
+    db = load_into_database(*written)
+    assert db.execute(
+        "SELECT position, stage_position, image_url FROM movement_illustration"
+    ).fetchall() == [(0, 1, "https://example.com/later.png")]
+
+
+@pytest.mark.parametrize("positions", [[-1], [1, 1], [True], None])
+def test_rejects_invalid_stage_associations_before_replacing_any_seed(
+    tmp_path, export_data, positions
+):
+    export_data[0]["illustrationStagePositions"] = positions
+    (tmp_path / MOVEMENTS_FILE).write_text("Keep existing seed")
+    with pytest.raises(InvalidExportError):
+        make_seed(write_export(tmp_path / "export", export_data), tmp_path)
+    assert (tmp_path / MOVEMENTS_FILE).read_text() == "Keep existing seed"

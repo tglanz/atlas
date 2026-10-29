@@ -64,6 +64,9 @@ class MovementEntity {
 
   @Embeddable
   static class IllustrationRow {
+    @Column(name = "stage_position")
+    Integer stagePosition;
+
     @Column(name = "image_url")
     String imageUrl;
   }

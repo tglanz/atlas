@@ -21,7 +21,6 @@ class HomePageTest {
           mock(GraphUseCase.class),
           mock(MovementPageService.class),
           new PageMetadataFactory("https://atlas.example"),
-          mock(GenerationPanel.class),
           mock(PreviewImages.class));
 
   @Test

@@ -1,8 +1,11 @@
 package com.tglanz.atlas.backend.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,13 +13,13 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.tglanz.atlas.backend.avatar.application.port.in.AvatarUseCase;
 import com.tglanz.atlas.backend.avatar.domain.Avatar;
+import com.tglanz.atlas.backend.generation.application.port.in.GenerationDraft;
 import com.tglanz.atlas.backend.generation.application.port.in.GenerationUseCase;
 import com.tglanz.atlas.backend.generation.application.port.in.ViewpointUseCase;
 import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations;
@@ -34,6 +37,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -148,37 +152,51 @@ class IllustrationPagesTest {
 
   @Test
   void generationConflictReturnsAnInlineError() throws Exception {
-    when(generations.request("plank", avatar.id(), viewpoint.id()))
+    when(generations.request(eq("plank"), eq(avatar.id()), eq(viewpoint.id()), any(), isNull()))
         .thenThrow(new ConflictException("A generation is already in progress"));
     mvc.perform(
             post("/movements/plank/generations")
                 .with(csrf())
                 .header("X-Fragment", "true")
                 .param("avatarId", avatar.id().toString())
-                .param("viewpointId", viewpoint.id().toString()))
+                .param("viewpointId", viewpoint.id().toString())
+                .param("name", "Temporary plank")
+                .param("guidelines", "Show the fingers clearly")
+                .param("stages[0].name", "Temporary hold")
+                .param("stages[0].description", "Arms visible in profile"))
         .andExpect(status().isConflict())
-        .andExpect(model().attribute("generationAvatarId", avatar.id().toString()))
-        .andExpect(model().attribute("generationViewpointId", viewpoint.id().toString()))
         .andExpect(content().string(containsString("A generation is already in progress")))
         .andExpect(content().string(containsString("id=\"generation-panel\"")));
   }
 
   @Test
-  void nativeGenerationSubmissionRedirectsBackToTheEditor() throws Exception {
+  void nativeGenerationSubmissionPreservesTheDraftAndReturnsToIllustrations() throws Exception {
     mvc.perform(
             post("/movements/plank/generations")
                 .with(csrf())
                 .param("avatarId", avatar.id().toString())
-                .param("viewpointId", viewpoint.id().toString()))
+                .param("viewpointId", viewpoint.id().toString())
+                .param("name", "Temporary plank")
+                .param("guidelines", "Show the fingers clearly")
+                .param("stages[0].name", "Temporary hold")
+                .param("stages[0].description", "Arms visible in profile"))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirectedUrl("/movements/plank/edit#generation-panel"));
-    verify(generations).request("plank", avatar.id(), viewpoint.id());
+        .andExpect(redirectedUrl("/illustrations?movement=plank"));
+    var draft = ArgumentCaptor.forClass(GenerationDraft.class);
+    verify(generations)
+        .request(eq("plank"), eq(avatar.id()), eq(viewpoint.id()), draft.capture(), isNull());
+    assertThat(draft.getValue().name()).isEqualTo("Temporary plank");
+    assertThat(draft.getValue().guidelines()).isEqualTo("Show the fingers clearly");
   }
 
   @Test
   @WithMockUser(roles = "PRACTITIONER")
   void practitionerCannotReadOrChangeGenerationSettings() throws Exception {
     mvc.perform(get("/settings/illustrations")).andExpect(status().isForbidden());
+    mvc.perform(get("/illustrations")).andExpect(status().isForbidden());
+    mvc.perform(get("/illustrations/plank/status")).andExpect(status().isForbidden());
+    mvc.perform(post("/illustrations/plank/generations").with(csrf()))
+        .andExpect(status().isForbidden());
     mvc.perform(get("/movements/plank/generation-status")).andExpect(status().isForbidden());
     mvc.perform(
             post("/settings/illustrations/avatars")
@@ -186,6 +204,61 @@ class IllustrationPagesTest {
                 .param("name", "Name")
                 .param("specification", "Appearance"))
         .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void workspaceLoadsEditableInputsAndKeepsTheStatusFragmentSeparate() throws Exception {
+    mvc.perform(get("/illustrations").param("movement", "plank"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("data-generation-form")))
+        .andExpect(content().string(containsString("Additional guidelines")))
+        .andExpect(content().string(containsString("Generate this stage")))
+        .andExpect(content().string(containsString("Generate all stages")))
+        .andExpect(content().string(containsString("Keep the body straight")))
+        .andExpect(content().string(not(containsString("Refresh generation status"))))
+        .andExpect(content().string(containsString("/illustrations/plank/status")));
+    mvc.perform(get("/illustrations/plank/status"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(not(containsString("data-generation-form"))))
+        .andExpect(content().string(not(containsString("<textarea"))));
+  }
+
+  @Test
+  void invalidNativeSubmissionKeepsEditedInputs() throws Exception {
+    mvc.perform(
+            post("/illustrations/plank/generations")
+                .with(csrf())
+                .param("name", "Draft still here")
+                .param("guidelines", "Keep these guidelines")
+                .param("stages[0].name", "Hold")
+                .param("stages[0].description", "Edited pose"))
+        .andExpect(status().isBadRequest())
+        .andExpect(view().name("illustrations/workspace"))
+        .andExpect(content().string(containsString("Draft still here")))
+        .andExpect(content().string(containsString("Keep these guidelines")));
+  }
+
+  @Test
+  void selectedStageIsPassedWithTheLiveDraft() throws Exception {
+    mvc.perform(
+            post("/illustrations/plank/generations")
+                .with(csrf())
+                .header("X-Fragment", "true")
+                .param("avatarId", avatar.id().toString())
+                .param("viewpointId", viewpoint.id().toString())
+                .param("name", "Draft name")
+                .param("cues", "First edited cue\nSecond edited cue")
+                .param("guidelines", "Front view of hands")
+                .param("stagePosition", "0")
+                .param("stages[0].name", "Draft hold")
+                .param("stages[0].description", "Draft body position"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(not(containsString("data-generation-form"))));
+    var draft = ArgumentCaptor.forClass(GenerationDraft.class);
+    verify(generations)
+        .request(eq("plank"), eq(avatar.id()), eq(viewpoint.id()), draft.capture(), eq(0));
+    assertThat(draft.getValue().cues()).containsExactly("First edited cue", "Second edited cue");
+    assertThat(draft.getValue().stages().getFirst().name()).isEqualTo("Draft hold");
   }
 
   private GenerationMovementIllustrations pendingGeneration() {

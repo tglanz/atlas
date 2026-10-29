@@ -6,10 +6,10 @@ import com.tglanz.atlas.backend.generation.application.port.out.ImageConnector;
 import com.tglanz.atlas.backend.generation.application.port.out.ImageRequest;
 import com.tglanz.atlas.backend.generation.application.port.out.Movements;
 import com.tglanz.atlas.backend.generation.application.port.out.ViewpointRepository;
+import com.tglanz.atlas.backend.generation.domain.GenerationInput;
 import com.tglanz.atlas.backend.generation.domain.GenerationMovementIllustrations;
 import com.tglanz.atlas.backend.generation.domain.GenerationStatus;
 import com.tglanz.atlas.backend.generation.domain.IllustrationStage;
-import com.tglanz.atlas.backend.generation.domain.Viewpoint;
 import java.time.Clock;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -59,14 +59,21 @@ public class ImageGenerationWorker implements RunGenerationUseCase {
         id,
         generation.movementKey(),
         generation.stages().size());
-    var movement = movements.find(generation.movementKey()).orElse(null);
+    GenerationInput input = generation.input();
+    if (input == null) {
+      var movement = movements.find(generation.movementKey()).orElse(null);
+      if (movement != null)
+        input =
+            new GenerationInput(
+                movement.name(), movement.description(), movement.cues(), "", "", "");
+    }
     for (IllustrationStage stage : generation.stages()) {
       int position = stage.position();
       try {
-        if (movement == null) {
+        if (input == null) {
           throw new IllegalStateException("The movement no longer exists");
         }
-        ImageRequest request = compose(movement, stage);
+        ImageRequest request = compose(input, stage);
         log.debug("Generation {} stage {} request: {}", id, position, request);
         ImageConnector.Submission submission = connector.submit(request);
         lifecycle.update(
@@ -109,24 +116,30 @@ public class ImageGenerationWorker implements RunGenerationUseCase {
     }
   }
 
-  private ImageRequest compose(Movements.Info movement, IllustrationStage stage) {
+  private ImageRequest compose(GenerationInput movement, IllustrationStage stage) {
     String avatar =
-        avatars
-            .find(stage.avatarId())
-            .orElseThrow(() -> new IllegalStateException("The avatar no longer exists"));
-    Viewpoint viewpoint =
-        viewpoints
-            .findById(stage.viewpointId())
-            .orElseThrow(() -> new IllegalStateException("The viewpoint no longer exists"));
+        movement.avatarSpecification().isEmpty()
+            ? avatars
+                .find(stage.avatarId())
+                .orElseThrow(() -> new IllegalStateException("The avatar no longer exists"))
+            : movement.avatarSpecification();
+    String viewpoint =
+        movement.viewpointSpecification().isEmpty()
+            ? viewpoints
+                .findById(stage.viewpointId())
+                .orElseThrow(() -> new IllegalStateException("The viewpoint no longer exists"))
+                .specification()
+            : movement.viewpointSpecification();
     return templates.render(
         new GenerationTemplates.Model(
             movement.name(),
             movement.description(),
             movement.cues(),
             avatar,
-            viewpoint.specification(),
+            viewpoint,
             stage.name(),
-            stage.description()));
+            stage.description(),
+            movement.guidelines()));
   }
 
   private static String describe(RuntimeException e) {

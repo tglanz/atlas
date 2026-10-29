@@ -15,4 +15,7 @@ public interface Movements {
 
   /** Replaces the Movement's whole sequence of Illustrations. */
   void replaceIllustrations(String movementKey, List<String> urls);
+
+  /** Replaces only the image associated with this stage, preserving all other images. */
+  void replaceStageIllustration(String movementKey, int stagePosition, String url);
 }

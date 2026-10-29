@@ -226,3 +226,8 @@ dialog ul { list-style: none; padding: 0; }
 .share-panel { background: var(--subtle); }
 .share-panel .share-status:empty { display: none; }
 .share-panel input[readonly] { background: var(--surface); }
+
+.illustration-workspace { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+.illustration-workspace > * { min-width: 0; }
+.preserve-lines { white-space: pre-wrap; }
+@media (max-width: 60rem) { .illustration-workspace { grid-template-columns: minmax(0, 1fr); } }

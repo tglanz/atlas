@@ -123,6 +123,6 @@ class ErrorPagesTest {
         .andExpect(status().isNotFound())
         .andExpect(model().attribute("signedIn", true))
         .andExpect(model().attribute("maintainer", true))
-        .andExpect(content().string(containsString("href=\"/settings/illustrations\"")));
+        .andExpect(content().string(containsString("href=\"/illustrations\"")));
   }
 }

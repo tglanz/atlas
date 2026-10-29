@@ -17,7 +17,7 @@ uv run atlas-utils export-movements https://your-app.example.com -o export
 uv run atlas-utils make-seed export
 ```
 
-The export includes public movements, items, stages, tags, illustration URLs and relationships. It does not copy accounts, routines, generation history or maintainer settings. Images stay at their existing URLs.
+The export includes public movements, items, stages, tags, illustration URLs and relationships. It does not copy accounts, routines, generation history or maintainer settings. Images stay at their existing URLs, with stage associations preserved for partially illustrated Movements.
 
 Use a fresh export directory to capture the current catalog without leaving files for removed movements. Existing files are skipped so an interrupted export can resume; `--overwrite` fetches them again.
 

@@ -135,6 +135,8 @@ class SecurityConfig {
                     .authenticated()
                     .requestMatchers(
                         "/settings/**",
+                        "/illustrations",
+                        "/illustrations/**",
                         "/movements/new",
                         "/movements/*/edit",
                         "/movements/*/generations/**",
@@ -164,7 +166,9 @@ class SecurityConfig {
         || path.contains("\\")
         || path.contains("\r")
         || path.contains("\n")) return "/movements";
-    return path.matches("/(?:movements|routines|settings)(?:[/?].*)?") ? path : "/movements";
+    return path.matches("/(?:movements|routines|settings|illustrations)(?:[/?].*)?")
+        ? path
+        : "/movements";
   }
 
   @Bean
